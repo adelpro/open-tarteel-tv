@@ -47,7 +47,7 @@ export default function HomeScreen() {
       <FlatList
         data={reciters}
         keyExtractor={(item, index) => `${item.id}-${item.moshaf.id}-${index}`}
-        numColumns={2}
+        numColumns={4}
         renderItem={({ item }) => (
           <SpatialNavigationFocusableView>
             {({ isFocused }) => (

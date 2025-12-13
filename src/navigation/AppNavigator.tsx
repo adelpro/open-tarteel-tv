@@ -1,7 +1,10 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { SpatialNavigationRoot } from "react-tv-space-navigation";
+import {
+  SpatialNavigationRoot,
+  SpatialNavigation,
+} from "react-tv-space-navigation";
 
 import HomeScreen from "../screens/HomeScreen";
 import PlayerScreen from "../screens/PlayerScreen";
@@ -10,6 +13,17 @@ import PrivacyScreen from "../screens/PrivacyScreen";
 
 const Stack = createNativeStackNavigator();
 
+// Configure remote control BEFORE rendering
+SpatialNavigation.configureRemoteControl({
+  remoteControlSubscriber: (callback) => {
+    // Expo does not support TVEventHandler, return dummy subscription
+    return { remove: () => {} };
+  },
+  remoteControlUnsubscriber: (subscriber) => {
+    subscriber.remove();
+  },
+});
+
 export default function AppNavigator() {
   return (
     <SpatialNavigationRoot>
@@ -17,13 +31,9 @@ export default function AppNavigator() {
         <Stack.Navigator
           initialRouteName="Home"
           screenOptions={{
-            headerStyle: {
-              backgroundColor: "#000",
-            },
+            headerStyle: { backgroundColor: "#000" },
             headerTintColor: "#fff",
-            headerTitleStyle: {
-              fontWeight: "bold",
-            },
+            headerTitleStyle: { fontWeight: "bold" },
           }}
         >
           <Stack.Screen

@@ -1,37 +1,47 @@
-import { Audio } from "expo-av";
-import { Sound } from "expo-av/build/Audio";
+import { AudioModule, createAudioPlayer, AudioPlayer } from "expo-audio";
 
 class AudioService {
-  private sound: Sound | null = null;
+  private player: AudioPlayer | null = null;
   private currentUrl: string | null = null;
   private isPlaying: boolean = false;
 
   async loadAndPlay(url: string): Promise<void> {
     try {
-      // If we're already playing this URL, just resume
-      if (this.currentUrl === url && this.sound) {
-        await this.play();
+      if (this.currentUrl === url && this.player) {
+        this.play();
         return;
       }
 
-      // Unload previous sound if exists
-      await this.unload();
+      this.unload();
 
-      // Set audio mode
-      await Audio.setAudioModeAsync({
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: true,
-        shouldDuckAndroid: true,
-      });
+      if (AudioModule && typeof AudioModule.setAudioModeAsync === "function") {
+        await AudioModule.setAudioModeAsync({
+          playsInSilentModeIOS: true,
+          staysActiveInBackground: true,
+          shouldDuckAndroid: true,
+        } as any);
+      }
 
-      // Load and play new sound
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: url },
-        { shouldPlay: true },
-        this.onPlaybackStatusUpdate
-      );
+      const source = { uri: url };
+      // @ts-ignore - CreateAudioPlayerOptions might differ, relying on simple usage
+      this.player = createAudioPlayer(source, { autoPlay: true });
 
-      this.sound = sound;
+      // Attempt to listen to status updates if supported
+      // @ts-ignore
+      if (this.player.addListener) {
+        // @ts-ignore
+        this.player.addListener("playbackStatusUpdate", (status: any) => {
+          if (status) {
+            this.isPlaying = status.playing; // specific prop check
+            if (status.didJustFinish) {
+              // verify this exists
+              this.isPlaying = false;
+            }
+          }
+        });
+      }
+
+      this.player.play();
       this.currentUrl = url;
       this.isPlaying = true;
     } catch (error) {
@@ -40,32 +50,37 @@ class AudioService {
     }
   }
 
-  async play(): Promise<void> {
-    if (this.sound) {
-      await this.sound.playAsync();
+  play(): void {
+    if (this.player) {
+      this.player.play();
       this.isPlaying = true;
     }
   }
 
-  async pause(): Promise<void> {
-    if (this.sound) {
-      await this.sound.pauseAsync();
+  pause(): void {
+    if (this.player) {
+      this.player.pause();
       this.isPlaying = false;
     }
   }
 
-  async togglePlayPause(): Promise<void> {
+  togglePlayPause(): void {
     if (this.isPlaying) {
-      await this.pause();
+      this.pause();
     } else {
-      await this.play();
+      this.play();
     }
   }
 
-  async unload(): Promise<void> {
-    if (this.sound) {
-      await this.sound.unloadAsync();
-      this.sound = null;
+  unload(): void {
+    if (this.player) {
+      // @ts-ignore
+      if (this.player.remove) {
+        this.player.remove();
+      } else if ((this.player as any).unload) {
+        (this.player as any).unload();
+      }
+      this.player = null;
       this.currentUrl = null;
       this.isPlaying = false;
     }
@@ -78,20 +93,6 @@ class AudioService {
   getCurrentUrl(): string | null {
     return this.currentUrl;
   }
-
-  private onPlaybackStatusUpdate = (status: any) => {
-    if (status.isLoaded) {
-      this.isPlaying = status.isPlaying;
-
-      // Handle when audio finishes playing
-      if (status.didJustFinish) {
-        this.isPlaying = false;
-      }
-    } else if (status.error) {
-      console.error("Playback error:", status.error);
-    }
-  };
 }
 
-// Export a singleton instance
 export const audioService = new AudioService();

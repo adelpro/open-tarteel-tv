@@ -3,7 +3,7 @@
     "name": "open-tarteel-tv",
     "slug": "open-tarteel-tv",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "landscape",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
@@ -26,18 +26,13 @@
       "intentFilters": [
         {
           "action": "MAIN",
-          "category": [
-            "LEANBACK_LAUNCHER",
-            "LAUNCHER"
-          ]
+          "category": ["LEANBACK_LAUNCHER", "LAUNCHER"]
         }
       ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "expo-font"
-    ]
+    "plugins": ["expo-font", "expo-audio", "expo-video"]
   }
 }
