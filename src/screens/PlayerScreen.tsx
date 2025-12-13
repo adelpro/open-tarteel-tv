@@ -4,6 +4,7 @@ import { useRoute } from "@react-navigation/native";
 import { SpatialNavigationFocusableView } from "react-tv-space-navigation";
 import { SURAHS } from "../constants/surahs";
 import { Reciter } from "../types";
+import { FontAwesome } from "@expo/vector-icons";
 
 export default function PlayerScreen() {
   const route = useRoute<any>();
@@ -69,7 +70,59 @@ export default function PlayerScreen() {
             Now Playing:{" "}
             {SURAHS.find((s) => s.id === selectedSurah)?.englishName}
           </Text>
-          {/* TODO: Add play/pause/next/prev controls */}
+          <View style={styles.controlsRow}>
+            <SpatialNavigationFocusableView>
+              {({ isFocused }) => (
+                <Pressable
+                  style={[
+                    styles.controlBtn,
+                    isFocused && styles.controlBtnFocused,
+                  ]}
+                >
+                  <FontAwesome
+                    name="step-backward"
+                    size={30}
+                    color={isFocused ? "#4CAF50" : "#fff"}
+                  />
+                </Pressable>
+              )}
+            </SpatialNavigationFocusableView>
+
+            <SpatialNavigationFocusableView>
+              {({ isFocused }) => (
+                <Pressable
+                  style={[
+                    styles.controlBtn,
+                    styles.playBtn,
+                    isFocused && styles.controlBtnFocused,
+                  ]}
+                >
+                  <FontAwesome
+                    name="play"
+                    size={40}
+                    color={isFocused ? "#4CAF50" : "#fff"}
+                  />
+                </Pressable>
+              )}
+            </SpatialNavigationFocusableView>
+
+            <SpatialNavigationFocusableView>
+              {({ isFocused }) => (
+                <Pressable
+                  style={[
+                    styles.controlBtn,
+                    isFocused && styles.controlBtnFocused,
+                  ]}
+                >
+                  <FontAwesome
+                    name="step-forward"
+                    size={30}
+                    color={isFocused ? "#4CAF50" : "#fff"}
+                  />
+                </Pressable>
+              )}
+            </SpatialNavigationFocusableView>
+          </View>
         </View>
       )}
     </View>
@@ -146,10 +199,37 @@ const styles = StyleSheet.create({
     backgroundColor: "#1E1E1E",
     borderTopWidth: 2,
     borderTopColor: "#4CAF50",
+    alignItems: "center",
   },
   nowPlaying: {
     fontSize: 16,
     color: "#fff",
-    textAlign: "center",
+    marginBottom: 15,
+  },
+  controlsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 30,
+  },
+  controlBtn: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#333",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+  playBtn: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#444",
+  },
+  controlBtnFocused: {
+    borderColor: "#4CAF50",
+    backgroundColor: "#2E2E2E",
+    transform: [{ scale: 1.1 }],
   },
 });
