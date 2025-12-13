@@ -23,16 +23,21 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.opentarteel.tv",
-      "isTv": true,
       "intentFilters": [
         {
           "action": "MAIN",
-          "category": ["LEANBACK_LAUNCHER", "LAUNCHER"]
+          "category": [
+            "LEANBACK_LAUNCHER",
+            "LAUNCHER"
+          ]
         }
       ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-font"
+    ]
   }
 }

@@ -1,15 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, FlatList, StyleSheet, Pressable } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { SpatialNavigationFocusableView } from "react-tv-space-navigation";
 import { SURAHS } from "../constants/surahs";
 import { Reciter } from "../types";
 import { FontAwesome } from "@expo/vector-icons";
+import { audioService } from "../services/AudioService";
 
 export default function PlayerScreen() {
   const route = useRoute<any>();
   const reciter: Reciter = route.params?.reciter;
   const [selectedSurah, setSelectedSurah] = useState<number | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  // Cleanup audio when component unmounts
+  useEffect(() => {
+    return () => {
+      audioService.unload();
+    };
+  }, []);
 
   if (!reciter) {
     return (
@@ -19,13 +28,45 @@ export default function PlayerScreen() {
     );
   }
 
-  const handleSurahPress = (surahId: number) => {
+  const handleSurahPress = async (surahId: number) => {
     setSelectedSurah(surahId);
-    // TODO: Integrate react-native-track-player here
     const audioUrl = reciter.moshaf.playlist.find(
       (item) => parseInt(item.surahId) === surahId
     )?.link;
-    console.log("Playing:", audioUrl);
+
+    if (audioUrl) {
+      try {
+        await audioService.loadAndPlay(audioUrl);
+        setIsPlaying(true);
+      } catch (error) {
+        console.error("Error playing audio:", error);
+      }
+    }
+  };
+
+  const handlePlayPause = async () => {
+    try {
+      await audioService.togglePlayPause();
+      setIsPlaying(audioService.getIsPlaying());
+    } catch (error) {
+      console.error("Error toggling playback:", error);
+    }
+  };
+
+  const handlePrevious = async () => {
+    if (!selectedSurah) return;
+    const currentIndex = SURAHS.findIndex((s) => s.id === selectedSurah);
+    if (currentIndex > 0) {
+      await handleSurahPress(SURAHS[currentIndex - 1].id);
+    }
+  };
+
+  const handleNext = async () => {
+    if (!selectedSurah) return;
+    const currentIndex = SURAHS.findIndex((s) => s.id === selectedSurah);
+    if (currentIndex < SURAHS.length - 1) {
+      await handleSurahPress(SURAHS[currentIndex + 1].id);
+    }
   };
 
   return (
@@ -78,6 +119,7 @@ export default function PlayerScreen() {
                     styles.controlBtn,
                     isFocused && styles.controlBtnFocused,
                   ]}
+                  onPress={handlePrevious}
                 >
                   <FontAwesome
                     name="step-backward"
@@ -96,9 +138,10 @@ export default function PlayerScreen() {
                     styles.playBtn,
                     isFocused && styles.controlBtnFocused,
                   ]}
+                  onPress={handlePlayPause}
                 >
                   <FontAwesome
-                    name="play"
+                    name={isPlaying ? "pause" : "play"}
                     size={40}
                     color={isFocused ? "#4CAF50" : "#fff"}
                   />
@@ -113,6 +156,7 @@ export default function PlayerScreen() {
                     styles.controlBtn,
                     isFocused && styles.controlBtnFocused,
                   ]}
+                  onPress={handleNext}
                 >
                   <FontAwesome
                     name="step-forward"
