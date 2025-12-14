@@ -36,7 +36,7 @@ const generatePlaylist = (moshaf: MP3APIMoshaf): Playlist => {
 export async function getAllReciters(): Promise<Reciter[]> {
   try {
     const response = await fetch(
-      "https://www.mp3quran.net/api/v3/reciters?language=ar",
+      "https://www.mp3quran.net/api/v3/reciters?language=en",
       { cache: "force-cache" }
     );
 

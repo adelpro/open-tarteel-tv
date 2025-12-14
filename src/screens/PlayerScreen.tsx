@@ -1,15 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, memo } from "react";
 import { View, Text, FlatList, StyleSheet, Pressable } from "react-native";
-import { useRoute } from "@react-navigation/native";
+import { useRoute, useFocusEffect } from "@react-navigation/native";
 import { SpatialNavigationFocusableView } from "react-tv-space-navigation";
 import { SURAHS } from "../constants/surahs";
 import { Reciter } from "../types";
+import { getAllReciters } from "../services/api";
 import { FontAwesome } from "@expo/vector-icons";
 import { audioService } from "../services/AudioService";
 
 export default function PlayerScreen() {
   const route = useRoute<any>();
-  const reciter: Reciter = route.params?.reciter;
+  const [reciter, setReciter] = useState<Reciter | null>(
+    route.params?.reciter ?? null
+  );
   const [selectedSurah, setSelectedSurah] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -20,6 +23,33 @@ export default function PlayerScreen() {
     };
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        audioService.unload();
+      };
+    }, [])
+  );
+
+  useEffect(() => {
+    const maybeLoadFromDeepLink = async () => {
+      const reciterId: number | undefined = route.params?.reciterId;
+      const surahId: number | undefined = route.params?.surahId;
+      if (!reciter && reciterId) {
+        const all = await getAllReciters();
+        const found = all.find((r) => r.id === reciterId) || null;
+        if (found) {
+          setReciter(found);
+          if (surahId) {
+            await handleSurahPress(surahId);
+          }
+        }
+      }
+    };
+    maybeLoadFromDeepLink();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   if (!reciter) {
     return (
       <View style={styles.centerContainer}>
@@ -28,21 +58,24 @@ export default function PlayerScreen() {
     );
   }
 
-  const handleSurahPress = async (surahId: number) => {
-    setSelectedSurah(surahId);
-    const audioUrl = reciter.moshaf.playlist.find(
-      (item) => parseInt(item.surahId) === surahId
-    )?.link;
+  const handleSurahPress = useCallback(
+    async (surahId: number) => {
+      setSelectedSurah(surahId);
+      const audioUrl = reciter.moshaf.playlist.find(
+        (item) => parseInt(item.surahId) === surahId
+      )?.link;
 
-    if (audioUrl) {
-      try {
-        await audioService.loadAndPlay(audioUrl);
-        setIsPlaying(true);
-      } catch (error) {
-        console.error("Error playing audio:", error);
+      if (audioUrl) {
+        try {
+          await audioService.loadAndPlay(audioUrl);
+          setIsPlaying(true);
+        } catch (error) {
+          console.error("Error playing audio:", error);
+        }
       }
-    }
-  };
+    },
+    [reciter]
+  );
 
   const handlePlayPause = async () => {
     try {
@@ -80,29 +113,21 @@ export default function PlayerScreen() {
         data={SURAHS}
         keyExtractor={(item) => item.id.toString()}
         numColumns={3}
-        renderItem={({ item }) => {
-          const isSelected = selectedSurah === item.id;
-          return (
-            <SpatialNavigationFocusableView>
-              {({ isFocused }) => (
-                <Pressable
-                  style={[
-                    styles.surahCard,
-                    isFocused && styles.surahCardFocused,
-                    isSelected && styles.surahCardSelected,
-                  ]}
-                  onPress={() => handleSurahPress(item.id)}
-                >
-                  <Text style={styles.surahNumber}>{item.id}</Text>
-                  <Text style={styles.surahName}>{item.name}</Text>
-                  <Text style={styles.surahEnglishName}>
-                    {item.englishName}
-                  </Text>
-                </Pressable>
-              )}
-            </SpatialNavigationFocusableView>
-          );
-        }}
+        initialNumToRender={18}
+        maxToRenderPerBatch={18}
+        windowSize={7}
+        removeClippedSubviews
+        columnWrapperStyle={{ justifyContent: "space-between" }}
+        renderItem={({ item, index }) => (
+          <SurahItem
+            id={item.id}
+            name={item.name}
+            englishName={item.englishName}
+            selected={selectedSurah === item.id}
+            preferredFocus={index === 0}
+            onPress={handleSurahPress}
+          />
+        )}
       />
 
       {selectedSurah && (
@@ -119,6 +144,9 @@ export default function PlayerScreen() {
                     styles.controlBtn,
                     isFocused && styles.controlBtnFocused,
                   ]}
+                  focusable
+                  accessibilityRole="button"
+                  accessibilityLabel="Previous"
                   onPress={handlePrevious}
                 >
                   <FontAwesome
@@ -138,6 +166,9 @@ export default function PlayerScreen() {
                     styles.playBtn,
                     isFocused && styles.controlBtnFocused,
                   ]}
+                  focusable
+                  accessibilityRole="button"
+                  accessibilityLabel={isPlaying ? "Pause" : "Play"}
                   onPress={handlePlayPause}
                 >
                   <FontAwesome
@@ -156,6 +187,9 @@ export default function PlayerScreen() {
                     styles.controlBtn,
                     isFocused && styles.controlBtnFocused,
                   ]}
+                  focusable
+                  accessibilityRole="button"
+                  accessibilityLabel="Next"
                   onPress={handleNext}
                 >
                   <FontAwesome
@@ -277,3 +311,43 @@ const styles = StyleSheet.create({
     transform: [{ scale: 1.1 }],
   },
 });
+type SurahItemProps = {
+  id: number;
+  name: string;
+  englishName: string;
+  selected: boolean;
+  preferredFocus: boolean;
+  onPress: (id: number) => void;
+};
+
+const SurahItem = memo(
+  ({
+    id,
+    name,
+    englishName,
+    selected,
+    preferredFocus,
+    onPress,
+  }: SurahItemProps) => (
+    <SpatialNavigationFocusableView>
+      {({ isFocused }) => (
+        <Pressable
+          style={[
+            styles.surahCard,
+            isFocused && styles.surahCardFocused,
+            selected && styles.surahCardSelected,
+          ]}
+          focusable
+          hasTVPreferredFocus={preferredFocus}
+          accessibilityRole="button"
+          accessibilityLabel={`Surah ${englishName} number ${id}`}
+          onPress={() => onPress(id)}
+        >
+          <Text style={styles.surahNumber}>{id}</Text>
+          <Text style={styles.surahName}>{name}</Text>
+          <Text style={styles.surahEnglishName}>{englishName}</Text>
+        </Pressable>
+      )}
+    </SpatialNavigationFocusableView>
+  )
+);

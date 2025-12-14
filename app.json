@@ -5,6 +5,7 @@
     "version": "1.0.0",
     "orientation": "landscape",
     "icon": "./assets/icon.png",
+    "scheme": "opentarteel",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
@@ -28,6 +29,13 @@
         {
           "action": "MAIN",
           "category": ["LEANBACK_LAUNCHER", "LAUNCHER"]
+        },
+        {
+          "action": "VIEW",
+          "category": ["DEFAULT", "BROWSABLE"],
+          "data": {
+            "scheme": "opentarteel"
+          }
         }
       ]
     },

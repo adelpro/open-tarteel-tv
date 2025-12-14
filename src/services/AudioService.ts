@@ -4,6 +4,7 @@ class AudioService {
   private player: AudioPlayer | null = null;
   private currentUrl: string | null = null;
   private isPlaying: boolean = false;
+  private switching: boolean = false;
 
   async loadAndPlay(url: string): Promise<void> {
     try {
@@ -12,7 +13,7 @@ class AudioService {
         return;
       }
 
-      this.unload();
+      await this.unload();
 
       if (AudioModule && typeof AudioModule.setAudioModeAsync === "function") {
         await AudioModule.setAudioModeAsync({
@@ -41,8 +42,11 @@ class AudioService {
         });
       }
 
-      this.player.play();
       this.currentUrl = url;
+      // Ensure any residual state is cleared before starting
+      (this.player as any)?.pause?.();
+      (this.player as any)?.stop?.();
+      this.player.play();
       this.isPlaying = true;
     } catch (error) {
       console.error("Error loading audio:", error);
@@ -72,17 +76,24 @@ class AudioService {
     }
   }
 
-  unload(): void {
-    if (this.player) {
-      // @ts-ignore
-      if (this.player.remove) {
-        this.player.remove();
-      } else if ((this.player as any).unload) {
-        (this.player as any).unload();
+  async unload(): Promise<void> {
+    if (!this.player) return;
+    try {
+      (this.player as any)?.pause?.();
+      (this.player as any)?.stop?.();
+      if ((this.player as any)?.unload) {
+        await Promise.resolve((this.player as any).unload());
+      } else if ((this.player as any)?.remove) {
+        (this.player as any).remove();
       }
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn("Audio unload error", e);
+    } finally {
       this.player = null;
       this.currentUrl = null;
       this.isPlaying = false;
+      await Promise.resolve();
     }
   }
 

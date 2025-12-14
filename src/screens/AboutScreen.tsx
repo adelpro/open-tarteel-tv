@@ -1,7 +1,10 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, useColorScheme } from "react-native";
 
 export default function AboutScreen() {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme !== "light";
+  const styles = createStyles(isDark);
   const currentYear = new Date().getFullYear();
   const version = "1.0.0"; // Match this with package.json
 
@@ -45,49 +48,55 @@ export default function AboutScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#121212",
-  },
-  content: {
-    padding: 40,
-  },
-  title: {
-    fontSize: 36,
-    fontWeight: "bold",
-    color: "#4CAF50",
-    marginBottom: 10,
-  },
-  description: {
-    fontSize: 18,
-    color: "#AAA",
-    marginBottom: 30,
-  },
-  section: {
-    marginBottom: 30,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#fff",
-    marginBottom: 15,
-  },
-  text: {
-    fontSize: 16,
-    color: "#DDD",
-    marginBottom: 10,
-    lineHeight: 24,
-  },
-  footer: {
-    marginTop: 50,
-    paddingTop: 20,
-    borderTopWidth: 1,
-    borderTopColor: "#333",
-  },
-  footerText: {
-    fontSize: 14,
-    color: "#888",
-    marginBottom: 5,
-  },
-});
+function createStyles(isDark: boolean) {
+  const bg = isDark ? "#121212" : "#FFFFFF";
+  const textPrimary = isDark ? "#fff" : "#111";
+  const textSecondary = isDark ? "#AAA" : "#555";
+  const border = isDark ? "#333" : "#E0E0E0";
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: bg,
+    },
+    content: {
+      padding: 40,
+    },
+    title: {
+      fontSize: 36,
+      fontWeight: "bold",
+      color: "#4CAF50",
+      marginBottom: 10,
+    },
+    description: {
+      fontSize: 18,
+      color: textSecondary,
+      marginBottom: 30,
+    },
+    section: {
+      marginBottom: 30,
+    },
+    sectionTitle: {
+      fontSize: 24,
+      fontWeight: "bold",
+      color: textPrimary,
+      marginBottom: 15,
+    },
+    text: {
+      fontSize: 16,
+      color: isDark ? "#DDD" : "#333",
+      marginBottom: 10,
+      lineHeight: 24,
+    },
+    footer: {
+      marginTop: 50,
+      paddingTop: 20,
+      borderTopWidth: 1,
+      borderTopColor: border,
+    },
+    footerText: {
+      fontSize: 14,
+      color: isDark ? "#888" : "#666",
+      marginBottom: 5,
+    },
+  });
+}

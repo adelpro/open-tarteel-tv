@@ -1,7 +1,10 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, useColorScheme } from "react-native";
 
 export default function PrivacyScreen() {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme !== "light";
+  const styles = createStyles(isDark);
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
@@ -50,48 +53,54 @@ export default function PrivacyScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#121212",
-  },
-  content: {
-    padding: 40,
-  },
-  title: {
-    fontSize: 36,
-    fontWeight: "bold",
-    color: "#4CAF50",
-    marginBottom: 30,
-  },
-  section: {
-    marginBottom: 30,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#fff",
-    marginBottom: 15,
-  },
-  text: {
-    fontSize: 16,
-    color: "#DDD",
-    marginBottom: 10,
-    lineHeight: 24,
-  },
-  linkText: {
-    fontSize: 16,
-    color: "#4CAF50",
-    marginTop: 10,
-  },
-  footer: {
-    marginTop: 30,
-    paddingTop: 20,
-    borderTopWidth: 1,
-    borderTopColor: "#333",
-  },
-  footerText: {
-    fontSize: 14,
-    color: "#888",
-  },
-});
+function createStyles(isDark: boolean) {
+  const bg = isDark ? "#121212" : "#FFFFFF";
+  const textPrimary = isDark ? "#fff" : "#111";
+  const textSecondary = isDark ? "#AAA" : "#555";
+  const border = isDark ? "#333" : "#E0E0E0";
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: bg,
+    },
+    content: {
+      padding: 40,
+    },
+    title: {
+      fontSize: 36,
+      fontWeight: "bold",
+      color: "#4CAF50",
+      marginBottom: 30,
+    },
+    section: {
+      marginBottom: 30,
+    },
+    sectionTitle: {
+      fontSize: 24,
+      fontWeight: "bold",
+      color: textPrimary,
+      marginBottom: 15,
+    },
+    text: {
+      fontSize: 16,
+      color: isDark ? "#DDD" : "#333",
+      marginBottom: 10,
+      lineHeight: 24,
+    },
+    linkText: {
+      fontSize: 16,
+      color: "#4CAF50",
+      marginTop: 10,
+    },
+    footer: {
+      marginTop: 30,
+      paddingTop: 20,
+      borderTopWidth: 1,
+      borderTopColor: border,
+    },
+    footerText: {
+      fontSize: 14,
+      color: isDark ? "#888" : "#666",
+    },
+  });
+}
