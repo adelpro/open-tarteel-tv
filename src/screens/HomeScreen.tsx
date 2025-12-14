@@ -34,6 +34,7 @@ export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRiwaya, setSelectedRiwaya] = useState<Riwaya | "all">("all");
   const [retryCount, setRetryCount] = useState(0);
+  const [searchFocused, setSearchFocused] = useState(false);
   const MAX_RETRIES = 3;
 
   useEffect(() => {
@@ -73,9 +74,8 @@ export default function HomeScreen() {
       setLoading(false);
     }
   };
-
   const handleRetry = () => {
-    setRetryCount((prev) => prev + 1);
+    setRetryCount((prev: number) => prev + 1);
     loadReciters();
   };
 
@@ -105,6 +105,13 @@ export default function HomeScreen() {
     onPress: (reciter: Reciter) => void;
   };
 
+  const riwayaLabel = (r: Riwaya) => {
+    if (r === Riwaya.WARSH_AN_NAFI) return "Warsh";
+    if (r === Riwaya.QALUN_AN_NAFI) return "Qalun";
+    if (r === Riwaya.ALDURI_AN_ALKAISSAI) return "Ad-Duri";
+    return "Hafs";
+  };
+
   const ReciterCard = memo(
     ({ reciter, preferredFocus, onPress }: ReciterCardProps) => (
       <SpatialNavigationFocusableView onSelect={() => onPress(reciter)}>
@@ -116,8 +123,20 @@ export default function HomeScreen() {
             accessibilityRole="button"
             accessibilityLabel={`Reciter ${reciter.name}, Moshaf ${reciter.moshaf.name}`}
           >
-            <Text style={styles.reciterName}>{reciter.name}</Text>
-            <Text style={styles.reciterMoshaf}>{reciter.moshaf.name}</Text>
+            <Text
+              style={styles.reciterName}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {reciter.name}
+            </Text>
+            <Text
+              style={styles.reciterDesc}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              {reciter.moshaf.name} • {riwayaLabel(reciter.moshaf.riwaya)}
+            </Text>
           </Pressable>
         )}
       </SpatialNavigationFocusableView>
@@ -158,39 +177,53 @@ export default function HomeScreen() {
     value: string;
     onChangeText: (text: string) => void;
     preferredFocus?: boolean;
+    onFocusChange?: (focused: boolean) => void;
   };
-
   const SearchInput = memo(
-    ({ value, onChangeText, preferredFocus }: SearchInputProps) => (
-      <SpatialNavigationFocusableView>
-        {({ isFocused }) => (
-          <View
-            style={[
-              styles.searchInputContainer,
-              isFocused && styles.searchInputFocused,
-            ]}
-          >
-            <TextInput
-              style={styles.searchInput}
-              focusable
-              hasTVPreferredFocus={!!preferredFocus}
-              accessibilityRole="search"
-              accessibilityLabel="Search reciters"
-              value={value}
-              onChangeText={onChangeText}
-              placeholder="Search reciters..."
-              placeholderTextColor={isDark ? "#888" : "#999"}
-            />
-            <Ionicons
-              name="search"
-              size={20}
-              color={isFocused ? "#4CAF50" : isDark ? "#888" : "#999"}
-              style={styles.searchInputIcon}
-            />
-          </View>
-        )}
-      </SpatialNavigationFocusableView>
-    )
+    ({ value, onChangeText, onFocusChange }: SearchInputProps) => {
+      const [textFocused, setTextFocused] = useState(false);
+
+      return (
+        <SpatialNavigationFocusableView onSelect={() => {}}>
+          {({ isFocused }) => (
+            <View
+              style={[
+                styles.searchInputContainer,
+                (textFocused || isFocused) && styles.searchInputFocused,
+              ]}
+            >
+              <TextInput
+                style={styles.searchInput}
+                value={value}
+                onChangeText={onChangeText}
+                onFocus={() => {
+                  setTextFocused(true);
+                  onFocusChange?.(true);
+                }}
+                onBlur={() => {
+                  setTextFocused(false);
+                  onFocusChange?.(false);
+                }}
+                placeholder="Search reciters..."
+                placeholderTextColor={isDark ? "#888" : "#999"}
+              />
+              <Ionicons
+                name="search"
+                size={20}
+                color={
+                  textFocused || isFocused
+                    ? "#4CAF50"
+                    : isDark
+                    ? "#888"
+                    : "#999"
+                }
+                style={styles.searchInputIcon}
+              />
+            </View>
+          )}
+        </SpatialNavigationFocusableView>
+      );
+    }
   );
 
   type FilterChipProps = {
@@ -213,7 +246,14 @@ export default function HomeScreen() {
           accessibilityLabel={`Filter ${label}${selected ? " selected" : ""}`}
           onPress={onPress}
         >
-          <Text style={styles.filterChipText}>{label}</Text>
+          <Text
+            style={[
+              styles.filterChipText,
+              selected && styles.filterChipTextSelected,
+            ]}
+          >
+            {label}
+          </Text>
         </Pressable>
       )}
     </SpatialNavigationFocusableView>
@@ -299,6 +339,16 @@ export default function HomeScreen() {
     return 3;
   }, [width]);
 
+  const itemWidth = useMemo(() => {
+    const contentPadding = 20;
+    const rowPadding = 20;
+    const rowGap = 12;
+    const available = width - contentPadding * 2 - rowPadding * 2;
+    const gutters = rowGap * (cardsPerRow - 1);
+    const w = (available - gutters) / cardsPerRow;
+    return w > 0 ? Math.floor(w) : 0;
+  }, [width, cardsPerRow]);
+
   const reciterRows = useMemo(() => {
     const rows: Reciter[][] = [];
     filteredReciters.forEach((reciter, index) => {
@@ -366,15 +416,15 @@ export default function HomeScreen() {
         />
       </View>
       <BrandHeader />
+      <View style={styles.searchContainer}>
+        <SearchInput
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          onFocusChange={setSearchFocused}
+        />
+      </View>
       <SpatialNavigationScrollView>
         <View style={styles.content}>
-          <View style={styles.searchContainer}>
-            <SearchInput
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              preferredFocus
-            />
-          </View>
           <View style={styles.filterRow}>
             <FilterChip
               label="All"
@@ -409,12 +459,24 @@ export default function HomeScreen() {
             >
               <View style={styles.reciterRow}>
                 {row.map((reciter, cardIndex) => (
-                  <ReciterCard
+                  <View
+                    style={[
+                      styles.reciterItem,
+                      {
+                        width: itemWidth,
+                        marginRight: cardIndex === row.length - 1 ? 0 : 12,
+                      },
+                    ]}
                     key={`${reciter.id}-${reciter.moshaf.id}`}
-                    reciter={reciter}
-                    preferredFocus={rowIndex === 0 && cardIndex === 0}
-                    onPress={handleReciterPress}
-                  />
+                  >
+                    <ReciterCard
+                      reciter={reciter}
+                      preferredFocus={
+                        !searchFocused && rowIndex === 0 && cardIndex === 0
+                      }
+                      onPress={handleReciterPress}
+                    />
+                  </View>
                 ))}
               </View>
             </SpatialNavigationView>
@@ -454,6 +516,8 @@ function createStyles(isDark: boolean, width: number) {
     },
     content: {
       paddingBottom: 40,
+      paddingTop: 8,
+      overflow: "visible",
     },
     header: {
       fontSize: 22,
@@ -485,17 +549,24 @@ function createStyles(isDark: boolean, width: number) {
     },
     reciterRow: {
       flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "stretch",
+      justifyContent: "flex-start",
+      alignItems: "flex-start",
       marginBottom: 16,
-      gap: 12,
+      overflow: "visible",
+      paddingHorizontal: 20,
+    },
+    reciterItem: {
+      overflow: "visible",
+      marginVertical: 8,
     },
     reciterCard: {
-      flex: 1,
+      width: "100%",
+      height: isVeryWide ? 140 : isWide ? 128 : isMedium ? 118 : 110,
       backgroundColor: cardBg,
       paddingVertical: isVeryWide ? 28 : isWide ? 24 : 20,
       paddingHorizontal: isVeryWide ? 24 : isWide ? 20 : 16,
-      borderRadius: 14,
+      margin: 2,
+      borderRadius: 8,
       borderWidth: 2,
       borderColor: border,
     },
@@ -503,6 +574,7 @@ function createStyles(isDark: boolean, width: number) {
       backgroundColor: isDark ? "#2E7D32" : "#C8E6C9",
       borderColor: "#4CAF50",
       transform: [{ scale: 1.05 }],
+      zIndex: 2,
     },
     reciterName: {
       fontSize: isVeryWide ? 26 : isWide ? 24 : isMedium ? 20 : 18,
@@ -510,8 +582,8 @@ function createStyles(isDark: boolean, width: number) {
       color: textPrimary,
       marginBottom: 5,
     },
-    reciterMoshaf: {
-      fontSize: isVeryWide ? 20 : isWide ? 18 : isMedium ? 16 : 14,
+    reciterDesc: {
+      fontSize: isVeryWide ? 18 : isWide ? 16 : isMedium ? 15 : 14,
       color: textSecondary,
     },
     searchContainer: {
@@ -526,14 +598,14 @@ function createStyles(isDark: boolean, width: number) {
       flex: 1,
       paddingVertical: isVeryWide ? 16 : isWide ? 14 : 12,
       paddingHorizontal: isVeryWide ? 16 : isWide ? 14 : 12,
-      borderRadius: 10,
+      borderRadius: 8,
       fontSize: 16,
     },
     searchInputContainer: {
       flexDirection: "row",
       alignItems: "center",
       backgroundColor: cardBg,
-      borderRadius: 10,
+      borderRadius: 8,
       borderWidth: 2,
       borderColor: border,
       paddingHorizontal: 14,
@@ -549,32 +621,42 @@ function createStyles(isDark: boolean, width: number) {
     filterRow: {
       flexDirection: "row",
       alignItems: "center",
+      justifyContent: "flex-start",
       flexWrap: "wrap",
-      gap: 8,
       marginBottom: 12,
     },
     filterChip: {
       backgroundColor: cardBg,
-      paddingVertical: isVeryWide ? 12 : isWide ? 10 : 8,
-      paddingHorizontal: isVeryWide ? 18 : isWide ? 16 : 14,
-      borderRadius: 999,
+      paddingVertical: isVeryWide ? 12 : isWide ? 10 : 10,
+      paddingHorizontal: isVeryWide ? 20 : isWide ? 18 : 16,
+      borderRadius: 8,
       borderWidth: 2,
       borderColor: border,
+      margin: 4,
+      marginRight: 12,
+      marginBottom: 12,
     },
     filterChipText: {
       color: textPrimary,
       fontSize: 14,
       fontWeight: "600",
     },
+    filterChipTextSelected: {
+      color: "#fff",
+    },
     filterChipFocused: {
-      backgroundColor: isDark ? "#2E7D32" : "#C8E6C9",
+      backgroundColor: isDark ? "#2E7D32" : "#E8F5E9",
       borderColor: "#4CAF50",
       transform: [{ scale: 1.05 }],
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.15,
+      shadowRadius: 4,
+      elevation: 2,
     },
     filterChipSelected: {
-      backgroundColor: "#1976D2",
-      borderColor: "#2196F3",
-      color: "#fff",
+      backgroundColor: "#4CAF50",
+      borderColor: "#4CAF50",
     },
     menuRow: {
       flexDirection: "row",
