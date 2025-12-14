@@ -1,12 +1,18 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView, useColorScheme } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  useColorScheme,
+} from "react-native";
+import { version } from "../../package.json";
 
 export default function AboutScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme !== "light";
   const styles = createStyles(isDark);
   const currentYear = new Date().getFullYear();
-  const version = "1.0.0"; // Match this with package.json
 
   return (
     <ScrollView style={styles.container}>

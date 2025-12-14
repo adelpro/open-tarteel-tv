@@ -9,9 +9,14 @@ import {
   TextInput,
   Image,
   useColorScheme,
+  useWindowDimensions,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { SpatialNavigationFocusableView } from "react-tv-space-navigation";
+import {
+  SpatialNavigationFocusableView,
+  SpatialNavigationScrollView,
+  SpatialNavigationView,
+} from "react-tv-space-navigation";
 import { Reciter, Riwaya } from "../types";
 import { getAllReciters } from "../services/api";
 import { Ionicons } from "@expo/vector-icons";
@@ -23,7 +28,8 @@ export default function HomeScreen() {
   const route = useRoute<any>();
   const colorScheme = useColorScheme();
   const isDark = colorScheme !== "light";
-  const styles = createStyles(isDark);
+  const { width } = useWindowDimensions();
+  const styles = createStyles(isDark, width);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRiwaya, setSelectedRiwaya] = useState<Riwaya | "all">("all");
 
@@ -80,7 +86,7 @@ export default function HomeScreen() {
 
   const ReciterCard = memo(
     ({ reciter, preferredFocus, onPress }: ReciterCardProps) => (
-      <SpatialNavigationFocusableView>
+      <SpatialNavigationFocusableView onSelect={() => onPress(reciter)}>
         {({ isFocused }) => (
           <Pressable
             style={[styles.reciterCard, isFocused && styles.reciterCardFocused]}
@@ -88,7 +94,6 @@ export default function HomeScreen() {
             hasTVPreferredFocus={preferredFocus}
             accessibilityRole="button"
             accessibilityLabel={`Reciter ${reciter.name}, Moshaf ${reciter.moshaf.name}`}
-            onPress={() => onPress(reciter)}
           >
             <Text style={styles.reciterName}>{reciter.name}</Text>
             <Text style={styles.reciterMoshaf}>{reciter.moshaf.name}</Text>
@@ -105,14 +110,13 @@ export default function HomeScreen() {
   };
 
   const MenuButton = memo(({ label, iconName, onPress }: MenuButtonProps) => (
-    <SpatialNavigationFocusableView>
+    <SpatialNavigationFocusableView onSelect={onPress}>
       {({ isFocused }) => (
         <Pressable
           style={[styles.menuButton, isFocused && styles.menuButtonFocused]}
           focusable
           accessibilityRole="button"
           accessibilityLabel={label}
-          onPress={onPress}
         >
           <View style={styles.menuButtonContent}>
             {iconName ? (
@@ -162,7 +166,7 @@ export default function HomeScreen() {
   };
 
   const FilterChip = memo(({ label, selected, onPress }: FilterChipProps) => (
-    <SpatialNavigationFocusableView>
+    <SpatialNavigationFocusableView onSelect={onPress}>
       {({ isFocused }) => (
         <Pressable
           style={[
@@ -186,7 +190,7 @@ export default function HomeScreen() {
   };
 
   const VoiceButton = memo(({ onPress }: VoiceButtonProps) => (
-    <SpatialNavigationFocusableView>
+    <SpatialNavigationFocusableView onSelect={onPress}>
       {({ isFocused }) => (
         <Pressable
           style={[styles.micButton, isFocused && styles.micButtonFocused]}
@@ -220,11 +224,40 @@ export default function HomeScreen() {
     </View>
   ));
 
+  const cardsPerRow = useMemo(() => {
+    if (width >= 2800) return 6;
+    if (width >= 2200) return 5;
+    if (width >= 1600) return 4;
+    return 3;
+  }, [width]);
+
+  const reciterRows = useMemo(() => {
+    const rows: Reciter[][] = [];
+    filteredReciters.forEach((reciter, index) => {
+      const rowIndex = Math.floor(index / cardsPerRow);
+      if (!rows[rowIndex]) {
+        rows[rowIndex] = [];
+      }
+      rows[rowIndex].push(reciter);
+    });
+    return rows;
+  }, [filteredReciters, cardsPerRow]);
+
   if (loading) {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color="#4CAF50" />
         <Text style={styles.loadingText}>Loading Reciters...</Text>
+      </View>
+    );
+  }
+
+  if (!loading && reciters.length === 0) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text style={styles.loadingText}>
+          Could not load reciters. Please check your connection and try again.
+        </Text>
       </View>
     );
   }
@@ -244,87 +277,89 @@ export default function HomeScreen() {
         />
       </View>
       <BrandHeader />
-      <FlatList
-        data={filteredReciters}
-        keyExtractor={(item, index) => `${item.id}-${item.moshaf.id}-${index}`}
-        numColumns={4}
-        initialNumToRender={12}
-        maxToRenderPerBatch={12}
-        windowSize={7}
-        removeClippedSubviews
-        columnWrapperStyle={{ justifyContent: "space-between" }}
-        contentContainerStyle={{ paddingBottom: 20 }}
-        ListHeaderComponent={() => (
-          <View>
-            <View style={styles.searchContainer}>
-              <View style={styles.searchRow}>
-                <View style={styles.searchIconContainer}>
-                  <Ionicons name="search" size={22} color="#999" />
-                </View>
-                <SearchInput
-                  value={searchQuery}
-                  onChangeText={setSearchQuery}
-                  preferredFocus
-                />
-                <VoiceButton
-                  onPress={() => {
-                    navigation.navigate("Search", {
-                      q: searchQuery,
-                      riwaya:
-                        selectedRiwaya === "all" ? undefined : selectedRiwaya,
-                    });
-                  }}
-                />
+      <SpatialNavigationScrollView>
+        <View style={styles.content}>
+          <View style={styles.searchContainer}>
+            <View style={styles.searchRow}>
+              <View style={styles.searchIconContainer}>
+                <Ionicons name="search" size={22} color="#999" />
               </View>
-            </View>
-            <View style={styles.filterRow}>
-              <FilterChip
-                label="All"
-                selected={selectedRiwaya === "all"}
-                onPress={() => setSelectedRiwaya("all")}
+              <SearchInput
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                preferredFocus
               />
-              <FilterChip
-                label="Hafs"
-                selected={selectedRiwaya === Riwaya.HAFS_A_ASIM}
-                onPress={() => setSelectedRiwaya(Riwaya.HAFS_A_ASIM)}
-              />
-              <FilterChip
-                label="Warsh"
-                selected={selectedRiwaya === Riwaya.WARSH_AN_NAFI}
-                onPress={() => setSelectedRiwaya(Riwaya.WARSH_AN_NAFI)}
-              />
-              <FilterChip
-                label="Qalun"
-                selected={selectedRiwaya === Riwaya.QALUN_AN_NAFI}
-                onPress={() => setSelectedRiwaya(Riwaya.QALUN_AN_NAFI)}
-              />
-              <FilterChip
-                label="Alduri"
-                selected={selectedRiwaya === Riwaya.ALDURI_AN_ALKAISSAI}
-                onPress={() => setSelectedRiwaya(Riwaya.ALDURI_AN_ALKAISSAI)}
+              <VoiceButton
+                onPress={() => {
+                  navigation.navigate("Search", {
+                    q: searchQuery,
+                    riwaya:
+                      selectedRiwaya === "all" ? undefined : selectedRiwaya,
+                  });
+                }}
               />
             </View>
           </View>
-        )}
-        renderItem={({ item }) => (
-          <ReciterCard
-            reciter={item}
-            preferredFocus={false}
-            onPress={handleReciterPress}
-          />
-        )}
-      />
+          <View style={styles.filterRow}>
+            <FilterChip
+              label="All"
+              selected={selectedRiwaya === "all"}
+              onPress={() => setSelectedRiwaya("all")}
+            />
+            <FilterChip
+              label="Hafs"
+              selected={selectedRiwaya === Riwaya.HAFS_A_ASIM}
+              onPress={() => setSelectedRiwaya(Riwaya.HAFS_A_ASIM)}
+            />
+            <FilterChip
+              label="Warsh"
+              selected={selectedRiwaya === Riwaya.WARSH_AN_NAFI}
+              onPress={() => setSelectedRiwaya(Riwaya.WARSH_AN_NAFI)}
+            />
+            <FilterChip
+              label="Qalun"
+              selected={selectedRiwaya === Riwaya.QALUN_AN_NAFI}
+              onPress={() => setSelectedRiwaya(Riwaya.QALUN_AN_NAFI)}
+            />
+            <FilterChip
+              label="Alduri"
+              selected={selectedRiwaya === Riwaya.ALDURI_AN_ALKAISSAI}
+              onPress={() => setSelectedRiwaya(Riwaya.ALDURI_AN_ALKAISSAI)}
+            />
+          </View>
+          {reciterRows.map((row, rowIndex) => (
+            <SpatialNavigationView
+              key={`row-${rowIndex}`}
+              direction="horizontal"
+            >
+              <View style={styles.reciterRow}>
+                {row.map((reciter, cardIndex) => (
+                  <ReciterCard
+                    key={`${reciter.id}-${reciter.moshaf.id}`}
+                    reciter={reciter}
+                    preferredFocus={rowIndex === 0 && cardIndex === 0}
+                    onPress={handleReciterPress}
+                  />
+                ))}
+              </View>
+            </SpatialNavigationView>
+          ))}
+        </View>
+      </SpatialNavigationScrollView>
     </View>
   );
 }
 
-function createStyles(isDark: boolean) {
+function createStyles(isDark: boolean, width: number) {
   const bg = isDark ? "#121212" : "#FFFFFF";
   const textPrimary = isDark ? "#fff" : "#111";
   const textSecondary = isDark ? "#AAA" : "#555";
   const cardBg = isDark ? "#1E1E1E" : "#F5F5F5";
   const border = isDark ? "#333" : "#E0E0E0";
   const focusBg = isDark ? "#2E2E2E" : "#EAEAEA";
+  const isVeryWide = width >= 2800;
+  const isWide = width >= 2200 && width < 2800;
+  const isMedium = width >= 1600 && width < 2200;
   return StyleSheet.create({
     container: {
       flex: 1,
@@ -340,7 +375,10 @@ function createStyles(isDark: boolean) {
     loadingText: {
       color: textPrimary,
       marginTop: 10,
-      fontSize: 16,
+      fontSize: isVeryWide ? 24 : isWide ? 20 : 16,
+    },
+    content: {
+      paddingBottom: 40,
     },
     header: {
       fontSize: 22,
@@ -361,21 +399,28 @@ function createStyles(isDark: boolean) {
       borderRadius: 12,
     },
     brandTitle: {
-      fontSize: 24,
+      fontSize: isVeryWide ? 34 : isWide ? 30 : isMedium ? 26 : 24,
       fontWeight: "800",
       color: "#4CAF50",
     },
     brandSubtitle: {
-      fontSize: 14,
+      fontSize: isVeryWide ? 20 : isWide ? 18 : 14,
       color: textSecondary,
       marginTop: 2,
+    },
+    reciterRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "stretch",
+      marginBottom: 16,
+      gap: 12,
     },
     reciterCard: {
       flex: 1,
       backgroundColor: cardBg,
-      margin: 10,
-      padding: 20,
-      borderRadius: 12,
+      paddingVertical: isVeryWide ? 28 : isWide ? 24 : 20,
+      paddingHorizontal: isVeryWide ? 24 : isWide ? 20 : 16,
+      borderRadius: 14,
       borderWidth: 2,
       borderColor: border,
     },
@@ -385,13 +430,13 @@ function createStyles(isDark: boolean) {
       transform: [{ scale: 1.05 }],
     },
     reciterName: {
-      fontSize: 18,
+      fontSize: isVeryWide ? 26 : isWide ? 24 : isMedium ? 20 : 18,
       fontWeight: "bold",
       color: textPrimary,
       marginBottom: 5,
     },
     reciterMoshaf: {
-      fontSize: 14,
+      fontSize: isVeryWide ? 20 : isWide ? 18 : isMedium ? 16 : 14,
       color: textSecondary,
     },
     searchContainer: {
@@ -435,8 +480,8 @@ function createStyles(isDark: boolean) {
     },
     filterChip: {
       backgroundColor: cardBg,
-      paddingVertical: 8,
-      paddingHorizontal: 14,
+      paddingVertical: isVeryWide ? 12 : isWide ? 10 : 8,
+      paddingHorizontal: isVeryWide ? 18 : isWide ? 16 : 14,
       borderRadius: 999,
       borderWidth: 2,
       borderColor: border,
