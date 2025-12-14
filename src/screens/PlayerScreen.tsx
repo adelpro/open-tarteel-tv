@@ -15,8 +15,12 @@ import {
   Animated,
   Easing,
 } from "react-native";
+import type { FlatList as RNFlatList } from "react-native";
 import { useRoute, useFocusEffect } from "@react-navigation/native";
-import { SpatialNavigationFocusableView } from "react-tv-space-navigation";
+import {
+  SpatialNavigationFocusableView,
+  SpatialNavigationView,
+} from "react-tv-space-navigation";
 import { SURAHS } from "../constants/surahs";
 import { Reciter } from "../types";
 import { getAllReciters } from "../services/api";
@@ -36,6 +40,7 @@ export default function PlayerScreen() {
   const [repeat, setRepeat] = useState(false);
   const [muted, setMuted] = useState(false);
   const [previousVolume, setPreviousVolume] = useState(1);
+  const playlistRef = useRef<RNFlatList<any> | null>(null);
 
   const playlistData = useMemo(
     () => SURAHS.slice().sort((a, b) => a.id - b.id),
@@ -229,6 +234,27 @@ export default function PlayerScreen() {
     audioService.setRepeat(next);
   };
 
+  const hasSelection = selectedSurah !== null;
+  const currentSurah = hasSelection
+    ? SURAHS.find((s) => s.id === selectedSurah)
+    : null;
+  const controlsDisabled = !hasSelection;
+
+  useEffect(() => {
+    if (!selectedSurah || !playlistRef.current) return;
+    const index = playlistData.findIndex((s) => s.id === selectedSurah);
+    if (index === -1) return;
+    try {
+      playlistRef.current.scrollToIndex({
+        index,
+        animated: true,
+        viewPosition: 0.5,
+      });
+    } catch {
+      // ignored
+    }
+  }, [selectedSurah, playlistData]);
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -247,215 +273,317 @@ export default function PlayerScreen() {
         </Text>
       </View>
 
-      <View style={styles.playlistContainer}>
-        <FlatList
-          data={playlistData}
-          keyExtractor={(item) => item.id.toString()}
-          numColumns={3}
-          initialNumToRender={18}
-          maxToRenderPerBatch={18}
-          windowSize={7}
-          removeClippedSubviews
-          columnWrapperStyle={{ justifyContent: "space-between" }}
-          renderItem={({ item, index }) => (
-            <SurahItem
-              id={item.id}
-              name={item.name}
-              englishName={item.englishName}
-              revelationType={item.revelationType}
-              ayahCount={item.ayahCount}
-              selected={selectedSurah === item.id}
-              preferredFocus={index === 0}
-              onPress={handleSurahPress}
-            />
-          )}
-        />
-      </View>
-
-      {selectedSurah && (
-        <View style={styles.playerControls}>
-          <Text style={styles.nowPlaying}>
-            Now Playing:{" "}
-            {SURAHS.find((s) => s.id === selectedSurah)?.englishName}
-          </Text>
-          <Text style={styles.controlsMeta}>
-            Volume {Math.round(volume * 100)}% {muted ? "(Muted)" : ""} • Repeat{" "}
-            {repeat ? "On" : "Off"}
-          </Text>
-          <AudioSpectrum playing={isPlaying} />
-          <View style={styles.controlsRow}>
-            <SpatialNavigationFocusableView>
-              {({ isFocused }) => (
-                <Pressable
+      <View style={styles.mainContent}>
+        <View style={styles.playerColumn}>
+          <View style={styles.metadataCard}>
+            {hasSelection ? (
+              <>
+                <Text style={styles.metadataTitle}>
+                  {currentSurah?.englishName ?? "Select a surah"}
+                </Text>
+                <Text
                   style={[
-                    styles.controlBtnRect,
-                    isFocused && styles.controlBtnFocused,
+                    styles.metadataSubtitle,
+                    isArabicText(currentSurah?.name ?? "") && styles.arabicText,
                   ]}
-                  focusable
-                  accessibilityRole="button"
-                  accessibilityLabel="Stop"
-                  onPress={handleStop}
                 >
-                  <FontAwesome
-                    name="stop"
-                    size={24}
-                    color={isFocused ? "#4CAF50" : "#fff"}
-                  />
-                </Pressable>
-              )}
-            </SpatialNavigationFocusableView>
+                  {currentSurah?.name}
+                </Text>
+                <Text style={styles.metadataMeta}>
+                  {reciter.name} • {reciter.moshaf.name}
+                </Text>
+                <Text style={styles.metadataMeta}>
+                  Track {currentSurah?.id ?? "-"} of{" "}
+                  {reciter.moshaf.surah_total}
+                </Text>
+              </>
+            ) : (
+              <>
+                <Text style={styles.metadataTitle}>Select a surah</Text>
+                <Text style={styles.metadataSubtitle}>
+                  Use the playlist on the right to start
+                </Text>
+              </>
+            )}
+          </View>
 
-            <SpatialNavigationFocusableView>
-              {({ isFocused }) => (
-                <Pressable
-                  style={[
-                    styles.controlBtnRect,
-                    isFocused && styles.controlBtnFocused,
-                  ]}
-                  focusable
-                  accessibilityRole="button"
-                  accessibilityLabel="Previous"
-                  onPress={handlePrevious}
-                >
-                  <FontAwesome
-                    name="step-backward"
-                    size={28}
-                    color={isFocused ? "#4CAF50" : "#fff"}
-                  />
-                </Pressable>
-              )}
-            </SpatialNavigationFocusableView>
+          <View style={styles.playerArea}>
+            <View style={styles.playerControls}>
+              <Text style={styles.nowPlaying}>
+                {hasSelection
+                  ? `Now Playing: ${currentSurah?.englishName ?? ""}`
+                  : "Select a surah to start playing"}
+              </Text>
+              <Text style={styles.controlsMeta}>
+                {hasSelection
+                  ? `Volume ${Math.round(volume * 100)}% ${
+                      muted ? "(Muted)" : ""
+                    } • Repeat ${repeat ? "On" : "Off"}`
+                  : "Playback controls will be enabled once a surah is selected"}
+              </Text>
+              <AudioSpectrum playing={hasSelection && isPlaying} />
+              <SpatialNavigationView direction="horizontal">
+                <View style={styles.controlsRow}>
+                  <SpatialNavigationFocusableView>
+                    {({ isFocused }) => (
+                      <Pressable
+                        style={[
+                          styles.controlBtnRect,
+                          controlsDisabled && styles.controlBtnDisabled,
+                          isFocused &&
+                            !controlsDisabled &&
+                            styles.controlBtnFocused,
+                        ]}
+                        focusable={!controlsDisabled}
+                        disabled={controlsDisabled}
+                        accessibilityRole="button"
+                        accessibilityLabel="Stop"
+                        onPress={handleStop}
+                      >
+                        <FontAwesome
+                          name="stop"
+                          size={24}
+                          color={
+                            isFocused && !controlsDisabled ? "#4CAF50" : "#fff"
+                          }
+                        />
+                      </Pressable>
+                    )}
+                  </SpatialNavigationFocusableView>
 
-            <SpatialNavigationFocusableView>
-              {({ isFocused }) => (
-                <Pressable
-                  style={[
-                    styles.controlBtnRectWide,
-                    isFocused && styles.controlBtnFocused,
-                  ]}
-                  focusable
-                  accessibilityRole="button"
-                  accessibilityLabel={isPlaying ? "Pause" : "Play"}
-                  onPress={handlePlayPause}
-                >
-                  <FontAwesome
-                    name={isPlaying ? "pause" : "play"}
-                    size={32}
-                    color={isFocused ? "#4CAF50" : "#fff"}
-                  />
-                </Pressable>
-              )}
-            </SpatialNavigationFocusableView>
+                  <SpatialNavigationFocusableView>
+                    {({ isFocused }) => (
+                      <Pressable
+                        style={[
+                          styles.controlBtnRect,
+                          controlsDisabled && styles.controlBtnDisabled,
+                          isFocused &&
+                            !controlsDisabled &&
+                            styles.controlBtnFocused,
+                        ]}
+                        focusable={!controlsDisabled}
+                        disabled={controlsDisabled}
+                        accessibilityRole="button"
+                        accessibilityLabel="Previous"
+                        onPress={handlePrevious}
+                      >
+                        <FontAwesome
+                          name="step-backward"
+                          size={28}
+                          color={
+                            isFocused && !controlsDisabled ? "#4CAF50" : "#fff"
+                          }
+                        />
+                      </Pressable>
+                    )}
+                  </SpatialNavigationFocusableView>
 
-            <SpatialNavigationFocusableView>
-              {({ isFocused }) => (
-                <Pressable
-                  style={[
-                    styles.controlBtnRect,
-                    isFocused && styles.controlBtnFocused,
-                  ]}
-                  focusable
-                  accessibilityRole="button"
-                  accessibilityLabel="Next"
-                  onPress={handleNext}
-                >
-                  <FontAwesome
-                    name="step-forward"
-                    size={28}
-                    color={isFocused ? "#4CAF50" : "#fff"}
-                  />
-                </Pressable>
-              )}
-            </SpatialNavigationFocusableView>
+                  <SpatialNavigationFocusableView>
+                    {({ isFocused }) => (
+                      <Pressable
+                        style={[
+                          styles.controlBtnRectWide,
+                          controlsDisabled && styles.controlBtnDisabled,
+                          isFocused &&
+                            !controlsDisabled &&
+                            styles.controlBtnFocused,
+                        ]}
+                        focusable={!controlsDisabled}
+                        disabled={controlsDisabled}
+                        accessibilityRole="button"
+                        accessibilityLabel={isPlaying ? "Pause" : "Play"}
+                        onPress={handlePlayPause}
+                      >
+                        <FontAwesome
+                          name={isPlaying ? "pause" : "play"}
+                          size={32}
+                          color={
+                            isFocused && !controlsDisabled ? "#4CAF50" : "#fff"
+                          }
+                        />
+                      </Pressable>
+                    )}
+                  </SpatialNavigationFocusableView>
 
-            <SpatialNavigationFocusableView>
-              {({ isFocused }) => (
-                <Pressable
-                  style={[
-                    styles.controlBtnRect,
-                    isFocused && styles.controlBtnFocused,
-                  ]}
-                  focusable
-                  accessibilityRole="button"
-                  accessibilityLabel="Volume down"
-                  onPress={() => handleVolumeChange(-0.1)}
-                >
-                  <FontAwesome
-                    name="volume-down"
-                    size={24}
-                    color={isFocused ? "#4CAF50" : "#fff"}
-                  />
-                </Pressable>
-              )}
-            </SpatialNavigationFocusableView>
+                  <SpatialNavigationFocusableView>
+                    {({ isFocused }) => (
+                      <Pressable
+                        style={[
+                          styles.controlBtnRect,
+                          controlsDisabled && styles.controlBtnDisabled,
+                          isFocused &&
+                            !controlsDisabled &&
+                            styles.controlBtnFocused,
+                        ]}
+                        focusable={!controlsDisabled}
+                        disabled={controlsDisabled}
+                        accessibilityRole="button"
+                        accessibilityLabel="Next"
+                        onPress={handleNext}
+                      >
+                        <FontAwesome
+                          name="step-forward"
+                          size={28}
+                          color={
+                            isFocused && !controlsDisabled ? "#4CAF50" : "#fff"
+                          }
+                        />
+                      </Pressable>
+                    )}
+                  </SpatialNavigationFocusableView>
 
-            <SpatialNavigationFocusableView>
-              {({ isFocused }) => (
-                <Pressable
-                  style={[
-                    styles.controlBtnRect,
-                    isFocused && styles.controlBtnFocused,
-                  ]}
-                  focusable
-                  accessibilityRole="button"
-                  accessibilityLabel="Volume up"
-                  onPress={() => handleVolumeChange(0.1)}
-                >
-                  <FontAwesome
-                    name="volume-up"
-                    size={24}
-                    color={isFocused ? "#4CAF50" : "#fff"}
-                  />
-                </Pressable>
-              )}
-            </SpatialNavigationFocusableView>
+                  <SpatialNavigationFocusableView>
+                    {({ isFocused }) => (
+                      <Pressable
+                        style={[
+                          styles.controlBtnRect,
+                          controlsDisabled && styles.controlBtnDisabled,
+                          isFocused &&
+                            !controlsDisabled &&
+                            styles.controlBtnFocused,
+                        ]}
+                        focusable={!controlsDisabled}
+                        disabled={controlsDisabled}
+                        accessibilityRole="button"
+                        accessibilityLabel="Volume down"
+                        onPress={() => handleVolumeChange(-0.1)}
+                      >
+                        <FontAwesome
+                          name="volume-down"
+                          size={24}
+                          color={
+                            isFocused && !controlsDisabled ? "#4CAF50" : "#fff"
+                          }
+                        />
+                      </Pressable>
+                    )}
+                  </SpatialNavigationFocusableView>
 
-            <SpatialNavigationFocusableView>
-              {({ isFocused }) => (
-                <Pressable
-                  style={[
-                    styles.controlBtnRect,
-                    muted && styles.controlBtnActive,
-                    isFocused && styles.controlBtnFocused,
-                  ]}
-                  focusable
-                  accessibilityRole="button"
-                  accessibilityLabel={muted ? "Unmute" : "Mute"}
-                  onPress={handleToggleMute}
-                >
-                  <FontAwesome
-                    name="volume-off"
-                    size={24}
-                    color={muted || isFocused ? "#4CAF50" : "#fff"}
-                  />
-                </Pressable>
-              )}
-            </SpatialNavigationFocusableView>
+                  <SpatialNavigationFocusableView>
+                    {({ isFocused }) => (
+                      <Pressable
+                        style={[
+                          styles.controlBtnRect,
+                          controlsDisabled && styles.controlBtnDisabled,
+                          isFocused &&
+                            !controlsDisabled &&
+                            styles.controlBtnFocused,
+                        ]}
+                        focusable={!controlsDisabled}
+                        disabled={controlsDisabled}
+                        accessibilityRole="button"
+                        accessibilityLabel="Volume up"
+                        onPress={() => handleVolumeChange(0.1)}
+                      >
+                        <FontAwesome
+                          name="volume-up"
+                          size={24}
+                          color={
+                            isFocused && !controlsDisabled ? "#4CAF50" : "#fff"
+                          }
+                        />
+                      </Pressable>
+                    )}
+                  </SpatialNavigationFocusableView>
 
-            <SpatialNavigationFocusableView>
-              {({ isFocused }) => (
-                <Pressable
-                  style={[
-                    styles.controlBtnRect,
-                    repeat && styles.controlBtnActive,
-                    isFocused && styles.controlBtnFocused,
-                  ]}
-                  focusable
-                  accessibilityRole="button"
-                  accessibilityLabel="Toggle repeat"
-                  onPress={handleToggleRepeat}
-                >
-                  <FontAwesome
-                    name="repeat"
-                    size={22}
-                    color={repeat || isFocused ? "#4CAF50" : "#fff"}
-                  />
-                </Pressable>
-              )}
-            </SpatialNavigationFocusableView>
+                  <SpatialNavigationFocusableView>
+                    {({ isFocused }) => (
+                      <Pressable
+                        style={[
+                          styles.controlBtnRect,
+                          controlsDisabled && styles.controlBtnDisabled,
+                          muted && styles.controlBtnActive,
+                          isFocused &&
+                            !controlsDisabled &&
+                            styles.controlBtnFocused,
+                        ]}
+                        focusable={!controlsDisabled}
+                        disabled={controlsDisabled}
+                        accessibilityRole="button"
+                        accessibilityLabel={muted ? "Unmute" : "Mute"}
+                        onPress={handleToggleMute}
+                      >
+                        <FontAwesome
+                          name="volume-off"
+                          size={24}
+                          color={
+                            muted || (isFocused && !controlsDisabled)
+                              ? "#4CAF50"
+                              : "#fff"
+                          }
+                        />
+                      </Pressable>
+                    )}
+                  </SpatialNavigationFocusableView>
+
+                  <SpatialNavigationFocusableView>
+                    {({ isFocused }) => (
+                      <Pressable
+                        style={[
+                          styles.controlBtnRect,
+                          controlsDisabled && styles.controlBtnDisabled,
+                          repeat && styles.controlBtnActive,
+                          isFocused &&
+                            !controlsDisabled &&
+                            styles.controlBtnFocused,
+                        ]}
+                        focusable={!controlsDisabled}
+                        disabled={controlsDisabled}
+                        accessibilityRole="button"
+                        accessibilityLabel="Toggle repeat"
+                        onPress={handleToggleRepeat}
+                      >
+                        <FontAwesome
+                          name="repeat"
+                          size={22}
+                          color={
+                            repeat || (isFocused && !controlsDisabled)
+                              ? "#4CAF50"
+                              : "#fff"
+                          }
+                        />
+                      </Pressable>
+                    )}
+                  </SpatialNavigationFocusableView>
+                </View>
+              </SpatialNavigationView>
+            </View>
           </View>
         </View>
-      )}
+
+        <View style={styles.playlistPanel}>
+          <View style={styles.playlistHeaderRow}>
+            <Text style={styles.playlistTitle}>Playlist</Text>
+          </View>
+          <View style={styles.playlistBody}>
+            <SpatialNavigationView direction="vertical">
+              <FlatList
+                ref={playlistRef}
+                data={playlistData}
+                keyExtractor={(item) => item.id.toString()}
+                showsVerticalScrollIndicator={false}
+                initialNumToRender={18}
+                maxToRenderPerBatch={18}
+                windowSize={10}
+                removeClippedSubviews
+                contentContainerStyle={styles.playlistContent}
+                renderItem={({ item, index }) => (
+                  <SurahItem
+                    id={item.id}
+                    name={item.name}
+                    englishName={item.englishName}
+                    revelationType={item.revelationType}
+                    ayahCount={item.ayahCount}
+                    selected={selectedSurah === item.id}
+                    preferredFocus={index === 0}
+                    onPress={handleSurahPress}
+                  />
+                )}
+              />
+            </SpatialNavigationView>
+          </View>
+        </View>
+      </View>
     </View>
   );
 }
@@ -498,55 +626,109 @@ const styles = StyleSheet.create({
     color: "#888",
     marginTop: 4,
   },
+  mainContent: {
+    flex: 1,
+    flexDirection: "row",
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 20,
+  },
+  playerColumn: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  playerArea: {
+    marginTop: 12,
+  },
+  playlistPanel: {
+    height: "100%",
+    marginLeft: 12,
+    width: 320,
+    backgroundColor: "#181818",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#262626",
+    overflow: "hidden",
+  },
   arabicText: {
     textAlign: "right",
     writingDirection: "rtl",
   },
   playlistContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 6,
+    flex: 1,
+    paddingVertical: 16,
+  },
+  playlistHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#262626",
+  },
+  playlistTitle: {
+    fontSize: 14,
+    color: "#fff",
+    fontWeight: "600",
+  },
+  playlistBody: {
+    flex: 1,
+  },
+  playlistContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 8,
   },
   surahCard: {
-    flex: 1,
-    backgroundColor: "#1E1E1E",
-    margin: 8,
-    padding: 14,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: "#333",
-    minWidth: 150,
+    width: 280,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    marginBottom: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 12,
+    backgroundColor: "#181818",
+    borderWidth: 1,
+    borderColor: "#262626",
   },
   surahCardFocused: {
-    backgroundColor: "#2E7D32",
+    borderWidth: 2,
+    backgroundColor: "#1F2A1F",
     borderColor: "#4CAF50",
-    transform: [{ scale: 1.05 }],
+    transform: [{ scale: 1.06 }],
+    shadowColor: "#4CAF50",
+    shadowOpacity: 0.6,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 6,
   },
   surahCardSelected: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: "#2E7D32",
     borderColor: "#4CAF50",
   },
   surahNumber: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#4CAF50",
-    marginBottom: 5,
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#B0B0B0",
+    marginRight: 12,
   },
   surahName: {
-    fontSize: 16,
+    fontSize: 14,
     color: "#fff",
-    marginBottom: 3,
+    flexShrink: 1,
   },
   surahEnglishName: {
-    fontSize: 12,
-    color: "#AAA",
+    fontSize: 13,
+    color: "#EEE",
   },
   surahMeta: {
     fontSize: 12,
     color: "#888",
-    marginTop: 2,
+    marginTop: 0,
   },
   playerControls: {
-    padding: 20,
+    paddingHorizontal: 24,
+    paddingVertical: 18,
     backgroundColor: "#1E1E1E",
     borderTopWidth: 2,
     borderTopColor: "#4CAF50",
@@ -554,15 +736,38 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,
   },
-  nowPlaying: {
-    fontSize: 16,
+  metadataCard: {
+    marginTop: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    backgroundColor: "#1A1A1A",
+    borderWidth: 1,
+    borderColor: "#2A2A2A",
+  },
+  metadataTitle: {
+    fontSize: 20,
     color: "#fff",
-    marginBottom: 15,
+    marginBottom: 4,
+  },
+  metadataSubtitle: {
+    fontSize: 16,
+    color: "#DDD",
+    marginBottom: 4,
+  },
+  metadataMeta: {
+    fontSize: 12,
+    color: "#AAA",
+  },
+  nowPlaying: {
+    fontSize: 18,
+    color: "#fff",
+    marginBottom: 6,
   },
   controlsMeta: {
-    fontSize: 13,
+    fontSize: 12,
     color: "#AAA",
-    marginBottom: 12,
+    marginBottom: 16,
   },
   spectrumRow: {
     flexDirection: "row",
@@ -582,23 +787,23 @@ const styles = StyleSheet.create({
   controlsRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 20,
+    gap: 18,
   },
   controlBtnRect: {
-    width: 64,
-    height: 44,
-    borderRadius: 8,
-    backgroundColor: "#333",
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: "#232323",
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
     borderColor: "transparent",
   },
   controlBtnRectWide: {
-    width: 100,
-    height: 44,
-    borderRadius: 8,
-    backgroundColor: "#444",
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: "#2F2F2F",
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
@@ -607,7 +812,15 @@ const styles = StyleSheet.create({
   controlBtnFocused: {
     borderColor: "#4CAF50",
     backgroundColor: "#2E2E2E",
-    transform: [{ scale: 1.1 }],
+    transform: [{ scale: 1.14 }],
+    shadowColor: "#4CAF50",
+    shadowOpacity: 0.7,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 8,
+  },
+  controlBtnDisabled: {
+    opacity: 0.4,
   },
   controlBtnActive: {
     borderColor: "#4CAF50",
@@ -652,14 +865,8 @@ const SurahItem = memo(
           onPress={() => onPress(id)}
         >
           <Text style={styles.surahNumber}>{id}</Text>
-          <Text
-            style={[styles.surahName, isArabicText(name) && styles.arabicText]}
-          >
-            {name}
-          </Text>
-          <Text style={styles.surahEnglishName}>{englishName}</Text>
-          <Text style={styles.surahMeta}>
-            {revelationType} • {ayahCount} verses
+          <Text style={[styles.surahName]} numberOfLines={1}>
+            {englishName}
           </Text>
         </Pressable>
       )}
