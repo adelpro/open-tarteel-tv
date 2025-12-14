@@ -16,6 +16,7 @@
       "supportsTablet": true
     },
     "android": {
+      "jsEngine": "hermes",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -33,6 +34,27 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": ["expo-font", "expo-audio", "expo-video"]
+    "plugins": [
+      "expo-font",
+      "expo-audio",
+      "expo-video",
+      [
+        "@react-native-tvos/config-tv",
+        {
+          "isTV": true,
+          "androidTVBanner": "./assets/icon-400x240.png",
+          "androidTVIcon": "./assets/icon-760x760.png",
+          "appleTVImages": {
+            "icon": "./assets/icon-1280x768.png",
+            "iconSmall": "./assets/icon-400x240.png",
+            "iconSmall2x": "./assets/icon-800x480.png",
+            "topShelf": "./assets/icon-1920x720.png",
+            "topShelf2x": "./assets/icon-3840x1440.png",
+            "topShelfWide": "./assets/icon-2320x720.png",
+            "topShelfWide2x": "./assets/icon-4640x1440.png"
+          }
+        }
+      ]
+    ]
   }
 }
