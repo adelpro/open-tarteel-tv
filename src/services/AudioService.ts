@@ -5,6 +5,8 @@ class AudioService {
   private currentUrl: string | null = null;
   private isPlaying: boolean = false;
   private switching: boolean = false;
+  private volume: number = 1;
+  private repeat: boolean = false;
 
   async loadAndPlay(url: string): Promise<void> {
     try {
@@ -33,19 +35,23 @@ class AudioService {
         // @ts-ignore
         this.player.addListener("playbackStatusUpdate", (status: any) => {
           if (status) {
-            this.isPlaying = status.playing; // specific prop check
+            this.isPlaying = status.playing;
             if (status.didJustFinish) {
-              // verify this exists
               this.isPlaying = false;
+              if (this.repeat && this.currentUrl) {
+                this.loadAndPlay(this.currentUrl);
+              }
             }
           }
         });
       }
 
       this.currentUrl = url;
-      // Ensure any residual state is cleared before starting
       (this.player as any)?.pause?.();
       (this.player as any)?.stop?.();
+      if ((this.player as any)?.setVolume) {
+        (this.player as any).setVolume(this.volume);
+      }
       this.player.play();
       this.isPlaying = true;
     } catch (error) {
@@ -103,6 +109,26 @@ class AudioService {
 
   getCurrentUrl(): string | null {
     return this.currentUrl;
+  }
+
+  setVolume(level: number): void {
+    const next = Math.min(1, Math.max(0, level));
+    this.volume = next;
+    if (this.player && (this.player as any)?.setVolume) {
+      (this.player as any).setVolume(next);
+    }
+  }
+
+  getVolume(): number {
+    return this.volume;
+  }
+
+  setRepeat(enabled: boolean): void {
+    this.repeat = enabled;
+  }
+
+  getRepeat(): boolean {
+    return this.repeat;
   }
 }
 
