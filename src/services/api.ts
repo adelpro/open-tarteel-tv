@@ -32,17 +32,57 @@ const generatePlaylist = (moshaf: MP3APIMoshaf): Playlist => {
   return result;
 };
 
+// Helper function to fetch with timeout
+const fetchWithTimeout = (
+  url: string,
+  timeoutMs: number = 10000
+): Promise<Response> => {
+  return Promise.race([
+    fetch(url),
+    new Promise<Response>((_, reject) =>
+      setTimeout(() => reject(new Error("Fetch timeout")), timeoutMs)
+    ),
+  ]);
+};
+
+// Retry logic with exponential backoff
+const retryFetch = async (
+  url: string,
+  maxAttempts: number = 3
+): Promise<Response> => {
+  let lastError: Error | null = null;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const response = await fetchWithTimeout(url);
+      if (response.ok) {
+        return response;
+      }
+      throw new Error(`HTTP ${response.status}`);
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      console.warn(
+        `Fetch attempt ${attempt}/${maxAttempts} failed:`,
+        lastError.message
+      );
+
+      if (attempt < maxAttempts) {
+        // Exponential backoff: 1s, 2s, 4s
+        const waitTime = 1000 * Math.pow(2, attempt - 1);
+        await new Promise((resolve) => setTimeout(resolve, waitTime));
+      }
+    }
+  }
+
+  throw lastError || new Error("Failed to fetch after all attempts");
+};
+
 // Function to fetch reciters from MP3Quran API
 export async function getAllReciters(): Promise<Reciter[]> {
   try {
-    const response = await fetch(
-      "https://www.mp3quran.net/api/v3/reciters?language=en",
-      { cache: "force-cache" }
+    const response = await retryFetch(
+      "https://www.mp3quran.net/api/v3/reciters?language=en"
     );
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch reciters: ${response.status}`);
-    }
 
     const data: mp3QuranAPiResponse = await response.json();
     const reciters: Reciter[] = [];
@@ -70,7 +110,9 @@ export async function getAllReciters(): Promise<Reciter[]> {
 
     return reciters;
   } catch (error) {
-    console.error("Error fetching reciters:", error);
-    return [];
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    console.error("Error fetching reciters:", errorMessage);
+    throw error; // Re-throw so HomeScreen can handle it
   }
 }

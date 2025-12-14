@@ -24,6 +24,7 @@ import { Ionicons } from "@expo/vector-icons";
 export default function HomeScreen() {
   const [reciters, setReciters] = useState<Reciter[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const colorScheme = useColorScheme();
@@ -32,6 +33,8 @@ export default function HomeScreen() {
   const styles = createStyles(isDark, width);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRiwaya, setSelectedRiwaya] = useState<Riwaya | "all">("all");
+  const [retryCount, setRetryCount] = useState(0);
+  const MAX_RETRIES = 3;
 
   useEffect(() => {
     loadReciters();
@@ -53,9 +56,27 @@ export default function HomeScreen() {
 
   const loadReciters = async () => {
     setLoading(true);
-    const data = await getAllReciters();
-    setReciters(data);
-    setLoading(false);
+    setError(null);
+    try {
+      const data = await getAllReciters();
+      setReciters(data);
+      setRetryCount(0);
+      setError(null);
+    } catch (err) {
+      const errorMsg =
+        err instanceof Error
+          ? err.message
+          : "Failed to load reciters. Please try again.";
+      setError(errorMsg);
+      setReciters([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRetry = () => {
+    setRetryCount((prev) => prev + 1);
+    loadReciters();
   };
 
   const handleReciterPress = useCallback(
@@ -143,17 +164,30 @@ export default function HomeScreen() {
     ({ value, onChangeText, preferredFocus }: SearchInputProps) => (
       <SpatialNavigationFocusableView>
         {({ isFocused }) => (
-          <TextInput
-            style={[styles.searchInput, isFocused && styles.searchInputFocused]}
-            focusable
-            hasTVPreferredFocus={!!preferredFocus}
-            accessibilityRole="search"
-            accessibilityLabel="Search reciters"
-            value={value}
-            onChangeText={onChangeText}
-            placeholder="Search..."
-            placeholderTextColor={isDark ? "#888" : "#777"}
-          />
+          <View
+            style={[
+              styles.searchInputContainer,
+              isFocused && styles.searchInputFocused,
+            ]}
+          >
+            <TextInput
+              style={styles.searchInput}
+              focusable
+              hasTVPreferredFocus={!!preferredFocus}
+              accessibilityRole="search"
+              accessibilityLabel="Search reciters"
+              value={value}
+              onChangeText={onChangeText}
+              placeholder="Search reciters..."
+              placeholderTextColor={isDark ? "#888" : "#999"}
+            />
+            <Ionicons
+              name="search"
+              size={20}
+              color={isFocused ? "#4CAF50" : isDark ? "#888" : "#999"}
+              style={styles.searchInputIcon}
+            />
+          </View>
         )}
       </SpatialNavigationFocusableView>
     )
@@ -179,7 +213,7 @@ export default function HomeScreen() {
           accessibilityLabel={`Filter ${label}${selected ? " selected" : ""}`}
           onPress={onPress}
         >
-          <Text style={{ color: "#fff", fontSize: 14 }}>{label}</Text>
+          <Text style={styles.filterChipText}>{label}</Text>
         </Pressable>
       )}
     </SpatialNavigationFocusableView>
@@ -204,6 +238,40 @@ export default function HomeScreen() {
             size={20}
             color={isFocused ? "#4CAF50" : isDark ? "#bbb" : "#666"}
           />
+        </Pressable>
+      )}
+    </SpatialNavigationFocusableView>
+  ));
+
+  type RetryButtonProps = {
+    onPress: () => void;
+  };
+
+  const RetryButton = memo(({ onPress }: RetryButtonProps) => (
+    <SpatialNavigationFocusableView onSelect={onPress}>
+      {({ isFocused }) => (
+        <Pressable
+          style={[styles.retryButton, isFocused && styles.retryButtonFocused]}
+          focusable
+          hasTVPreferredFocus
+          accessibilityRole="button"
+          accessibilityLabel="Retry loading reciters"
+          onPress={onPress}
+        >
+          <Ionicons
+            name="refresh"
+            size={20}
+            color={isFocused ? "#fff" : "#4CAF50"}
+            style={styles.retryButtonIcon}
+          />
+          <Text
+            style={[
+              styles.retryButtonText,
+              isFocused && styles.retryButtonTextFocused,
+            ]}
+          >
+            Try Again
+          </Text>
         </Pressable>
       )}
     </SpatialNavigationFocusableView>
@@ -252,12 +320,33 @@ export default function HomeScreen() {
     );
   }
 
+  if (error) {
+    return (
+      <View style={styles.centerContainer}>
+        <View style={styles.errorContainer}>
+          <Ionicons name="alert-circle" size={64} color="#FF6B6B" />
+          <Text style={styles.errorTitle}>Failed to Load Reciters</Text>
+          <Text style={styles.errorMessage}>{error}</Text>
+          <Text style={styles.retryCountText}>
+            Attempt {retryCount + 1} of {MAX_RETRIES + 1}
+          </Text>
+          <RetryButton onPress={handleRetry} />
+        </View>
+      </View>
+    );
+  }
+
   if (!loading && reciters.length === 0) {
     return (
       <View style={styles.centerContainer}>
-        <Text style={styles.loadingText}>
-          Could not load reciters. Please check your connection and try again.
-        </Text>
+        <View style={styles.errorContainer}>
+          <Ionicons name="folder-outline" size={64} color="#999" />
+          <Text style={styles.errorTitle}>No Reciters Found</Text>
+          <Text style={styles.errorMessage}>
+            No reciter data available. Please check your connection.
+          </Text>
+          <RetryButton onPress={handleRetry} />
+        </View>
       </View>
     );
   }
@@ -280,25 +369,11 @@ export default function HomeScreen() {
       <SpatialNavigationScrollView>
         <View style={styles.content}>
           <View style={styles.searchContainer}>
-            <View style={styles.searchRow}>
-              <View style={styles.searchIconContainer}>
-                <Ionicons name="search" size={22} color="#999" />
-              </View>
-              <SearchInput
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                preferredFocus
-              />
-              <VoiceButton
-                onPress={() => {
-                  navigation.navigate("Search", {
-                    q: searchQuery,
-                    riwaya:
-                      selectedRiwaya === "all" ? undefined : selectedRiwaya,
-                  });
-                }}
-              />
-            </View>
+            <SearchInput
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              preferredFocus
+            />
           </View>
           <View style={styles.filterRow}>
             <FilterChip
@@ -354,9 +429,9 @@ function createStyles(isDark: boolean, width: number) {
   const bg = isDark ? "#121212" : "#FFFFFF";
   const textPrimary = isDark ? "#fff" : "#111";
   const textSecondary = isDark ? "#AAA" : "#555";
-  const cardBg = isDark ? "#1E1E1E" : "#F5F5F5";
-  const border = isDark ? "#333" : "#E0E0E0";
-  const focusBg = isDark ? "#2E2E2E" : "#EAEAEA";
+  const cardBg = isDark ? "#1E1E1E" : "#EFEFEF";
+  const border = isDark ? "#333" : "#D0D0D0";
+  const focusBg = isDark ? "#2E2E2E" : "#E0E0E0";
   const isVeryWide = width >= 2800;
   const isWide = width >= 2200 && width < 2800;
   const isMedium = width >= 1600 && width < 2200;
@@ -440,36 +515,36 @@ function createStyles(isDark: boolean, width: number) {
       color: textSecondary,
     },
     searchContainer: {
-      marginBottom: 12,
-    },
-    searchRow: {
-      flexDirection: "row",
+      marginBottom: 16,
       alignItems: "center",
-      gap: 10,
-    },
-    searchIconContainer: {
-      width: 42,
-      height: 42,
-      borderRadius: 8,
-      backgroundColor: cardBg,
-      justifyContent: "center",
-      alignItems: "center",
-      borderWidth: 2,
-      borderColor: border,
+      paddingHorizontal: 20,
+      width: "100%",
     },
     searchInput: {
       backgroundColor: cardBg,
       color: textPrimary,
-      paddingHorizontal: 16,
-      paddingVertical: 10,
-      borderRadius: 8,
+      flex: 1,
+      paddingVertical: isVeryWide ? 16 : isWide ? 14 : 12,
+      paddingHorizontal: isVeryWide ? 16 : isWide ? 14 : 12,
+      borderRadius: 10,
+      fontSize: 16,
+    },
+    searchInputContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: cardBg,
+      borderRadius: 10,
       borderWidth: 2,
       borderColor: border,
+      paddingHorizontal: 14,
+      width: "100%",
+    },
+    searchInputIcon: {
+      marginLeft: 10,
     },
     searchInputFocused: {
       backgroundColor: focusBg,
       borderColor: "#4CAF50",
-      transform: [{ scale: 1.02 }],
     },
     filterRow: {
       flexDirection: "row",
@@ -486,6 +561,11 @@ function createStyles(isDark: boolean, width: number) {
       borderWidth: 2,
       borderColor: border,
     },
+    filterChipText: {
+      color: textPrimary,
+      fontSize: 14,
+      fontWeight: "600",
+    },
     filterChipFocused: {
       backgroundColor: isDark ? "#2E7D32" : "#C8E6C9",
       borderColor: "#4CAF50",
@@ -494,6 +574,7 @@ function createStyles(isDark: boolean, width: number) {
     filterChipSelected: {
       backgroundColor: "#1976D2",
       borderColor: "#2196F3",
+      color: "#fff",
     },
     menuRow: {
       flexDirection: "row",
@@ -538,6 +619,55 @@ function createStyles(isDark: boolean, width: number) {
       backgroundColor: focusBg,
       borderColor: "#4CAF50",
       transform: [{ scale: 1.05 }],
+    },
+    errorContainer: {
+      alignItems: "center",
+      paddingHorizontal: 40,
+    },
+    errorTitle: {
+      fontSize: isVeryWide ? 32 : isWide ? 28 : 24,
+      fontWeight: "700",
+      color: textPrimary,
+      marginTop: 20,
+      marginBottom: 12,
+    },
+    errorMessage: {
+      fontSize: isVeryWide ? 20 : isWide ? 18 : 16,
+      color: textSecondary,
+      textAlign: "center",
+      marginBottom: 24,
+      lineHeight: 24,
+    },
+    retryCountText: {
+      fontSize: 14,
+      color: textSecondary,
+      marginBottom: 24,
+    },
+    retryButton: {
+      backgroundColor: "#4CAF50",
+      paddingVertical: 16,
+      paddingHorizontal: 32,
+      borderRadius: 8,
+      flexDirection: "row",
+      alignItems: "center",
+      borderWidth: 2,
+      borderColor: "#4CAF50",
+    },
+    retryButtonFocused: {
+      backgroundColor: "#45a049",
+      borderColor: "#fff",
+      transform: [{ scale: 1.08 }],
+    },
+    retryButtonIcon: {
+      marginRight: 10,
+    },
+    retryButtonText: {
+      color: "#fff",
+      fontSize: 18,
+      fontWeight: "600",
+    },
+    retryButtonTextFocused: {
+      color: "#fff",
     },
   });
 }
