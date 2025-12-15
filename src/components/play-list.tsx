@@ -17,15 +17,15 @@ const SURAH_ITEM_HEIGHT = 64;
 
 type PlaylistProps = {
   player: PlayerState;
+  listRef: React.RefObject<any>;
 };
 
-const Playlist = ({ player }: PlaylistProps) => {
+const Playlist = ({ player, listRef }: PlaylistProps) => {
   const { playlistData, selectedSurah, handleSurahPress } = player;
   const isDark = useColorScheme() !== "light";
   const styles = createStyles(isDark);
 
   const memoizedData = useMemo(() => playlistData, [playlistData]);
-  const listRef = useRef<any>(null);
 
   useEffect(() => {
     const index = memoizedData.findIndex((s) => s.id === selectedSurah);

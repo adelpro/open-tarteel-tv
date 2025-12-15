@@ -41,7 +41,7 @@ export default function PlayerScreen() {
       <View style={styles.mainContent}>
         <Player player={player} />
 
-        <Playlist player={player} />
+        <Playlist player={player} listRef={playlistRef} />
       </View>
     </View>
   );

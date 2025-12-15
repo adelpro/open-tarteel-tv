@@ -64,21 +64,6 @@ const Player = ({ player }: PlayerProps) => {
     );
   }
 
-  const renderControl = (
-    onSelect: () => void,
-    renderPressable: (isFocused: boolean) => React.ReactElement
-  ) => (
-    <SpatialNavigationFocusableView
-      onSelect={() => {
-        onSelect();
-      }}
-    >
-      {({ isFocused }) => {
-        return renderPressable(isFocused);
-      }}
-    </SpatialNavigationFocusableView>
-  );
-
   return (
     <View style={styles.playerColumn}>
       <View style={styles.metadataCard}>
@@ -132,146 +117,72 @@ const Player = ({ player }: PlayerProps) => {
             direction="horizontal"
             style={styles.controlsRow}
           >
-            {renderControl(handlePrevious, (isFocused) => (
-              <Pressable
-                onPress={handlePrevious}
-                style={[
-                  styles.controlBtn,
-                  styles.controlBtnRect,
-                  isFocused && styles.controlBtnFocused,
-                  controlsDisabled && styles.controlBtnDisabled,
-                ]}
+            {[
+              { icon: "step-backward", onSelect: handlePrevious, size: 28 },
+              {
+                icon: isPlaying ? "pause" : "play",
+                onSelect: handlePlayPause,
+                size: 28,
+                wide: true,
+              },
+              { icon: "step-forward", onSelect: handleNext, size: 28 },
+              {
+                icon: "volume-down",
+                onSelect: () => handleVolumeChange(-0.1),
+                size: 24,
+              },
+              {
+                icon: "volume-up",
+                onSelect: () => handleVolumeChange(0.1),
+                size: 24,
+              },
+              {
+                icon: "volume-off",
+                onSelect: handleToggleMute,
+                size: 24,
+                active: muted,
+              },
+              {
+                icon: "repeat",
+                onSelect: handleToggleRepeat,
+                size: 22,
+                active: repeat,
+              },
+            ].map((btn, index) => (
+              <SpatialNavigationFocusableView
+                key={index}
+                onSelect={btn.onSelect}
               >
-                <FontAwesome
-                  name="step-backward"
-                  size={28}
-                  color={isFocused && !controlsDisabled ? "#4CAF50" : "#fff"}
-                />
-              </Pressable>
-            ))}
-
-            {renderControl(handlePlayPause, (isFocused) => (
-              <Pressable
-                onPress={handlePlayPause}
-                style={[
-                  styles.controlBtn,
-                  styles.controlBtnRectWide,
-                  isFocused && styles.controlBtnFocused,
-                  controlsDisabled && styles.controlBtnDisabled,
-                ]}
-              >
-                <FontAwesome
-                  name={isPlaying ? "pause" : "play"}
-                  size={28} // proportional to wide button
-                  color={isFocused && !controlsDisabled ? "#4CAF50" : "#fff"}
-                />
-              </Pressable>
-            ))}
-
-            {renderControl(handleNext, (isFocused) => (
-              <Pressable
-                onPress={handleNext}
-                style={[
-                  styles.controlBtn,
-                  styles.controlBtnRect,
-                  isFocused && styles.controlBtnFocused,
-                  controlsDisabled && styles.controlBtnDisabled,
-                ]}
-              >
-                <FontAwesome
-                  name="step-forward"
-                  size={28}
-                  color={isFocused && !controlsDisabled ? "#4CAF50" : "#fff"}
-                />
-              </Pressable>
-            ))}
-
-            {renderControl(
-              () => handleVolumeChange(-0.1),
-              (isFocused) => (
-                <Pressable
-                  onPress={() => handleVolumeChange(-0.1)}
-                  style={[
-                    styles.controlBtn,
-                    styles.controlBtnRect,
-                    isFocused && styles.controlBtnFocused,
-                    controlsDisabled && styles.controlBtnDisabled,
-                  ]}
-                >
-                  <FontAwesome
-                    name="volume-down"
-                    size={24}
-                    color={isFocused && !controlsDisabled ? "#4CAF50" : "#fff"}
-                  />
-                </Pressable>
-              )
-            )}
-
-            {renderControl(
-              () => handleVolumeChange(0.1),
-              (isFocused) => (
-                <Pressable
-                  onPress={() => handleVolumeChange(0.1)}
-                  style={[
-                    styles.controlBtn,
-                    styles.controlBtnRect,
-                    isFocused && styles.controlBtnFocused,
-                    controlsDisabled && styles.controlBtnDisabled,
-                  ]}
-                >
-                  <FontAwesome
-                    name="volume-up"
-                    size={24}
-                    color={isFocused && !controlsDisabled ? "#4CAF50" : "#fff"}
-                  />
-                </Pressable>
-              )
-            )}
-
-            {renderControl(handleToggleMute, (isFocused) => (
-              <Pressable
-                onPress={handleToggleMute}
-                style={[
-                  styles.controlBtn,
-                  styles.controlBtnRect,
-                  muted && styles.controlBtnActive,
-                  isFocused && styles.controlBtnFocused,
-                  controlsDisabled && styles.controlBtnDisabled,
-                ]}
-              >
-                <FontAwesome
-                  name="volume-off"
-                  size={24}
-                  color={
-                    muted || (isFocused && !controlsDisabled)
-                      ? "#4CAF50"
-                      : "#fff"
-                  }
-                />
-              </Pressable>
-            ))}
-
-            {renderControl(handleToggleRepeat, (isFocused) => (
-              <Pressable
-                onPress={handleToggleRepeat}
-                style={[
-                  styles.controlBtn,
-                  styles.controlBtnRect,
-                  repeat && styles.controlBtnActive,
-                  isFocused && styles.controlBtnFocused,
-                  controlsDisabled && styles.controlBtnDisabled,
-                ]}
-              >
-                <FontAwesome
-                  name="repeat"
-                  size={22}
-                  color={
-                    repeat || (isFocused && !controlsDisabled)
-                      ? "#4CAF50"
-                      : "#fff"
-                  }
-                />
-              </Pressable>
+                {({ isFocused }) => (
+                  <Pressable
+                    onPress={btn.onSelect}
+                    focusable
+                    accessibilityRole="button"
+                    disabled={controlsDisabled}
+                    style={[
+                      styles.controlBtn,
+                      btn.wide
+                        ? styles.controlBtnRectWide
+                        : styles.controlBtnRect,
+                      btn.active && styles.controlBtnActive,
+                      isFocused &&
+                        !controlsDisabled &&
+                        styles.controlBtnFocused,
+                      controlsDisabled && styles.controlBtnDisabled,
+                    ]}
+                  >
+                    <FontAwesome
+                      name={btn.icon as any}
+                      size={btn.size}
+                      color={
+                        btn.active || (isFocused && !controlsDisabled)
+                          ? colorPrimaryGreen
+                          : "#fff"
+                      }
+                    />
+                  </Pressable>
+                )}
+              </SpatialNavigationFocusableView>
             ))}
           </SpatialNavigationView>
         </View>
@@ -341,14 +252,7 @@ function createStyles(isDark: boolean) {
     },
 
     controlBtnFocused: {
-      backgroundColor: isDark ? colorPrimaryGreenDark : colorPrimaryGreenLight,
-      borderColor: colorPrimaryGreen,
-      transform: [{ scale: focusScale }],
-      shadowColor: "#000",
-      shadowOpacity: 0.35,
-      shadowRadius: 12,
-      shadowOffset: { width: 0, height: 4 },
-      elevation: 10,
+      backgroundColor: "red",
     },
     controlBtnDisabled: { opacity: 0.4 },
     controlBtnActive: {
