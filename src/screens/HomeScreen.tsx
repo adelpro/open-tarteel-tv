@@ -1,25 +1,26 @@
-import React, { useEffect, useState, useCallback, memo, useMemo } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
   ActivityIndicator,
-  Pressable,
-  TextInput,
-  Image,
+  StyleSheet,
+  Text,
+  View,
   useColorScheme,
   useWindowDimensions,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
-  SpatialNavigationFocusableView,
   SpatialNavigationScrollView,
   SpatialNavigationView,
 } from "react-tv-space-navigation";
-import { Reciter, Riwaya } from "../types";
-import { getAllReciters } from "../services/api";
 import { Ionicons } from "@expo/vector-icons";
+import BrandHeader from "../components/brand-header";
+import FilterChip from "../components/filter-chip";
+import MenuButton from "../components/menu-button";
+import ReciterCard from "../components/reciter-card";
+import RetryButton from "../components/retry-button";
+import SearchInput from "../components/search-input";
+import { getAllReciters } from "../services/api";
+import { Reciter, Riwaya } from "../types";
 
 export default function HomeScreen() {
   const [reciters, setReciters] = useState<Reciter[]>([]);
@@ -99,239 +100,6 @@ export default function HomeScreen() {
     });
   }, [reciters, searchQuery, selectedRiwaya]);
 
-  type ReciterCardProps = {
-    reciter: Reciter;
-    preferredFocus: boolean;
-    onPress: (reciter: Reciter) => void;
-  };
-
-  const riwayaLabel = (r: Riwaya) => {
-    if (r === Riwaya.WARSH_AN_NAFI) return "Warsh";
-    if (r === Riwaya.QALUN_AN_NAFI) return "Qalun";
-    if (r === Riwaya.ALDURI_AN_ALKAISSAI) return "Ad-Duri";
-    return "Hafs";
-  };
-
-  const ReciterCard = memo(
-    ({ reciter, preferredFocus, onPress }: ReciterCardProps) => (
-      <SpatialNavigationFocusableView onSelect={() => onPress(reciter)}>
-        {({ isFocused }) => (
-          <Pressable
-            style={[styles.reciterCard, isFocused && styles.reciterCardFocused]}
-            focusable
-            hasTVPreferredFocus={preferredFocus}
-            accessibilityRole="button"
-            accessibilityLabel={`Reciter ${reciter.name}, Moshaf ${reciter.moshaf.name}`}
-          >
-            <Text
-              style={styles.reciterName}
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {reciter.name}
-            </Text>
-            <Text
-              style={styles.reciterDesc}
-              numberOfLines={2}
-              ellipsizeMode="tail"
-            >
-              {reciter.moshaf.name} • {riwayaLabel(reciter.moshaf.riwaya)}
-            </Text>
-          </Pressable>
-        )}
-      </SpatialNavigationFocusableView>
-    )
-  );
-
-  type MenuButtonProps = {
-    label: string;
-    iconName?: keyof typeof Ionicons.glyphMap;
-    onPress: () => void;
-  };
-
-  const MenuButton = memo(({ label, iconName, onPress }: MenuButtonProps) => (
-    <SpatialNavigationFocusableView onSelect={onPress}>
-      {({ isFocused }) => (
-        <Pressable
-          style={[styles.menuButton, isFocused && styles.menuButtonFocused]}
-          focusable
-          accessibilityRole="button"
-          accessibilityLabel={label}
-        >
-          <View style={styles.menuButtonContent}>
-            {iconName ? (
-              <Ionicons
-                name={iconName}
-                size={18}
-                color={isFocused ? "#4CAF50" : isDark ? "#bbb" : "#666"}
-              />
-            ) : null}
-            <Text style={styles.menuButtonText}>{label}</Text>
-          </View>
-        </Pressable>
-      )}
-    </SpatialNavigationFocusableView>
-  ));
-
-  type SearchInputProps = {
-    value: string;
-    onChangeText: (text: string) => void;
-    preferredFocus?: boolean;
-    onFocusChange?: (focused: boolean) => void;
-  };
-  const SearchInput = memo(
-    ({ value, onChangeText, onFocusChange }: SearchInputProps) => {
-      const [textFocused, setTextFocused] = useState(false);
-
-      return (
-        <SpatialNavigationFocusableView onSelect={() => {}}>
-          {({ isFocused }) => (
-            <View
-              style={[
-                styles.searchInputContainer,
-                (textFocused || isFocused) && styles.searchInputFocused,
-              ]}
-            >
-              <TextInput
-                style={styles.searchInput}
-                value={value}
-                onChangeText={onChangeText}
-                onFocus={() => {
-                  setTextFocused(true);
-                  onFocusChange?.(true);
-                }}
-                onBlur={() => {
-                  setTextFocused(false);
-                  onFocusChange?.(false);
-                }}
-                placeholder="Search reciters..."
-                placeholderTextColor={isDark ? "#888" : "#999"}
-              />
-              <Ionicons
-                name="search"
-                size={20}
-                color={
-                  textFocused || isFocused
-                    ? "#4CAF50"
-                    : isDark
-                    ? "#888"
-                    : "#999"
-                }
-                style={styles.searchInputIcon}
-              />
-            </View>
-          )}
-        </SpatialNavigationFocusableView>
-      );
-    }
-  );
-
-  type FilterChipProps = {
-    label: string;
-    selected: boolean;
-    onPress: () => void;
-  };
-
-  const FilterChip = memo(({ label, selected, onPress }: FilterChipProps) => (
-    <SpatialNavigationFocusableView onSelect={onPress}>
-      {({ isFocused }) => (
-        <Pressable
-          style={[
-            styles.filterChip,
-            isFocused && styles.filterChipFocused,
-            selected && styles.filterChipSelected,
-          ]}
-          focusable
-          accessibilityRole="button"
-          accessibilityLabel={`Filter ${label}${selected ? " selected" : ""}`}
-          onPress={onPress}
-        >
-          <Text
-            style={[
-              styles.filterChipText,
-              selected && styles.filterChipTextSelected,
-            ]}
-          >
-            {label}
-          </Text>
-        </Pressable>
-      )}
-    </SpatialNavigationFocusableView>
-  ));
-
-  type VoiceButtonProps = {
-    onPress: () => void;
-  };
-
-  const VoiceButton = memo(({ onPress }: VoiceButtonProps) => (
-    <SpatialNavigationFocusableView onSelect={onPress}>
-      {({ isFocused }) => (
-        <Pressable
-          style={[styles.micButton, isFocused && styles.micButtonFocused]}
-          focusable
-          accessibilityRole="button"
-          accessibilityLabel="Voice search"
-          onPress={onPress}
-        >
-          <Ionicons
-            name="mic"
-            size={20}
-            color={isFocused ? "#4CAF50" : isDark ? "#bbb" : "#666"}
-          />
-        </Pressable>
-      )}
-    </SpatialNavigationFocusableView>
-  ));
-
-  type RetryButtonProps = {
-    onPress: () => void;
-  };
-
-  const RetryButton = memo(({ onPress }: RetryButtonProps) => (
-    <SpatialNavigationFocusableView onSelect={onPress}>
-      {({ isFocused }) => (
-        <Pressable
-          style={[styles.retryButton, isFocused && styles.retryButtonFocused]}
-          focusable
-          hasTVPreferredFocus
-          accessibilityRole="button"
-          accessibilityLabel="Retry loading reciters"
-          onPress={onPress}
-        >
-          <Ionicons
-            name="refresh"
-            size={20}
-            color={isFocused ? "#fff" : "#4CAF50"}
-            style={styles.retryButtonIcon}
-          />
-          <Text
-            style={[
-              styles.retryButtonText,
-              isFocused && styles.retryButtonTextFocused,
-            ]}
-          >
-            Try Again
-          </Text>
-        </Pressable>
-      )}
-    </SpatialNavigationFocusableView>
-  ));
-
-  const BrandHeader = memo(() => (
-    <View style={styles.brandRow}>
-      <Image
-        source={require("../../assets/icon.png")}
-        style={styles.brandLogo}
-      />
-      <View>
-        <Text style={styles.brandTitle}>Open Tarteel TV</Text>
-        <Text style={styles.brandSubtitle}>
-          Quran recitations • TV optimized
-        </Text>
-      </View>
-    </View>
-  ));
-
   const cardsPerRow = useMemo(() => {
     if (width >= 2800) return 6;
     if (width >= 2200) return 5;
@@ -380,7 +148,7 @@ export default function HomeScreen() {
           <Text style={styles.retryCountText}>
             Attempt {retryCount + 1} of {MAX_RETRIES + 1}
           </Text>
-          <RetryButton onPress={handleRetry} />
+          <RetryButton onPress={handleRetry} styles={styles} />
         </View>
       </View>
     );
@@ -395,7 +163,7 @@ export default function HomeScreen() {
           <Text style={styles.errorMessage}>
             No reciter data available. Please check your connection.
           </Text>
-          <RetryButton onPress={handleRetry} />
+          <RetryButton onPress={handleRetry} styles={styles} />
         </View>
       </View>
     );
@@ -408,19 +176,25 @@ export default function HomeScreen() {
           label="About"
           iconName="information-circle-outline"
           onPress={() => navigation.navigate("About")}
+          styles={styles}
+          isDark={isDark}
         />
         <MenuButton
           label="Privacy"
           iconName="shield-checkmark-outline"
           onPress={() => navigation.navigate("Privacy")}
+          styles={styles}
+          isDark={isDark}
         />
       </View>
-      <BrandHeader />
+      <BrandHeader styles={styles} />
       <View style={styles.searchContainer}>
         <SearchInput
           value={searchQuery}
           onChangeText={setSearchQuery}
           onFocusChange={setSearchFocused}
+          styles={styles}
+          isDark={isDark}
         />
       </View>
       <SpatialNavigationScrollView>
@@ -430,26 +204,31 @@ export default function HomeScreen() {
               label="All"
               selected={selectedRiwaya === "all"}
               onPress={() => setSelectedRiwaya("all")}
+              styles={styles}
             />
             <FilterChip
               label="Hafs"
               selected={selectedRiwaya === Riwaya.HAFS_A_ASIM}
               onPress={() => setSelectedRiwaya(Riwaya.HAFS_A_ASIM)}
+              styles={styles}
             />
             <FilterChip
               label="Warsh"
               selected={selectedRiwaya === Riwaya.WARSH_AN_NAFI}
               onPress={() => setSelectedRiwaya(Riwaya.WARSH_AN_NAFI)}
+              styles={styles}
             />
             <FilterChip
               label="Qalun"
               selected={selectedRiwaya === Riwaya.QALUN_AN_NAFI}
               onPress={() => setSelectedRiwaya(Riwaya.QALUN_AN_NAFI)}
+              styles={styles}
             />
             <FilterChip
               label="Alduri"
               selected={selectedRiwaya === Riwaya.ALDURI_AN_ALKAISSAI}
               onPress={() => setSelectedRiwaya(Riwaya.ALDURI_AN_ALKAISSAI)}
+              styles={styles}
             />
           </View>
           {reciterRows.map((row, rowIndex) => (
@@ -475,6 +254,7 @@ export default function HomeScreen() {
                         !searchFocused && rowIndex === 0 && cardIndex === 0
                       }
                       onPress={handleReciterPress}
+                      styles={styles}
                     />
                   </View>
                 ))}
@@ -753,5 +533,3 @@ function createStyles(isDark: boolean, width: number) {
     },
   });
 }
-
-// removed module-scope component definitions in favor of inner components
