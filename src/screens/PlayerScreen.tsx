@@ -30,6 +30,8 @@ export default function PlayerScreen() {
   const [muted, setMuted] = useState(false);
   const [previousVolume, setPreviousVolume] = useState(1);
   const playlistRef = useRef<RNFlatList<any> | null>(null);
+  const [initialSurahFromDeepLink, setInitialSurahFromDeepLink] =
+    useState(false);
 
   const playlistData = useMemo(
     () => SURAHS.slice().sort((a, b) => a.id - b.id),
@@ -62,6 +64,7 @@ export default function PlayerScreen() {
           setReciter(found);
           if (surahId) {
             await handleSurahPress(surahId);
+            setInitialSurahFromDeepLink(true);
           }
         }
       }
@@ -69,6 +72,18 @@ export default function PlayerScreen() {
     maybeLoadFromDeepLink();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!reciter || selectedSurah !== null || initialSurahFromDeepLink) {
+      return;
+    }
+    if (!playlistData.length) {
+      return;
+    }
+    const first = playlistData[0];
+    setSelectedSurah(first.id);
+    setIsPlaying(false);
+  }, [reciter, selectedSurah, initialSurahFromDeepLink, playlistData]);
 
   if (!reciter) {
     return (

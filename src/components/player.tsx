@@ -49,58 +49,72 @@ const Player = ({
   onVolumeChange,
   onToggleMute,
   onToggleRepeat,
-}: PlayerProps) => (
-  <View style={styles.playerColumn}>
-    <View style={styles.metadataCard}>
-      {hasSelection ? (
-        <>
-          <Text style={styles.metadataTitle}>
-            {currentSurah?.englishName ?? "Select a surah"}
-          </Text>
-          <Text
-            style={[
-              styles.metadataSubtitle,
-              isCurrentSurahNameArabic && styles.arabicText,
-            ]}
-          >
-            {currentSurah?.name}
-          </Text>
-          <Text style={styles.metadataMeta}>
-            {reciter.name} • {reciter.moshaf.name}
-          </Text>
-          <Text style={styles.metadataMeta}>
-            Track {currentSurah?.id ?? "-"} of {reciter.moshaf.surah_total}
-          </Text>
-        </>
-      ) : (
-        <>
-          <Text style={styles.metadataTitle}>Select a surah</Text>
-          <Text style={styles.metadataSubtitle}>
-            Use the playlist on the right to start
-          </Text>
-        </>
-      )}
-    </View>
+}: PlayerProps) => {
+  const renderControl = (
+    onSelect: () => void,
+    renderPressable: (isFocused: boolean) => React.ReactElement
+  ) => {
+    if (controlsDisabled) {
+      return renderPressable(false);
+    }
+    return (
+      <SpatialNavigationFocusableView onSelect={onSelect}>
+        {({ isFocused }) => renderPressable(isFocused)}
+      </SpatialNavigationFocusableView>
+    );
+  };
 
-    <View style={styles.playerArea}>
-      <View style={styles.playerControls}>
-        <Text style={styles.nowPlaying}>
-          {hasSelection
-            ? `Now Playing: ${currentSurah?.englishName ?? ""}`
-            : "Select a surah to start playing"}
-        </Text>
-        <Text style={styles.controlsMeta}>
-          {hasSelection
-            ? `Volume ${Math.round(volume * 100)}% ${
-                muted ? "(Muted)" : ""
-              } • Repeat ${repeat ? "On" : "Off"}`
-            : "Playback controls will be enabled once a surah is selected"}
-        </Text>
-        <AudioSpectrum playing={hasSelection && isPlaying} />
-        <SpatialNavigationView direction="horizontal">
-          <View style={styles.controlsRow}>
-            <SpatialNavigationFocusableView onSelect={onPrevious}>
-              {({ isFocused }) => (
+  return (
+    <View style={styles.playerColumn}>
+      <View style={styles.metadataCard}>
+        {hasSelection ? (
+          <>
+            <Text style={styles.metadataTitle}>
+              {currentSurah?.englishName ?? "Select a surah"}
+            </Text>
+            <Text
+              style={[
+                styles.metadataSubtitle,
+                isCurrentSurahNameArabic && styles.arabicText,
+              ]}
+            >
+              {currentSurah?.name}
+            </Text>
+            <Text style={styles.metadataMeta}>
+              {reciter.name} • {reciter.moshaf.name}
+            </Text>
+            <Text style={styles.metadataMeta}>
+              Track {currentSurah?.id ?? "-"} of {reciter.moshaf.surah_total}
+            </Text>
+          </>
+        ) : (
+          <>
+            <Text style={styles.metadataTitle}>Select a surah</Text>
+            <Text style={styles.metadataSubtitle}>
+              Use the playlist on the right to start
+            </Text>
+          </>
+        )}
+      </View>
+
+      <View style={styles.playerArea}>
+        <View style={styles.playerControls}>
+          <Text style={styles.nowPlaying}>
+            {hasSelection
+              ? `Now Playing: ${currentSurah?.englishName ?? ""}`
+              : "Select a surah to start playing"}
+          </Text>
+          <Text style={styles.controlsMeta}>
+            {hasSelection
+              ? `Volume ${Math.round(volume * 100)}% ${
+                  muted ? "(Muted)" : ""
+                } • Repeat ${repeat ? "On" : "Off"}`
+              : "Playback controls will be enabled once a surah is selected"}
+          </Text>
+          <AudioSpectrum playing={hasSelection && isPlaying} />
+          {controlsDisabled ? (
+            <View style={styles.controlsRow}>
+              {renderControl(onPrevious, (isFocused) => (
                 <Pressable
                   style={[
                     styles.controlBtnRect,
@@ -119,11 +133,9 @@ const Player = ({
                     color={isFocused && !controlsDisabled ? "#4CAF50" : "#fff"}
                   />
                 </Pressable>
-              )}
-            </SpatialNavigationFocusableView>
+              ))}
 
-            <SpatialNavigationFocusableView onSelect={onPlayPause}>
-              {({ isFocused }) => (
+              {renderControl(onPlayPause, (isFocused) => (
                 <Pressable
                   style={[
                     styles.controlBtnRectWide,
@@ -142,11 +154,9 @@ const Player = ({
                     color={isFocused && !controlsDisabled ? "#4CAF50" : "#fff"}
                   />
                 </Pressable>
-              )}
-            </SpatialNavigationFocusableView>
+              ))}
 
-            <SpatialNavigationFocusableView onSelect={onNext}>
-              {({ isFocused }) => (
+              {renderControl(onNext, (isFocused) => (
                 <Pressable
                   style={[
                     styles.controlBtnRect,
@@ -165,61 +175,65 @@ const Player = ({
                     color={isFocused && !controlsDisabled ? "#4CAF50" : "#fff"}
                   />
                 </Pressable>
-              )}
-            </SpatialNavigationFocusableView>
+              ))}
 
-            <SpatialNavigationFocusableView
-              onSelect={() => onVolumeChange(-0.1)}
-            >
-              {({ isFocused }) => (
-                <Pressable
-                  style={[
-                    styles.controlBtnRect,
-                    controlsDisabled && styles.controlBtnDisabled,
-                    isFocused && !controlsDisabled && styles.controlBtnFocused,
-                  ]}
-                  focusable={!controlsDisabled}
-                  disabled={controlsDisabled}
-                  accessibilityRole="button"
-                  accessibilityLabel="Volume down"
-                  onPress={() => onVolumeChange(-0.1)}
-                >
-                  <FontAwesome
-                    name="volume-down"
-                    size={24}
-                    color={isFocused && !controlsDisabled ? "#4CAF50" : "#fff"}
-                  />
-                </Pressable>
+              {renderControl(
+                () => onVolumeChange(-0.1),
+                (isFocused) => (
+                  <Pressable
+                    style={[
+                      styles.controlBtnRect,
+                      controlsDisabled && styles.controlBtnDisabled,
+                      isFocused &&
+                        !controlsDisabled &&
+                        styles.controlBtnFocused,
+                    ]}
+                    focusable={!controlsDisabled}
+                    disabled={controlsDisabled}
+                    accessibilityRole="button"
+                    accessibilityLabel="Volume down"
+                    onPress={() => onVolumeChange(-0.1)}
+                  >
+                    <FontAwesome
+                      name="volume-down"
+                      size={24}
+                      color={
+                        isFocused && !controlsDisabled ? "#4CAF50" : "#fff"
+                      }
+                    />
+                  </Pressable>
+                )
               )}
-            </SpatialNavigationFocusableView>
 
-            <SpatialNavigationFocusableView
-              onSelect={() => onVolumeChange(0.1)}
-            >
-              {({ isFocused }) => (
-                <Pressable
-                  style={[
-                    styles.controlBtnRect,
-                    controlsDisabled && styles.controlBtnDisabled,
-                    isFocused && !controlsDisabled && styles.controlBtnFocused,
-                  ]}
-                  focusable={!controlsDisabled}
-                  disabled={controlsDisabled}
-                  accessibilityRole="button"
-                  accessibilityLabel="Volume up"
-                  onPress={() => onVolumeChange(0.1)}
-                >
-                  <FontAwesome
-                    name="volume-up"
-                    size={24}
-                    color={isFocused && !controlsDisabled ? "#4CAF50" : "#fff"}
-                  />
-                </Pressable>
+              {renderControl(
+                () => onVolumeChange(0.1),
+                (isFocused) => (
+                  <Pressable
+                    style={[
+                      styles.controlBtnRect,
+                      controlsDisabled && styles.controlBtnDisabled,
+                      isFocused &&
+                        !controlsDisabled &&
+                        styles.controlBtnFocused,
+                    ]}
+                    focusable={!controlsDisabled}
+                    disabled={controlsDisabled}
+                    accessibilityRole="button"
+                    accessibilityLabel="Volume up"
+                    onPress={() => onVolumeChange(0.1)}
+                  >
+                    <FontAwesome
+                      name="volume-up"
+                      size={24}
+                      color={
+                        isFocused && !controlsDisabled ? "#4CAF50" : "#fff"
+                      }
+                    />
+                  </Pressable>
+                )
               )}
-            </SpatialNavigationFocusableView>
 
-            <SpatialNavigationFocusableView onSelect={onToggleMute}>
-              {({ isFocused }) => (
+              {renderControl(onToggleMute, (isFocused) => (
                 <Pressable
                   style={[
                     styles.controlBtnRect,
@@ -243,11 +257,9 @@ const Player = ({
                     }
                   />
                 </Pressable>
-              )}
-            </SpatialNavigationFocusableView>
+              ))}
 
-            <SpatialNavigationFocusableView onSelect={onToggleRepeat}>
-              {({ isFocused }) => (
+              {renderControl(onToggleRepeat, (isFocused) => (
                 <Pressable
                   style={[
                     styles.controlBtnRect,
@@ -271,14 +283,205 @@ const Player = ({
                     }
                   />
                 </Pressable>
-              )}
-            </SpatialNavigationFocusableView>
-          </View>
-        </SpatialNavigationView>
+              ))}
+            </View>
+          ) : (
+            <SpatialNavigationView direction="horizontal">
+              <View style={styles.controlsRow}>
+                {renderControl(onPrevious, (isFocused) => (
+                  <Pressable
+                    style={[
+                      styles.controlBtnRect,
+                      controlsDisabled && styles.controlBtnDisabled,
+                      isFocused &&
+                        !controlsDisabled &&
+                        styles.controlBtnFocused,
+                    ]}
+                    focusable={!controlsDisabled}
+                    disabled={controlsDisabled}
+                    accessibilityRole="button"
+                    accessibilityLabel="Previous"
+                    onPress={onPrevious}
+                  >
+                    <FontAwesome
+                      name="step-backward"
+                      size={28}
+                      color={
+                        isFocused && !controlsDisabled ? "#4CAF50" : "#fff"
+                      }
+                    />
+                  </Pressable>
+                ))}
+
+                {renderControl(onPlayPause, (isFocused) => (
+                  <Pressable
+                    style={[
+                      styles.controlBtnRectWide,
+                      controlsDisabled && styles.controlBtnDisabled,
+                      isFocused &&
+                        !controlsDisabled &&
+                        styles.controlBtnFocused,
+                    ]}
+                    focusable={!controlsDisabled}
+                    disabled={controlsDisabled}
+                    accessibilityRole="button"
+                    accessibilityLabel={isPlaying ? "Pause" : "Play"}
+                    onPress={onPlayPause}
+                  >
+                    <FontAwesome
+                      name={isPlaying ? "pause" : "play"}
+                      size={32}
+                      color={
+                        isFocused && !controlsDisabled ? "#4CAF50" : "#fff"
+                      }
+                    />
+                  </Pressable>
+                ))}
+
+                {renderControl(onNext, (isFocused) => (
+                  <Pressable
+                    style={[
+                      styles.controlBtnRect,
+                      controlsDisabled && styles.controlBtnDisabled,
+                      isFocused &&
+                        !controlsDisabled &&
+                        styles.controlBtnFocused,
+                    ]}
+                    focusable={!controlsDisabled}
+                    disabled={controlsDisabled}
+                    accessibilityRole="button"
+                    accessibilityLabel="Next"
+                    onPress={onNext}
+                  >
+                    <FontAwesome
+                      name="step-forward"
+                      size={28}
+                      color={
+                        isFocused && !controlsDisabled ? "#4CAF50" : "#fff"
+                      }
+                    />
+                  </Pressable>
+                ))}
+
+                {renderControl(
+                  () => onVolumeChange(-0.1),
+                  (isFocused) => (
+                    <Pressable
+                      style={[
+                        styles.controlBtnRect,
+                        controlsDisabled && styles.controlBtnDisabled,
+                        isFocused &&
+                          !controlsDisabled &&
+                          styles.controlBtnFocused,
+                      ]}
+                      focusable={!controlsDisabled}
+                      disabled={controlsDisabled}
+                      accessibilityRole="button"
+                      accessibilityLabel="Volume down"
+                      onPress={() => onVolumeChange(-0.1)}
+                    >
+                      <FontAwesome
+                        name="volume-down"
+                        size={24}
+                        color={
+                          isFocused && !controlsDisabled ? "#4CAF50" : "#fff"
+                        }
+                      />
+                    </Pressable>
+                  )
+                )}
+
+                {renderControl(
+                  () => onVolumeChange(0.1),
+                  (isFocused) => (
+                    <Pressable
+                      style={[
+                        styles.controlBtnRect,
+                        controlsDisabled && styles.controlBtnDisabled,
+                        isFocused &&
+                          !controlsDisabled &&
+                          styles.controlBtnFocused,
+                      ]}
+                      focusable={!controlsDisabled}
+                      disabled={controlsDisabled}
+                      accessibilityRole="button"
+                      accessibilityLabel="Volume up"
+                      onPress={() => onVolumeChange(0.1)}
+                    >
+                      <FontAwesome
+                        name="volume-up"
+                        size={24}
+                        color={
+                          isFocused && !controlsDisabled ? "#4CAF50" : "#fff"
+                        }
+                      />
+                    </Pressable>
+                  )
+                )}
+
+                {renderControl(onToggleMute, (isFocused) => (
+                  <Pressable
+                    style={[
+                      styles.controlBtnRect,
+                      controlsDisabled && styles.controlBtnDisabled,
+                      muted && styles.controlBtnActive,
+                      isFocused &&
+                        !controlsDisabled &&
+                        styles.controlBtnFocused,
+                    ]}
+                    focusable={!controlsDisabled}
+                    disabled={controlsDisabled}
+                    accessibilityRole="button"
+                    accessibilityLabel={muted ? "Unmute" : "Mute"}
+                    onPress={onToggleMute}
+                  >
+                    <FontAwesome
+                      name="volume-off"
+                      size={24}
+                      color={
+                        muted || (isFocused && !controlsDisabled)
+                          ? "#4CAF50"
+                          : "#fff"
+                      }
+                    />
+                  </Pressable>
+                ))}
+
+                {renderControl(onToggleRepeat, (isFocused) => (
+                  <Pressable
+                    style={[
+                      styles.controlBtnRect,
+                      controlsDisabled && styles.controlBtnDisabled,
+                      repeat && styles.controlBtnActive,
+                      isFocused &&
+                        !controlsDisabled &&
+                        styles.controlBtnFocused,
+                    ]}
+                    focusable={!controlsDisabled}
+                    disabled={controlsDisabled}
+                    accessibilityRole="button"
+                    accessibilityLabel="Toggle repeat"
+                    onPress={onToggleRepeat}
+                  >
+                    <FontAwesome
+                      name="repeat"
+                      size={22}
+                      color={
+                        repeat || (isFocused && !controlsDisabled)
+                          ? "#4CAF50"
+                          : "#fff"
+                      }
+                    />
+                  </Pressable>
+                ))}
+              </View>
+            </SpatialNavigationView>
+          )}
+        </View>
       </View>
     </View>
-  </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   playerColumn: {

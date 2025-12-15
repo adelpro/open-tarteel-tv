@@ -35,7 +35,7 @@ type SurahItemProps = SurahItemData & {
 };
 
 const SurahItem = memo(
-  ({ id, englishName, selected, onPress }: SurahItemProps) => (
+  ({ id, englishName, selected, preferredFocus, onPress }: SurahItemProps) => (
     <SpatialNavigationFocusableView onSelect={() => onPress(id)}>
       {({ isFocused }) => (
         <Pressable
@@ -44,6 +44,7 @@ const SurahItem = memo(
             selected && styles.surahCardSelected,
             isFocused && styles.surahCardFocused,
           ]}
+          hasTVPreferredFocus={preferredFocus}
           accessibilityRole="button"
           accessibilityLabel={`Surah ${englishName} number ${id}`}
           onPress={() => onPress(id)}
