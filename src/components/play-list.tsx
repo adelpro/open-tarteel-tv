@@ -6,6 +6,8 @@ import {
   SpatialNavigationView,
 } from "react-tv-space-navigation";
 
+const SURAH_ITEM_HEIGHT = 64;
+
 type SurahItemData = {
   id: number;
   name: string;
@@ -43,24 +45,15 @@ type SurahItemProps = SurahItemData & {
 };
 
 const SurahItem = memo(
-  ({
-    id,
-    englishName,
-    selected,
-    preferredFocus,
-    onPress,
-    styles,
-  }: SurahItemProps) => (
-    <SpatialNavigationFocusableView>
+  ({ id, englishName, selected, onPress, styles }: SurahItemProps) => (
+    <SpatialNavigationFocusableView onSelect={() => onPress(id)}>
       {({ isFocused }) => (
         <Pressable
           style={[
             styles.surahCard,
-            isFocused && styles.surahCardFocused,
             selected && styles.surahCardSelected,
+            isFocused && styles.surahCardFocused,
           ]}
-          focusable
-          hasTVPreferredFocus={preferredFocus}
           accessibilityRole="button"
           accessibilityLabel={`Surah ${englishName} number ${id}`}
           onPress={() => onPress(id)}
@@ -86,6 +79,7 @@ const Playlist = ({
     <View style={styles.playlistHeaderRow}>
       <Text style={styles.playlistTitle}>Playlist</Text>
     </View>
+
     <View style={styles.playlistBody}>
       <SpatialNavigationView direction="vertical">
         <FlatList
@@ -93,10 +87,15 @@ const Playlist = ({
           data={playlistData}
           keyExtractor={(item) => item.id.toString()}
           showsVerticalScrollIndicator={false}
-          initialNumToRender={18}
-          maxToRenderPerBatch={18}
-          windowSize={10}
-          removeClippedSubviews
+          getItemLayout={(_, index) => ({
+            length: SURAH_ITEM_HEIGHT,
+            offset: SURAH_ITEM_HEIGHT * index,
+            index,
+          })}
+          removeClippedSubviews={true}
+          initialNumToRender={8}
+          maxToRenderPerBatch={8}
+          windowSize={5}
           contentContainerStyle={styles.playlistContent}
           renderItem={({ item, index }) => (
             <SurahItem

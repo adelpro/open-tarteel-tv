@@ -21,6 +21,13 @@ import RetryButton from "../components/retry-button";
 import SearchInput from "../components/search-input";
 import { getAllReciters } from "../services/api";
 import { Reciter, Riwaya } from "../types";
+import {
+  colorPrimaryGreen,
+  colorPrimaryGreenDark,
+  colorPrimaryGreenLight,
+  colorPrimaryGreenTint,
+  focusScale,
+} from "../constants/interaction-colors";
 
 export default function HomeScreen() {
   const [reciters, setReciters] = useState<Reciter[]>([]);
@@ -302,7 +309,7 @@ function createStyles(isDark: boolean, width: number) {
     header: {
       fontSize: 22,
       fontWeight: "700",
-      color: "#4CAF50",
+      color: colorPrimaryGreen,
       marginBottom: 12,
       textAlign: "left",
     },
@@ -320,7 +327,7 @@ function createStyles(isDark: boolean, width: number) {
     brandTitle: {
       fontSize: isVeryWide ? 34 : isWide ? 30 : isMedium ? 26 : 24,
       fontWeight: "800",
-      color: "#4CAF50",
+      color: colorPrimaryGreen,
     },
     brandSubtitle: {
       fontSize: isVeryWide ? 20 : isWide ? 18 : 14,
@@ -351,9 +358,9 @@ function createStyles(isDark: boolean, width: number) {
       borderColor: border,
     },
     reciterCardFocused: {
-      backgroundColor: isDark ? "#2E7D32" : "#C8E6C9",
-      borderColor: "#4CAF50",
-      transform: [{ scale: 1.05 }],
+      backgroundColor: isDark ? colorPrimaryGreenDark : colorPrimaryGreenLight,
+      borderColor: colorPrimaryGreen,
+      transform: [{ scale: focusScale }],
       zIndex: 2,
     },
     reciterName: {
@@ -396,7 +403,7 @@ function createStyles(isDark: boolean, width: number) {
     },
     searchInputFocused: {
       backgroundColor: focusBg,
-      borderColor: "#4CAF50",
+      borderColor: colorPrimaryGreen,
     },
     filterRow: {
       flexDirection: "row",
@@ -425,9 +432,9 @@ function createStyles(isDark: boolean, width: number) {
       color: "#fff",
     },
     filterChipFocused: {
-      backgroundColor: isDark ? "#2E7D32" : "#E8F5E9",
-      borderColor: "#4CAF50",
-      transform: [{ scale: 1.05 }],
+      backgroundColor: isDark ? colorPrimaryGreenDark : colorPrimaryGreenTint,
+      borderColor: colorPrimaryGreen,
+      transform: [{ scale: focusScale }],
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.15,
@@ -435,8 +442,8 @@ function createStyles(isDark: boolean, width: number) {
       elevation: 2,
     },
     filterChipSelected: {
-      backgroundColor: "#4CAF50",
-      borderColor: "#4CAF50",
+      backgroundColor: colorPrimaryGreen,
+      borderColor: colorPrimaryGreen,
     },
     menuRow: {
       flexDirection: "row",
@@ -453,9 +460,9 @@ function createStyles(isDark: boolean, width: number) {
       borderColor: border,
     },
     menuButtonFocused: {
-      backgroundColor: isDark ? "#2E7D32" : "#C8E6C9",
-      borderColor: "#4CAF50",
-      transform: [{ scale: 1.05 }],
+      backgroundColor: isDark ? colorPrimaryGreenDark : colorPrimaryGreenLight,
+      borderColor: colorPrimaryGreen,
+      transform: [{ scale: focusScale }],
     },
     menuButtonText: {
       color: textPrimary,
@@ -479,8 +486,8 @@ function createStyles(isDark: boolean, width: number) {
     },
     micButtonFocused: {
       backgroundColor: focusBg,
-      borderColor: "#4CAF50",
-      transform: [{ scale: 1.05 }],
+      borderColor: colorPrimaryGreen,
+      transform: [{ scale: focusScale }],
     },
     errorContainer: {
       alignItems: "center",
@@ -506,14 +513,14 @@ function createStyles(isDark: boolean, width: number) {
       marginBottom: 24,
     },
     retryButton: {
-      backgroundColor: "#4CAF50",
+      backgroundColor: colorPrimaryGreen,
       paddingVertical: 16,
       paddingHorizontal: 32,
       borderRadius: 8,
       flexDirection: "row",
       alignItems: "center",
       borderWidth: 2,
-      borderColor: "#4CAF50",
+      borderColor: colorPrimaryGreen,
     },
     retryButtonFocused: {
       backgroundColor: "#45a049",

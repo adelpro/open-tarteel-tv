@@ -122,7 +122,7 @@ const Player = ({
         <AudioSpectrum playing={hasSelection && isPlaying} styles={styles} />
         <SpatialNavigationView direction="horizontal">
           <View style={styles.controlsRow}>
-            <SpatialNavigationFocusableView>
+            <SpatialNavigationFocusableView onSelect={onStop}>
               {({ isFocused }) => (
                 <Pressable
                   style={[
@@ -139,15 +139,13 @@ const Player = ({
                   <FontAwesome
                     name="stop"
                     size={24}
-                    color={
-                      isFocused && !controlsDisabled ? "#4CAF50" : "#fff"
-                    }
+                    color={isFocused && !controlsDisabled ? "#4CAF50" : "#fff"}
                   />
                 </Pressable>
               )}
             </SpatialNavigationFocusableView>
 
-            <SpatialNavigationFocusableView>
+            <SpatialNavigationFocusableView onSelect={onPrevious}>
               {({ isFocused }) => (
                 <Pressable
                   style={[
@@ -164,15 +162,13 @@ const Player = ({
                   <FontAwesome
                     name="step-backward"
                     size={28}
-                    color={
-                      isFocused && !controlsDisabled ? "#4CAF50" : "#fff"
-                    }
+                    color={isFocused && !controlsDisabled ? "#4CAF50" : "#fff"}
                   />
                 </Pressable>
               )}
             </SpatialNavigationFocusableView>
 
-            <SpatialNavigationFocusableView>
+            <SpatialNavigationFocusableView onSelect={onPlayPause}>
               {({ isFocused }) => (
                 <Pressable
                   style={[
@@ -189,15 +185,15 @@ const Player = ({
                   <FontAwesome
                     name={isPlaying ? "pause" : "play"}
                     size={32}
-                    color={
-                      isFocused && !controlsDisabled ? "#4CAF50" : "#fff"
-                    }
+                    color={isFocused && !controlsDisabled ? "#4CAF50" : "#fff"}
                   />
                 </Pressable>
               )}
             </SpatialNavigationFocusableView>
 
-            <SpatialNavigationFocusableView>
+            <SpatialNavigationFocusableView
+              onSelect={() => onVolumeChange(-0.1)}
+            >
               {({ isFocused }) => (
                 <Pressable
                   style={[
@@ -214,9 +210,7 @@ const Player = ({
                   <FontAwesome
                     name="step-forward"
                     size={28}
-                    color={
-                      isFocused && !controlsDisabled ? "#4CAF50" : "#fff"
-                    }
+                    color={isFocused && !controlsDisabled ? "#4CAF50" : "#fff"}
                   />
                 </Pressable>
               )}
@@ -239,15 +233,15 @@ const Player = ({
                   <FontAwesome
                     name="volume-down"
                     size={24}
-                    color={
-                      isFocused && !controlsDisabled ? "#4CAF50" : "#fff"
-                    }
+                    color={isFocused && !controlsDisabled ? "#4CAF50" : "#fff"}
                   />
                 </Pressable>
               )}
             </SpatialNavigationFocusableView>
 
-            <SpatialNavigationFocusableView>
+            <SpatialNavigationFocusableView
+              onSelect={() => onVolumeChange(0.1)}
+            >
               {({ isFocused }) => (
                 <Pressable
                   style={[
@@ -264,15 +258,13 @@ const Player = ({
                   <FontAwesome
                     name="volume-up"
                     size={24}
-                    color={
-                      isFocused && !controlsDisabled ? "#4CAF50" : "#fff"
-                    }
+                    color={isFocused && !controlsDisabled ? "#4CAF50" : "#fff"}
                   />
                 </Pressable>
               )}
             </SpatialNavigationFocusableView>
 
-            <SpatialNavigationFocusableView>
+            <SpatialNavigationFocusableView onSelect={onToggleMute}>
               {({ isFocused }) => (
                 <Pressable
                   style={[
@@ -300,7 +292,7 @@ const Player = ({
               )}
             </SpatialNavigationFocusableView>
 
-            <SpatialNavigationFocusableView>
+            <SpatialNavigationFocusableView onSelect={onToggleRepeat}>
               {({ isFocused }) => (
                 <Pressable
                   style={[
@@ -335,4 +327,3 @@ const Player = ({
 );
 
 export default memo(Player);
-

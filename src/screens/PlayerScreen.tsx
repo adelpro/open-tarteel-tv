@@ -14,7 +14,13 @@ import { getAllReciters } from "../services/api";
 import { audioService } from "../services/AudioService";
 import Player from "../components/player";
 import Playlist from "../components/play-list";
+import {
+  colorPrimaryGreen,
+  colorPrimaryGreenLight,
+  focusScale,
+} from "../constants/interaction-colors";
 
+const SURAH_ITEM_HEIGHT = 64;
 const isArabicText = (text: string) => /[\u0600-\u06FF]/.test(text);
 
 export default function PlayerScreen() {
@@ -273,7 +279,7 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#1E1E1E",
     borderBottomWidth: 2,
-    borderBottomColor: "#4CAF50",
+    borderBottomColor: colorPrimaryGreen,
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
   },
@@ -346,8 +352,7 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   surahCard: {
-    width: 280,
-    paddingVertical: 10,
+    height: SURAH_ITEM_HEIGHT,
     paddingHorizontal: 16,
     marginBottom: 8,
     flexDirection: "row",
@@ -359,9 +364,8 @@ const styles = StyleSheet.create({
   },
   surahCardFocused: {
     borderWidth: 2,
-    backgroundColor: "#2E7D32",
-    borderColor: "#4CAF50",
-    transform: [{ scale: 1.08 }],
+    borderColor: colorPrimaryGreenLight,
+    transform: [{ scale: focusScale }],
     shadowColor: "#000",
     shadowOpacity: 0.3,
     shadowRadius: 10,
@@ -369,8 +373,8 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   surahCardSelected: {
-    backgroundColor: "#4CAF50",
-    borderColor: "#4CAF50",
+    backgroundColor: colorPrimaryGreen,
+    borderColor: colorPrimaryGreen,
   },
   surahNumber: {
     fontSize: 12,
@@ -397,7 +401,7 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     backgroundColor: "#1E1E1E",
     borderTopWidth: 2,
-    borderTopColor: "#4CAF50",
+    borderTopColor: colorPrimaryGreen,
     alignItems: "center",
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,
@@ -476,9 +480,9 @@ const styles = StyleSheet.create({
     borderColor: "transparent",
   },
   controlBtnFocused: {
-    borderColor: "#4CAF50",
+    borderColor: colorPrimaryGreen,
     backgroundColor: "#2E2E2E",
-    transform: [{ scale: 1.14 }],
+    transform: [{ scale: focusScale }],
     shadowColor: "#4CAF50",
     shadowOpacity: 0.7,
     shadowRadius: 18,
@@ -489,7 +493,7 @@ const styles = StyleSheet.create({
     opacity: 0.4,
   },
   controlBtnActive: {
-    borderColor: "#4CAF50",
+    borderColor: colorPrimaryGreen,
     backgroundColor: "#1E1E1E",
   },
 });
