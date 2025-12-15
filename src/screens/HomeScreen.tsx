@@ -8,6 +8,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { useTranslation } from "react-i18next";
 import {
   SpatialNavigationScrollView,
   SpatialNavigationView,
@@ -19,8 +20,11 @@ import MenuButton from "../components/menu-button";
 import ReciterCard from "../components/reciter-card";
 import RetryButton from "../components/retry-button";
 import SearchInput from "../components/search-input";
+import LanguageSwitcher from "../components/language-switcher";
 import { getAllReciters } from "../services/api";
 import { Reciter, Riwaya } from "../types";
+import { useLanguage } from "../context/LanguageContext";
+import { getFlexDirection, getHorizontalAlign, getTextAlign } from "../utils/rtl";
 import {
   colorPrimaryGreen,
   colorPrimaryGreenDark,
@@ -39,7 +43,9 @@ export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme !== "light";
   const { width } = useWindowDimensions();
-  const styles = createStyles(isDark, width);
+  const { isRTL } = useLanguage();
+  const { t } = useTranslation();
+  const styles = createStyles(isDark, width, isRTL);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRiwaya, setSelectedRiwaya] = useState<Riwaya | "all">("all");
   const [retryCount, setRetryCount] = useState(0);
@@ -76,7 +82,7 @@ export default function HomeScreen() {
       const errorMsg =
         err instanceof Error
           ? err.message
-          : "Failed to load reciters. Please try again.";
+          : t('home.error');
       setError(errorMsg);
       setReciters([]);
     } finally {
@@ -141,7 +147,7 @@ export default function HomeScreen() {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color="#4CAF50" />
-        <Text style={styles.loadingText}>Loading Reciters...</Text>
+        <Text style={styles.loadingText}>{t('home.loading')}</Text>
       </View>
     );
   }
@@ -151,10 +157,10 @@ export default function HomeScreen() {
       <View style={styles.centerContainer}>
         <View style={styles.errorContainer}>
           <Ionicons name="alert-circle" size={64} color="#FF6B6B" />
-          <Text style={styles.errorTitle}>Failed to Load Reciters</Text>
+          <Text style={styles.errorTitle}>{t('home.error')}</Text>
           <Text style={styles.errorMessage}>{error}</Text>
           <Text style={styles.retryCountText}>
-            Attempt {retryCount + 1} of {MAX_RETRIES + 1}
+            {t('common.close')} {retryCount + 1} of {MAX_RETRIES + 1}
           </Text>
           <RetryButton onPress={handleRetry} styles={styles} />
         </View>
@@ -167,9 +173,9 @@ export default function HomeScreen() {
       <View style={styles.centerContainer}>
         <View style={styles.errorContainer}>
           <Ionicons name="folder-outline" size={64} color="#999" />
-          <Text style={styles.errorTitle}>No Reciters Found</Text>
+          <Text style={styles.errorTitle}>{t('home.noResults')}</Text>
           <Text style={styles.errorMessage}>
-            No reciter data available. Please check your connection.
+            {t('home.error')}
           </Text>
           <RetryButton onPress={handleRetry} styles={styles} />
         </View>
@@ -179,16 +185,17 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.menuRow}>
+      <View style={[styles.menuRow, { flexDirection: getFlexDirection() }]}>
+        <LanguageSwitcher size="small" showLabel={true} />
         <MenuButton
-          label="About"
+          label={t('common.about')}
           iconName="information-circle-outline"
           onPress={() => navigation.navigate("About")}
           styles={styles}
           isDark={isDark}
         />
         <MenuButton
-          label="Privacy"
+          label={t('common.privacy')}
           iconName="shield-checkmark-outline"
           onPress={() => navigation.navigate("Privacy")}
           styles={styles}
@@ -207,33 +214,33 @@ export default function HomeScreen() {
       </View>
       <SpatialNavigationScrollView>
         <View style={styles.content}>
-          <View style={styles.filterRow}>
+          <View style={[styles.filterRow, { flexDirection: getFlexDirection() }]}>
             <FilterChip
-              label="All"
+              label={t('home.allRiwaya')}
               selected={selectedRiwaya === "all"}
               onPress={() => setSelectedRiwaya("all")}
               styles={styles}
             />
             <FilterChip
-              label="Hafs"
+              label={t('riwaya.hafs')}
               selected={selectedRiwaya === Riwaya.HAFS_A_ASIM}
               onPress={() => setSelectedRiwaya(Riwaya.HAFS_A_ASIM)}
               styles={styles}
             />
             <FilterChip
-              label="Warsh"
+              label={t('riwaya.warsh')}
               selected={selectedRiwaya === Riwaya.WARSH_AN_NAFI}
               onPress={() => setSelectedRiwaya(Riwaya.WARSH_AN_NAFI)}
               styles={styles}
             />
             <FilterChip
-              label="Qalun"
+              label={t('riwaya.qalun')}
               selected={selectedRiwaya === Riwaya.QALUN_AN_NAFI}
               onPress={() => setSelectedRiwaya(Riwaya.QALUN_AN_NAFI)}
               styles={styles}
             />
             <FilterChip
-              label="Alduri"
+              label={t('riwaya.alduri')}
               selected={selectedRiwaya === Riwaya.ALDURI_AN_ALKAISSAI}
               onPress={() => setSelectedRiwaya(Riwaya.ALDURI_AN_ALKAISSAI)}
               styles={styles}
@@ -244,14 +251,15 @@ export default function HomeScreen() {
               key={`row-${rowIndex}`}
               direction="horizontal"
             >
-              <View style={styles.reciterRow}>
+              <View style={[styles.reciterRow, { flexDirection: getFlexDirection() }]}>
                 {row.map((reciter, cardIndex) => (
                   <View
                     style={[
                       styles.reciterItem,
                       {
                         width: itemWidth,
-                        marginRight: cardIndex === row.length - 1 ? 0 : 12,
+                        marginRight: isRTL ? 0 : (cardIndex === row.length - 1 ? 0 : 12),
+                        marginLeft: isRTL ? (cardIndex === row.length - 1 ? 0 : 12) : 0,
                       },
                     ]}
                     key={`${reciter.id}-${reciter.moshaf.id}`}
@@ -275,17 +283,22 @@ export default function HomeScreen() {
   );
 }
 
-function createStyles(isDark: boolean, width: number) {
+function createStyles(isDark: boolean, width: number, isRTL: boolean) {
   const { bg, textPrimary, textSecondary, cardBg, border, focusBg } =
     getThemeColors(isDark);
   const isVeryWide = width >= 2800;
   const isWide = width >= 2200 && width < 2800;
   const isMedium = width >= 1600 && width < 2200;
+  
+  const flexDir = isRTL ? 'row-reverse' : 'row';
+  const textAlign = isRTL ? 'right' : 'left';
+  
   return StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: bg,
       padding: 20,
+      direction: isRTL ? 'rtl' : 'ltr',
     },
     centerContainer: {
       flex: 1,
@@ -297,6 +310,7 @@ function createStyles(isDark: boolean, width: number) {
       color: textPrimary,
       marginTop: 10,
       fontSize: isVeryWide ? 24 : isWide ? 20 : 16,
+      textAlign: textAlign,
     },
     content: {
       paddingBottom: 40,
@@ -308,10 +322,10 @@ function createStyles(isDark: boolean, width: number) {
       fontWeight: "700",
       color: colorPrimaryGreen,
       marginBottom: 12,
-      textAlign: "left",
+      textAlign: textAlign,
     },
     brandRow: {
-      flexDirection: "row",
+      flexDirection: flexDir,
       alignItems: "center",
       gap: 12,
       marginBottom: 12,
@@ -325,14 +339,15 @@ function createStyles(isDark: boolean, width: number) {
       fontSize: isVeryWide ? 34 : isWide ? 30 : isMedium ? 26 : 24,
       fontWeight: "800",
       color: colorPrimaryGreen,
+      textAlign: textAlign,
     },
     brandSubtitle: {
       fontSize: isVeryWide ? 20 : isWide ? 18 : 14,
       color: textSecondary,
       marginTop: 2,
+      textAlign: textAlign,
     },
     reciterRow: {
-      flexDirection: "row",
       justifyContent: "flex-start",
       alignItems: "flex-start",
       marginBottom: 16,
@@ -365,10 +380,12 @@ function createStyles(isDark: boolean, width: number) {
       fontWeight: "bold",
       color: textPrimary,
       marginBottom: 5,
+      textAlign: textAlign,
     },
     reciterDesc: {
       fontSize: isVeryWide ? 18 : isWide ? 16 : isMedium ? 15 : 14,
       color: textSecondary,
+      textAlign: textAlign,
     },
     searchContainer: {
       marginBottom: 16,
@@ -384,9 +401,10 @@ function createStyles(isDark: boolean, width: number) {
       paddingHorizontal: isVeryWide ? 16 : isWide ? 14 : 12,
       borderRadius: 8,
       fontSize: 16,
+      textAlign: textAlign,
     },
     searchInputContainer: {
-      flexDirection: "row",
+      flexDirection: flexDir,
       alignItems: "center",
       backgroundColor: cardBg,
       borderRadius: 8,
@@ -396,14 +414,14 @@ function createStyles(isDark: boolean, width: number) {
       width: "100%",
     },
     searchInputIcon: {
-      marginLeft: 10,
+      marginLeft: isRTL ? 0 : 10,
+      marginRight: isRTL ? 10 : 0,
     },
     searchInputFocused: {
       backgroundColor: focusBg,
       borderColor: colorPrimaryGreen,
     },
     filterRow: {
-      flexDirection: "row",
       alignItems: "center",
       justifyContent: "flex-start",
       flexWrap: "wrap",
@@ -417,13 +435,15 @@ function createStyles(isDark: boolean, width: number) {
       borderWidth: 2,
       borderColor: border,
       margin: 4,
-      marginRight: 12,
+      marginRight: isRTL ? 0 : 12,
+      marginLeft: isRTL ? 12 : 0,
       marginBottom: 12,
     },
     filterChipText: {
       color: textPrimary,
       fontSize: 14,
       fontWeight: "600",
+      textAlign: textAlign,
     },
     filterChipTextSelected: {
       color: "#fff",
@@ -443,7 +463,6 @@ function createStyles(isDark: boolean, width: number) {
       borderColor: colorPrimaryGreen,
     },
     menuRow: {
-      flexDirection: "row",
       justifyContent: "flex-end",
       gap: 12,
       marginBottom: 10,
@@ -465,9 +484,10 @@ function createStyles(isDark: boolean, width: number) {
       color: textPrimary,
       fontSize: 16,
       fontWeight: "600",
+      textAlign: textAlign,
     },
     menuButtonContent: {
-      flexDirection: "row",
+      flexDirection: flexDir,
       alignItems: "center",
       gap: 8,
     },
@@ -496,11 +516,12 @@ function createStyles(isDark: boolean, width: number) {
       color: textPrimary,
       marginTop: 20,
       marginBottom: 12,
+      textAlign: textAlign,
     },
     errorMessage: {
       fontSize: isVeryWide ? 20 : isWide ? 18 : 16,
       color: textSecondary,
-      textAlign: "center",
+      textAlign: textAlign,
       marginBottom: 24,
       lineHeight: 24,
     },
@@ -508,13 +529,14 @@ function createStyles(isDark: boolean, width: number) {
       fontSize: 14,
       color: textSecondary,
       marginBottom: 24,
+      textAlign: textAlign,
     },
     retryButton: {
       backgroundColor: colorPrimaryGreen,
       paddingVertical: 16,
       paddingHorizontal: 32,
       borderRadius: 8,
-      flexDirection: "row",
+      flexDirection: flexDir,
       alignItems: "center",
       borderWidth: 2,
       borderColor: colorPrimaryGreen,
@@ -525,12 +547,14 @@ function createStyles(isDark: boolean, width: number) {
       transform: [{ scale: 1.08 }],
     },
     retryButtonIcon: {
-      marginRight: 10,
+      marginRight: isRTL ? 0 : 10,
+      marginLeft: isRTL ? 10 : 0,
     },
     retryButtonText: {
       color: "#fff",
       fontSize: 18,
       fontWeight: "600",
+      textAlign: textAlign,
     },
     retryButtonTextFocused: {
       color: "#fff",

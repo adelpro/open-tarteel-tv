@@ -2,6 +2,9 @@ import React, { useCallback, useEffect, useState } from "react";
 import { View } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
+import { I18nextProvider } from "react-i18next";
+import i18n from "./src/i18n/config";
+import { LanguageProvider } from "./src/context/LanguageContext";
 import AppNavigator from "./src/navigation/AppNavigator";
 
 // Keep the splash screen visible while we fetch resources
@@ -13,6 +16,8 @@ export default function App() {
   useEffect(() => {
     async function prepare() {
       try {
+        // Initialize i18n
+        await i18n.init;
         await new Promise((resolve) => setTimeout(resolve, 2000));
       } catch {
       } finally {
@@ -34,9 +39,14 @@ export default function App() {
   }
 
   return (
-    <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-      <AppNavigator />
-      <StatusBar style="light" />
-    </View>
+    <I18nextProvider i18n={i18n}>
+      <LanguageProvider>
+        <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+          <AppNavigator />
+          <StatusBar style="light" />
+        </View>
+      </LanguageProvider>
+    </I18nextProvider>
   );
 }
+

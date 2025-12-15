@@ -1,3 +1,4 @@
+import i18n from "../i18n/config";
 import {
   Reciter,
   mp3QuranAPiResponse,
@@ -6,6 +7,38 @@ import {
   Riwaya,
   LinkSource,
 } from "../types";
+
+// Language mapping for API endpoints
+type APILanguage = "en" | "ar";
+
+const languageMap: { [key: string]: APILanguage } = {
+  en: "en",
+  ar: "ar",
+};
+
+/**
+ * Get the API language parameter based on current i18n language
+ */
+const getAPILanguage = (): APILanguage => {
+  const currentLanguage = i18n.language || "en";
+  return languageMap[currentLanguage] || "en";
+};
+
+/**
+ * Decode Arabic text properly if needed
+ * Handles UTF-8 encoding/decoding for Arabic characters
+ */
+const decodeText = (text: string): string => {
+  if (!text) return text;
+  try {
+    // If the text is already properly encoded, return as is
+    // This handles both native Arabic and pre-encoded text
+    return decodeURIComponent(text);
+  } catch {
+    // If decoding fails, return original text
+    return text;
+  }
+};
 
 const getRiwayaKeyFromMoshafName = (moshafName: string): Riwaya => {
   const lowerName = moshafName.toLowerCase();
@@ -32,7 +65,9 @@ const generatePlaylist = (moshaf: MP3APIMoshaf): Playlist => {
   return result;
 };
 
-// Helper function to fetch with timeout
+/**
+ * Helper function to fetch with timeout
+ */
 const fetchWithTimeout = (
   url: string,
   timeoutMs: number = 10000
@@ -45,7 +80,10 @@ const fetchWithTimeout = (
   ]);
 };
 
-// Retry logic with exponential backoff
+/**
+ * Retry logic with exponential backoff
+ * Handles network failures and temporary unavailability
+ */
 const retryFetch = async (
   url: string,
   maxAttempts: number = 3
@@ -77,12 +115,23 @@ const retryFetch = async (
   throw lastError || new Error("Failed to fetch after all attempts");
 };
 
-// Function to fetch reciters from MP3Quran API
-export async function getAllReciters(): Promise<Reciter[]> {
+/**
+ * Fetch reciters from MP3Quran API with multi-language support
+ * Supports both English (en) and Arabic (ar) language endpoints
+ * Properly handles RTL content and Arabic character encoding
+ * 
+ * @param language Optional: specific language to fetch ('en' or 'ar'). Defaults to current i18n language.
+ * @returns Promise<Reciter[]> Array of reciter objects with playlists
+ * @throws Error if fetch fails after retries or if response is invalid
+ */
+export async function getAllReciters(language?: string): Promise<Reciter[]> {
   try {
-    const response = await retryFetch(
-      "https://www.mp3quran.net/api/v3/reciters?language=en"
-    );
+    const apiLanguage = language ? (languageMap[language] || "en") : getAPILanguage();
+    const apiUrl = `https://www.mp3quran.net/api/v3/reciters?language=${apiLanguage}`;
+    
+    console.debug(`Fetching reciters with language: ${apiLanguage}`);
+    
+    const response = await retryFetch(apiUrl);
 
     const data: mp3QuranAPiResponse = await response.json();
     const reciters: Reciter[] = [];
@@ -92,13 +141,17 @@ export async function getAllReciters(): Promise<Reciter[]> {
         const playlist = generatePlaylist(apiMoshaf);
         const riwaya = getRiwayaKeyFromMoshafName(apiMoshaf.name);
 
+        // Properly decode reciter name and moshaf name for Arabic text
+        const reciterName = decodeText(apiReciter.name);
+        const moshafName = decodeText(apiMoshaf.name);
+
         reciters.push({
           id: apiReciter.id,
-          name: apiReciter.name,
+          name: reciterName,
           source: LinkSource.MP3QURAN,
           moshaf: {
             id: apiMoshaf.id,
-            name: apiMoshaf.name,
+            name: moshafName,
             riwaya,
             server: apiMoshaf.server,
             surah_total: apiMoshaf.surah_total,
@@ -108,11 +161,19 @@ export async function getAllReciters(): Promise<Reciter[]> {
       }
     }
 
+    console.debug(`Successfully fetched ${reciters.length} reciters`);
     return reciters;
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
     console.error("Error fetching reciters:", errorMessage);
-    throw error; // Re-throw so HomeScreen can handle it
+    throw error; // Re-throw so caller can handle it
   }
+}
+
+/**
+ * Get available languages for API
+ */
+export function getAvailableAPILanguages(): APILanguage[] {
+  return ["en", "ar"];
 }
