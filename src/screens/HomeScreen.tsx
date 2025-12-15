@@ -28,6 +28,7 @@ import {
   colorPrimaryGreenTint,
   focusScale,
 } from "../constants/interaction-colors";
+import { getThemeColors } from "../constants/theme";
 
 export default function HomeScreen() {
   const [reciters, setReciters] = useState<Reciter[]>([]);
@@ -275,12 +276,8 @@ export default function HomeScreen() {
 }
 
 function createStyles(isDark: boolean, width: number) {
-  const bg = isDark ? "#121212" : "#FFFFFF";
-  const textPrimary = isDark ? "#fff" : "#111";
-  const textSecondary = isDark ? "#AAA" : "#555";
-  const cardBg = isDark ? "#1E1E1E" : "#EFEFEF";
-  const border = isDark ? "#333" : "#D0D0D0";
-  const focusBg = isDark ? "#2E2E2E" : "#E0E0E0";
+  const { bg, textPrimary, textSecondary, cardBg, border, focusBg } =
+    getThemeColors(isDark);
   const isVeryWide = width >= 2800;
   const isWide = width >= 2200 && width < 2800;
   const isMedium = width >= 1600 && width < 2200;

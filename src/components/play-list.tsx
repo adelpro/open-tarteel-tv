@@ -1,6 +1,12 @@
 import React, { memo } from "react";
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
-import type { FlatList as RNFlatList } from "react-native";
+import {
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  useColorScheme,
+  View,
+} from "react-native";
 import {
   SpatialNavigationFocusableView,
   SpatialNavigationView,
@@ -10,8 +16,12 @@ import {
   colorPrimaryGreenLight,
   focusScale,
 } from "../constants/interaction-colors";
+import { getThemeColors } from "../constants/theme";
+import type { PlayerState } from "../hooks/use-player";
 
 const SURAH_ITEM_HEIGHT = 64;
+
+type PlaylistStyles = ReturnType<typeof createStyles>;
 
 type SurahItemData = {
   id: number;
@@ -21,21 +31,22 @@ type SurahItemData = {
   ayahCount: number;
 };
 
-type PlaylistProps = {
-  playlistRef: React.RefObject<RNFlatList<SurahItemData> | null>;
-  playlistData: SurahItemData[];
-  selectedSurah: number | null;
-  onSurahPress: (id: number) => void;
-};
-
 type SurahItemProps = SurahItemData & {
   selected: boolean;
   preferredFocus: boolean;
   onPress: (id: number) => void;
+  styles: PlaylistStyles;
 };
 
 const SurahItem = memo(
-  ({ id, englishName, selected, preferredFocus, onPress }: SurahItemProps) => (
+  ({
+    id,
+    englishName,
+    selected,
+    preferredFocus,
+    onPress,
+    styles,
+  }: SurahItemProps) => (
     <SpatialNavigationFocusableView onSelect={() => onPress(id)}>
       {({ isFocused }) => (
         <Pressable
@@ -72,126 +83,136 @@ const SurahItem = memo(
   )
 );
 
-const Playlist = ({
-  playlistRef,
-  playlistData,
-  selectedSurah,
-  onSurahPress,
-}: PlaylistProps) => (
-  <View style={styles.playlistPanel}>
-    <View style={styles.playlistHeaderRow}>
-      <Text style={styles.playlistTitle}>Playlist</Text>
-    </View>
+type PlaylistProps = {
+  player: PlayerState;
+};
 
-    <View style={styles.playlistBody}>
-      <SpatialNavigationView direction="vertical">
-        <FlatList
-          ref={playlistRef}
-          data={playlistData}
-          keyExtractor={(item) => item.id.toString()}
-          showsVerticalScrollIndicator={false}
-          getItemLayout={(_, index) => ({
-            length: SURAH_ITEM_HEIGHT,
-            offset: SURAH_ITEM_HEIGHT * index,
-            index,
-          })}
-          removeClippedSubviews={true}
-          initialNumToRender={8}
-          maxToRenderPerBatch={8}
-          windowSize={5}
-          contentContainerStyle={styles.playlistContent}
-          renderItem={({ item, index }) => (
-            <SurahItem
-              id={item.id}
-              name={item.name}
-              englishName={item.englishName}
-              revelationType={item.revelationType}
-              ayahCount={item.ayahCount}
-              selected={selectedSurah === item.id}
-              preferredFocus={index === 0}
-              onPress={onSurahPress}
-            />
-          )}
-        />
-      </SpatialNavigationView>
-    </View>
-  </View>
-);
+const Playlist = ({ player }: PlaylistProps) => {
+  const { playlistData, selectedSurah, handleSurahPress } = player;
 
-const styles = StyleSheet.create({
-  playlistPanel: {
-    height: "100%",
-    marginLeft: 12,
-    width: 320,
-    backgroundColor: "#181818",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#262626",
-    overflow: "hidden",
-  },
-  playlistHeaderRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#262626",
-  },
-  playlistTitle: {
-    fontSize: 14,
-    color: "#fff",
-    fontWeight: "600",
-  },
-  playlistBody: {
-    flex: 1,
-  },
-  playlistContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 8,
-  },
-  surahCard: {
-    height: SURAH_ITEM_HEIGHT,
-    paddingHorizontal: 16,
-    marginBottom: 8,
-    flexDirection: "row",
-    alignItems: "center",
-    borderRadius: 12,
-    backgroundColor: "#181818",
-    borderWidth: 1,
-    borderColor: "#262626",
-  },
-  surahCardFocused: {
-    borderWidth: 2,
-    borderColor: colorPrimaryGreenLight,
-    transform: [{ scale: focusScale }],
-    shadowColor: "#000",
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 8,
-  },
-  surahCardSelected: {
-    backgroundColor: colorPrimaryGreen,
-    borderColor: colorPrimaryGreen,
-  },
-  surahNumber: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#B0B0B0",
-    marginRight: 12,
-  },
-  surahName: {
-    fontSize: 14,
-    color: "#fff",
-    flexShrink: 1,
-  },
-  surahNumberFocused: {
-    color: "#fff",
-  },
-  surahNameFocused: {
-    color: colorPrimaryGreenLight,
-  },
-});
+  const isDark = useColorScheme() !== "light";
+  const styles = createStyles(isDark);
+  return (
+    <View style={styles.playlistPanel}>
+      <View style={styles.playlistHeaderRow}>
+        <Text style={styles.playlistTitle}>Playlist</Text>
+      </View>
+
+      <View style={styles.playlistBody}>
+        <SpatialNavigationView direction="vertical">
+          <FlatList
+            data={playlistData}
+            keyExtractor={(item) => item.id.toString()}
+            showsVerticalScrollIndicator={false}
+            getItemLayout={(_, index) => ({
+              length: SURAH_ITEM_HEIGHT,
+              offset: SURAH_ITEM_HEIGHT * index,
+              index,
+            })}
+            removeClippedSubviews={true}
+            initialNumToRender={8}
+            maxToRenderPerBatch={8}
+            windowSize={5}
+            contentContainerStyle={styles.playlistContent}
+            renderItem={({ item, index }) => (
+              <SurahItem
+                id={item.id}
+                name={item.name}
+                englishName={item.englishName}
+                revelationType={item.revelationType}
+                ayahCount={item.ayahCount}
+                selected={selectedSurah === item.id}
+                preferredFocus={index === 0}
+                onPress={handleSurahPress}
+                styles={styles}
+              />
+            )}
+          />
+        </SpatialNavigationView>
+      </View>
+    </View>
+  );
+};
+
+function createStyles(isDark: boolean) {
+  const { cardBg, textPrimary, textSecondary, border } = getThemeColors(isDark);
+  const panelBg = cardBg;
+  return StyleSheet.create({
+    playlistPanel: {
+      height: "100%",
+      marginLeft: 12,
+      width: 320,
+      backgroundColor: panelBg,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: border,
+      overflow: "hidden",
+    },
+    playlistHeaderRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderBottomWidth: 1,
+      borderBottomColor: border,
+    },
+    playlistTitle: {
+      fontSize: 14,
+      color: textPrimary,
+      fontWeight: "600",
+    },
+    playlistBody: {
+      flex: 1,
+    },
+    playlistContent: {
+      paddingTop: 8,
+      paddingHorizontal: 16,
+      paddingBottom: 8,
+    },
+    surahCard: {
+      height: SURAH_ITEM_HEIGHT,
+      paddingHorizontal: 16,
+      marginBottom: 8,
+      flexDirection: "row",
+      alignItems: "center",
+      borderRadius: 12,
+      backgroundColor: cardBg,
+      borderWidth: 1,
+      borderColor: border,
+    },
+    surahCardFocused: {
+      borderWidth: 2,
+      borderColor: colorPrimaryGreenLight,
+      transform: [{ scale: focusScale }],
+      shadowColor: "#000",
+      shadowOpacity: 0.3,
+      shadowRadius: 10,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 8,
+    },
+    surahCardSelected: {
+      backgroundColor: colorPrimaryGreen,
+      borderColor: colorPrimaryGreen,
+    },
+    surahNumber: {
+      fontSize: 12,
+      fontWeight: "600",
+      color: textSecondary,
+      marginRight: 12,
+    },
+    surahName: {
+      fontSize: 14,
+      color: textPrimary,
+      flexShrink: 1,
+    },
+    surahNumberFocused: {
+      color: textPrimary,
+    },
+    surahNameFocused: {
+      color: colorPrimaryGreenLight,
+    },
+  });
+}
 
 export default memo(Playlist);

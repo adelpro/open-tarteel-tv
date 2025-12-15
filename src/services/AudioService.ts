@@ -4,7 +4,6 @@ class AudioService {
   private player: AudioPlayer | null = null;
   private currentUrl: string | null = null;
   private isPlaying: boolean = false;
-  private switching: boolean = false;
   private volume: number = 1;
   private repeat: boolean = false;
 

@@ -1,55 +1,65 @@
 import React, { memo } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  useColorScheme,
+  View,
+} from "react-native";
 import {
   SpatialNavigationFocusableView,
   SpatialNavigationView,
 } from "react-tv-space-navigation";
 import { FontAwesome } from "@expo/vector-icons";
-import { Reciter } from "../types";
 import AudioSpectrum from "./audio-spectrum";
 import { colorPrimaryGreen, focusScale } from "../constants/interaction-colors";
+import { getThemeColors } from "../constants/theme";
+import type { PlayerState } from "../hooks/use-player";
+
+const isArabicText = (text: string) => /[\u0600-\u06FF]/.test(text);
 
 type PlayerProps = {
-  reciter: Reciter;
-  currentSurah: {
-    id: number;
-    englishName: string;
-    name: string;
-  } | null;
-  hasSelection: boolean;
-  isPlaying: boolean;
-  volume: number;
-  muted: boolean;
-  repeat: boolean;
-  controlsDisabled: boolean;
-  isCurrentSurahNameArabic: boolean;
-  onPlayPause: () => void;
-  onStop: () => void;
-  onPrevious: () => void;
-  onNext: () => void;
-  onVolumeChange: (delta: number) => void;
-  onToggleMute: () => void;
-  onToggleRepeat: () => void;
+  player: PlayerState;
 };
 
-const Player = ({
-  reciter,
-  currentSurah,
-  hasSelection,
-  isPlaying,
-  volume,
-  muted,
-  repeat,
-  controlsDisabled,
-  isCurrentSurahNameArabic,
-  onPlayPause,
-  onStop,
-  onPrevious,
-  onNext,
-  onVolumeChange,
-  onToggleMute,
-  onToggleRepeat,
-}: PlayerProps) => {
+const Player = ({ player }: PlayerProps) => {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme !== "light";
+
+  const {
+    playlistData,
+    reciter,
+    selectedSurah,
+    isPlaying,
+    volume,
+    repeat,
+    muted,
+    handlePlayPause,
+    handlePrevious,
+    handleNext,
+    handleVolumeChange,
+    handleToggleMute,
+    handleToggleRepeat,
+  } = player;
+
+  const hasSelection = selectedSurah !== null;
+  const currentSurah = hasSelection
+    ? playlistData.find((s) => s.id === selectedSurah)
+    : null;
+  const controlsDisabled = !hasSelection;
+  const isCurrentSurahNameArabic = isArabicText(currentSurah?.name ?? "");
+
+  const styles = createStyles(isDark);
+  if (!reciter) {
+    return (
+      <View style={styles.playerColumn}>
+        <View style={styles.metadataCard}>
+          <Text style={styles.metadataTitle}>No reciter selected</Text>
+        </View>
+      </View>
+    );
+  }
+
   const renderControl = (
     onSelect: () => void,
     renderPressable: (isFocused: boolean) => React.ReactElement
@@ -114,7 +124,7 @@ const Player = ({
           <AudioSpectrum playing={hasSelection && isPlaying} />
           {controlsDisabled ? (
             <View style={styles.controlsRow}>
-              {renderControl(onPrevious, (isFocused) => (
+              {renderControl(handlePrevious, (isFocused) => (
                 <Pressable
                   style={[
                     styles.controlBtnRect,
@@ -125,7 +135,7 @@ const Player = ({
                   disabled={controlsDisabled}
                   accessibilityRole="button"
                   accessibilityLabel="Previous"
-                  onPress={onPrevious}
+                  onPress={handlePrevious}
                 >
                   <FontAwesome
                     name="step-backward"
@@ -135,7 +145,7 @@ const Player = ({
                 </Pressable>
               ))}
 
-              {renderControl(onPlayPause, (isFocused) => (
+              {renderControl(handlePlayPause, (isFocused) => (
                 <Pressable
                   style={[
                     styles.controlBtnRectWide,
@@ -146,7 +156,7 @@ const Player = ({
                   disabled={controlsDisabled}
                   accessibilityRole="button"
                   accessibilityLabel={isPlaying ? "Pause" : "Play"}
-                  onPress={onPlayPause}
+                  onPress={handlePlayPause}
                 >
                   <FontAwesome
                     name={isPlaying ? "pause" : "play"}
@@ -156,7 +166,7 @@ const Player = ({
                 </Pressable>
               ))}
 
-              {renderControl(onNext, (isFocused) => (
+              {renderControl(handleNext, (isFocused) => (
                 <Pressable
                   style={[
                     styles.controlBtnRect,
@@ -167,7 +177,7 @@ const Player = ({
                   disabled={controlsDisabled}
                   accessibilityRole="button"
                   accessibilityLabel="Next"
-                  onPress={onNext}
+                  onPress={handleNext}
                 >
                   <FontAwesome
                     name="step-forward"
@@ -178,7 +188,7 @@ const Player = ({
               ))}
 
               {renderControl(
-                () => onVolumeChange(-0.1),
+                () => handleVolumeChange(-0.1),
                 (isFocused) => (
                   <Pressable
                     style={[
@@ -192,7 +202,7 @@ const Player = ({
                     disabled={controlsDisabled}
                     accessibilityRole="button"
                     accessibilityLabel="Volume down"
-                    onPress={() => onVolumeChange(-0.1)}
+                    onPress={() => handleVolumeChange(-0.1)}
                   >
                     <FontAwesome
                       name="volume-down"
@@ -206,7 +216,7 @@ const Player = ({
               )}
 
               {renderControl(
-                () => onVolumeChange(0.1),
+                () => handleVolumeChange(0.1),
                 (isFocused) => (
                   <Pressable
                     style={[
@@ -220,7 +230,7 @@ const Player = ({
                     disabled={controlsDisabled}
                     accessibilityRole="button"
                     accessibilityLabel="Volume up"
-                    onPress={() => onVolumeChange(0.1)}
+                    onPress={() => handleVolumeChange(0.1)}
                   >
                     <FontAwesome
                       name="volume-up"
@@ -233,7 +243,7 @@ const Player = ({
                 )
               )}
 
-              {renderControl(onToggleMute, (isFocused) => (
+              {renderControl(handleToggleMute, (isFocused) => (
                 <Pressable
                   style={[
                     styles.controlBtnRect,
@@ -245,7 +255,7 @@ const Player = ({
                   disabled={controlsDisabled}
                   accessibilityRole="button"
                   accessibilityLabel={muted ? "Unmute" : "Mute"}
-                  onPress={onToggleMute}
+                  onPress={handleToggleMute}
                 >
                   <FontAwesome
                     name="volume-off"
@@ -259,7 +269,7 @@ const Player = ({
                 </Pressable>
               ))}
 
-              {renderControl(onToggleRepeat, (isFocused) => (
+              {renderControl(handleToggleRepeat, (isFocused) => (
                 <Pressable
                   style={[
                     styles.controlBtnRect,
@@ -271,7 +281,7 @@ const Player = ({
                   disabled={controlsDisabled}
                   accessibilityRole="button"
                   accessibilityLabel="Toggle repeat"
-                  onPress={onToggleRepeat}
+                  onPress={handleToggleRepeat}
                 >
                   <FontAwesome
                     name="repeat"
@@ -288,7 +298,7 @@ const Player = ({
           ) : (
             <SpatialNavigationView direction="horizontal">
               <View style={styles.controlsRow}>
-                {renderControl(onPrevious, (isFocused) => (
+                {renderControl(handlePrevious, (isFocused) => (
                   <Pressable
                     style={[
                       styles.controlBtnRect,
@@ -301,7 +311,7 @@ const Player = ({
                     disabled={controlsDisabled}
                     accessibilityRole="button"
                     accessibilityLabel="Previous"
-                    onPress={onPrevious}
+                    onPress={handlePrevious}
                   >
                     <FontAwesome
                       name="step-backward"
@@ -313,7 +323,7 @@ const Player = ({
                   </Pressable>
                 ))}
 
-                {renderControl(onPlayPause, (isFocused) => (
+                {renderControl(handlePlayPause, (isFocused) => (
                   <Pressable
                     style={[
                       styles.controlBtnRectWide,
@@ -326,7 +336,7 @@ const Player = ({
                     disabled={controlsDisabled}
                     accessibilityRole="button"
                     accessibilityLabel={isPlaying ? "Pause" : "Play"}
-                    onPress={onPlayPause}
+                    onPress={handlePlayPause}
                   >
                     <FontAwesome
                       name={isPlaying ? "pause" : "play"}
@@ -338,7 +348,7 @@ const Player = ({
                   </Pressable>
                 ))}
 
-                {renderControl(onNext, (isFocused) => (
+                {renderControl(handleNext, (isFocused) => (
                   <Pressable
                     style={[
                       styles.controlBtnRect,
@@ -351,7 +361,7 @@ const Player = ({
                     disabled={controlsDisabled}
                     accessibilityRole="button"
                     accessibilityLabel="Next"
-                    onPress={onNext}
+                    onPress={handleNext}
                   >
                     <FontAwesome
                       name="step-forward"
@@ -364,7 +374,7 @@ const Player = ({
                 ))}
 
                 {renderControl(
-                  () => onVolumeChange(-0.1),
+                  () => handleVolumeChange(-0.1),
                   (isFocused) => (
                     <Pressable
                       style={[
@@ -378,7 +388,7 @@ const Player = ({
                       disabled={controlsDisabled}
                       accessibilityRole="button"
                       accessibilityLabel="Volume down"
-                      onPress={() => onVolumeChange(-0.1)}
+                      onPress={() => handleVolumeChange(-0.1)}
                     >
                       <FontAwesome
                         name="volume-down"
@@ -392,7 +402,7 @@ const Player = ({
                 )}
 
                 {renderControl(
-                  () => onVolumeChange(0.1),
+                  () => handleVolumeChange(0.1),
                   (isFocused) => (
                     <Pressable
                       style={[
@@ -406,7 +416,7 @@ const Player = ({
                       disabled={controlsDisabled}
                       accessibilityRole="button"
                       accessibilityLabel="Volume up"
-                      onPress={() => onVolumeChange(0.1)}
+                      onPress={() => handleVolumeChange(0.1)}
                     >
                       <FontAwesome
                         name="volume-up"
@@ -419,7 +429,7 @@ const Player = ({
                   )
                 )}
 
-                {renderControl(onToggleMute, (isFocused) => (
+                {renderControl(handleToggleMute, (isFocused) => (
                   <Pressable
                     style={[
                       styles.controlBtnRect,
@@ -433,7 +443,7 @@ const Player = ({
                     disabled={controlsDisabled}
                     accessibilityRole="button"
                     accessibilityLabel={muted ? "Unmute" : "Mute"}
-                    onPress={onToggleMute}
+                    onPress={handleToggleMute}
                   >
                     <FontAwesome
                       name="volume-off"
@@ -447,7 +457,7 @@ const Player = ({
                   </Pressable>
                 ))}
 
-                {renderControl(onToggleRepeat, (isFocused) => (
+                {renderControl(handleToggleRepeat, (isFocused) => (
                   <Pressable
                     style={[
                       styles.controlBtnRect,
@@ -461,7 +471,7 @@ const Player = ({
                     disabled={controlsDisabled}
                     accessibilityRole="button"
                     accessibilityLabel="Toggle repeat"
-                    onPress={onToggleRepeat}
+                    onPress={handleToggleRepeat}
                   >
                     <FontAwesome
                       name="repeat"
@@ -483,103 +493,111 @@ const Player = ({
   );
 };
 
-const styles = StyleSheet.create({
-  playerColumn: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  playerArea: {
-    marginTop: 12,
-  },
-  metadataCard: {
-    marginTop: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-    backgroundColor: "#1A1A1A",
-    borderWidth: 1,
-    borderColor: "#2A2A2A",
-  },
-  metadataTitle: {
-    fontSize: 20,
-    color: "#fff",
-    marginBottom: 4,
-  },
-  metadataSubtitle: {
-    fontSize: 16,
-    color: "#DDD",
-    marginBottom: 4,
-  },
-  metadataMeta: {
-    fontSize: 12,
-    color: "#AAA",
-  },
-  nowPlaying: {
-    fontSize: 18,
-    color: "#fff",
-    marginBottom: 6,
-  },
-  controlsMeta: {
-    fontSize: 12,
-    color: "#AAA",
-    marginBottom: 16,
-  },
-  playerControls: {
-    paddingHorizontal: 24,
-    paddingVertical: 18,
-    backgroundColor: "#1E1E1E",
-    borderTopWidth: 2,
-    borderTopColor: colorPrimaryGreen,
-    alignItems: "center",
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
-  },
-  controlsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 18,
-  },
-  controlBtnRect: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: "#232323",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "transparent",
-  },
-  controlBtnRectWide: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: "#2F2F2F",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "transparent",
-  },
-  controlBtnFocused: {
-    borderColor: colorPrimaryGreen,
-    backgroundColor: "#2E2E2E",
-    transform: [{ scale: focusScale }],
-    shadowColor: "#4CAF50",
-    shadowOpacity: 0.7,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 0 },
-    elevation: 8,
-  },
-  controlBtnDisabled: {
-    opacity: 0.4,
-  },
-  controlBtnActive: {
-    borderColor: colorPrimaryGreen,
-    backgroundColor: "#1E1E1E",
-  },
-  arabicText: {
-    textAlign: "right",
-    writingDirection: "rtl",
-  },
-});
+function createStyles(isDark: boolean) {
+  const { textPrimary, textSecondary, cardBg, border, focusBg } =
+    getThemeColors(isDark);
+  const panelBg = cardBg;
+  const controlBg = isDark ? "#232323" : "#E0E0E0";
+  const controlBgWide = isDark ? "#2F2F2F" : "#DADADA";
+  const controlFocusedBg = focusBg;
+  return StyleSheet.create({
+    playerColumn: {
+      flex: 1,
+      justifyContent: "flex-start",
+    },
+    playerArea: {
+      marginTop: 12,
+    },
+    metadataCard: {
+      marginTop: 8,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 10,
+      backgroundColor: cardBg,
+      borderWidth: 1,
+      borderColor: border,
+    },
+    metadataTitle: {
+      fontSize: 20,
+      color: textPrimary,
+      marginBottom: 4,
+    },
+    metadataSubtitle: {
+      fontSize: 16,
+      color: textSecondary,
+      marginBottom: 4,
+    },
+    metadataMeta: {
+      fontSize: 12,
+      color: textSecondary,
+    },
+    nowPlaying: {
+      fontSize: 18,
+      color: textPrimary,
+      marginBottom: 6,
+    },
+    controlsMeta: {
+      fontSize: 12,
+      color: textSecondary,
+      marginBottom: 16,
+    },
+    playerControls: {
+      paddingHorizontal: 24,
+      paddingVertical: 18,
+      backgroundColor: panelBg,
+      borderTopWidth: 2,
+      borderTopColor: colorPrimaryGreen,
+      alignItems: "center",
+      borderBottomLeftRadius: 8,
+      borderBottomRightRadius: 8,
+    },
+    controlsRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 18,
+    },
+    controlBtnRect: {
+      width: 52,
+      height: 52,
+      borderRadius: 26,
+      backgroundColor: controlBg,
+      justifyContent: "center",
+      alignItems: "center",
+      borderWidth: 2,
+      borderColor: "transparent",
+    },
+    controlBtnRectWide: {
+      width: 72,
+      height: 72,
+      borderRadius: 36,
+      backgroundColor: controlBgWide,
+      justifyContent: "center",
+      alignItems: "center",
+      borderWidth: 2,
+      borderColor: "transparent",
+    },
+    controlBtnFocused: {
+      borderColor: colorPrimaryGreen,
+      backgroundColor: controlFocusedBg,
+      transform: [{ scale: focusScale }],
+      shadowColor: "#4CAF50",
+      shadowOpacity: 0.7,
+      shadowRadius: 18,
+      shadowOffset: { width: 0, height: 0 },
+      elevation: 8,
+    },
+    controlBtnDisabled: {
+      opacity: 0.4,
+    },
+    controlBtnActive: {
+      borderColor: colorPrimaryGreen,
+      backgroundColor: panelBg,
+    },
+    arabicText: {
+      textAlign: "right",
+      writingDirection: "rtl",
+    },
+  });
+}
 
 export default memo(Player);
