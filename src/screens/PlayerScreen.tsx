@@ -14,13 +14,8 @@ import { getAllReciters } from "../services/api";
 import { audioService } from "../services/AudioService";
 import Player from "../components/player";
 import Playlist from "../components/play-list";
-import {
-  colorPrimaryGreen,
-  colorPrimaryGreenLight,
-  focusScale,
-} from "../constants/interaction-colors";
+import { colorPrimaryGreen } from "../constants/interaction-colors";
 
-const SURAH_ITEM_HEIGHT = 64;
 const isArabicText = (text: string) => /[\u0600-\u06FF]/.test(text);
 
 export default function PlayerScreen() {
@@ -238,7 +233,6 @@ export default function PlayerScreen() {
           repeat={repeat}
           controlsDisabled={controlsDisabled}
           isCurrentSurahNameArabic={isCurrentSurahNameArabic}
-          styles={styles}
           onPlayPause={handlePlayPause}
           onStop={handleStop}
           onPrevious={handlePrevious}
@@ -249,7 +243,6 @@ export default function PlayerScreen() {
         />
 
         <Playlist
-          styles={styles}
           playlistRef={playlistRef}
           playlistData={playlistData}
           selectedSurah={selectedSurah}
@@ -305,195 +298,8 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 20,
   },
-  playerColumn: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  playerArea: {
-    marginTop: 12,
-  },
-  playlistPanel: {
-    height: "100%",
-    marginLeft: 12,
-    width: 320,
-    backgroundColor: "#181818",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#262626",
-    overflow: "hidden",
-  },
   arabicText: {
     textAlign: "right",
     writingDirection: "rtl",
-  },
-  playlistContainer: {
-    flex: 1,
-    paddingVertical: 16,
-  },
-  playlistHeaderRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#262626",
-  },
-  playlistTitle: {
-    fontSize: 14,
-    color: "#fff",
-    fontWeight: "600",
-  },
-  playlistBody: {
-    flex: 1,
-  },
-  playlistContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 8,
-  },
-  surahCard: {
-    height: SURAH_ITEM_HEIGHT,
-    paddingHorizontal: 16,
-    marginBottom: 8,
-    flexDirection: "row",
-    alignItems: "center",
-    borderRadius: 12,
-    backgroundColor: "#181818",
-    borderWidth: 1,
-    borderColor: "#262626",
-  },
-  surahCardFocused: {
-    borderWidth: 2,
-    borderColor: colorPrimaryGreenLight,
-    transform: [{ scale: focusScale }],
-    shadowColor: "#000",
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 8,
-  },
-  surahCardSelected: {
-    backgroundColor: colorPrimaryGreen,
-    borderColor: colorPrimaryGreen,
-  },
-  surahNumber: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#B0B0B0",
-    marginRight: 12,
-  },
-  surahName: {
-    fontSize: 14,
-    color: "#fff",
-    flexShrink: 1,
-  },
-  surahEnglishName: {
-    fontSize: 13,
-    color: "#EEE",
-  },
-  surahMeta: {
-    fontSize: 12,
-    color: "#888",
-    marginTop: 0,
-  },
-  playerControls: {
-    paddingHorizontal: 24,
-    paddingVertical: 18,
-    backgroundColor: "#1E1E1E",
-    borderTopWidth: 2,
-    borderTopColor: colorPrimaryGreen,
-    alignItems: "center",
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
-  },
-  metadataCard: {
-    marginTop: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-    backgroundColor: "#1A1A1A",
-    borderWidth: 1,
-    borderColor: "#2A2A2A",
-  },
-  metadataTitle: {
-    fontSize: 20,
-    color: "#fff",
-    marginBottom: 4,
-  },
-  metadataSubtitle: {
-    fontSize: 16,
-    color: "#DDD",
-    marginBottom: 4,
-  },
-  metadataMeta: {
-    fontSize: 12,
-    color: "#AAA",
-  },
-  nowPlaying: {
-    fontSize: 18,
-    color: "#fff",
-    marginBottom: 6,
-  },
-  controlsMeta: {
-    fontSize: 12,
-    color: "#AAA",
-    marginBottom: 16,
-  },
-  spectrumRow: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    justifyContent: "center",
-    gap: 4,
-    marginBottom: 16,
-    height: 40,
-  },
-  spectrumBar: {
-    width: 6,
-    height: 40,
-    borderRadius: 3,
-    backgroundColor: "#4CAF50",
-    opacity: 0.9,
-  },
-  controlsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 18,
-  },
-  controlBtnRect: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: "#232323",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "transparent",
-  },
-  controlBtnRectWide: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: "#2F2F2F",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "transparent",
-  },
-  controlBtnFocused: {
-    borderColor: colorPrimaryGreen,
-    backgroundColor: "#2E2E2E",
-    transform: [{ scale: focusScale }],
-    shadowColor: "#4CAF50",
-    shadowOpacity: 0.7,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 0 },
-    elevation: 8,
-  },
-  controlBtnDisabled: {
-    opacity: 0.4,
-  },
-  controlBtnActive: {
-    borderColor: colorPrimaryGreen,
-    backgroundColor: "#1E1E1E",
   },
 });

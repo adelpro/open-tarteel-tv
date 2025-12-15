@@ -49,8 +49,8 @@ class AudioService {
       this.currentUrl = url;
       (this.player as any)?.pause?.();
       (this.player as any)?.stop?.();
-      if ((this.player as any)?.setVolume) {
-        (this.player as any).setVolume(this.volume);
+      if (this.player) {
+        (this.player as any).volume = this.volume;
       }
       this.player.play();
       this.isPlaying = true;
@@ -114,8 +114,8 @@ class AudioService {
   setVolume(level: number): void {
     const next = Math.min(1, Math.max(0, level));
     this.volume = next;
-    if (this.player && (this.player as any)?.setVolume) {
-      (this.player as any).setVolume(next);
+    if (this.player) {
+      (this.player as any).volume = next;
     }
   }
 

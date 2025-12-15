@@ -1,17 +1,11 @@
 import React, { memo, useEffect, useRef } from "react";
-import { Animated, Easing, View } from "react-native";
-
-type AudioSpectrumStyles = {
-  spectrumRow: any;
-  spectrumBar: any;
-};
+import { Animated, Easing, StyleSheet, View } from "react-native";
 
 type AudioSpectrumProps = {
   playing: boolean;
-  styles: AudioSpectrumStyles;
 };
 
-const AudioSpectrum = ({ playing, styles }: AudioSpectrumProps) => {
+const AudioSpectrum = ({ playing }: AudioSpectrumProps) => {
   const bars = 14;
   const valuesRef = useRef<Animated.Value[]>(
     Array.from({ length: bars }, () => new Animated.Value(0.6))
@@ -68,5 +62,23 @@ const AudioSpectrum = ({ playing, styles }: AudioSpectrumProps) => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  spectrumRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "center",
+    gap: 4,
+    marginBottom: 16,
+    height: 40,
+  },
+  spectrumBar: {
+    width: 6,
+    height: 40,
+    borderRadius: 3,
+    backgroundColor: "#4CAF50",
+    opacity: 0.9,
+  },
+});
 
 export default memo(AudioSpectrum);

@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import {
   SpatialNavigationFocusableView,
   SpatialNavigationView,
@@ -7,28 +7,7 @@ import {
 import { FontAwesome } from "@expo/vector-icons";
 import { Reciter } from "../types";
 import AudioSpectrum from "./audio-spectrum";
-
-type PlayerStyles = {
-  playerColumn: any;
-  metadataCard: any;
-  metadataTitle: any;
-  metadataSubtitle: any;
-  metadataMeta: any;
-  metadataMetaSecondary?: any;
-  playerArea: any;
-  playerControls: any;
-  nowPlaying: any;
-  controlsMeta: any;
-  spectrumRow: any;
-  spectrumBar: any;
-  controlsRow: any;
-  controlBtnRect: any;
-  controlBtnRectWide: any;
-  controlBtnDisabled: any;
-  controlBtnFocused: any;
-  controlBtnActive: any;
-  arabicText: any;
-};
+import { colorPrimaryGreen, focusScale } from "../constants/interaction-colors";
 
 type PlayerProps = {
   reciter: Reciter;
@@ -44,7 +23,6 @@ type PlayerProps = {
   repeat: boolean;
   controlsDisabled: boolean;
   isCurrentSurahNameArabic: boolean;
-  styles: PlayerStyles;
   onPlayPause: () => void;
   onStop: () => void;
   onPrevious: () => void;
@@ -64,7 +42,6 @@ const Player = ({
   repeat,
   controlsDisabled,
   isCurrentSurahNameArabic,
-  styles,
   onPlayPause,
   onStop,
   onPrevious,
@@ -119,32 +96,9 @@ const Player = ({
               } • Repeat ${repeat ? "On" : "Off"}`
             : "Playback controls will be enabled once a surah is selected"}
         </Text>
-        <AudioSpectrum playing={hasSelection && isPlaying} styles={styles} />
+        <AudioSpectrum playing={hasSelection && isPlaying} />
         <SpatialNavigationView direction="horizontal">
           <View style={styles.controlsRow}>
-            <SpatialNavigationFocusableView onSelect={onStop}>
-              {({ isFocused }) => (
-                <Pressable
-                  style={[
-                    styles.controlBtnRect,
-                    controlsDisabled && styles.controlBtnDisabled,
-                    isFocused && !controlsDisabled && styles.controlBtnFocused,
-                  ]}
-                  focusable={!controlsDisabled}
-                  disabled={controlsDisabled}
-                  accessibilityRole="button"
-                  accessibilityLabel="Stop"
-                  onPress={onStop}
-                >
-                  <FontAwesome
-                    name="stop"
-                    size={24}
-                    color={isFocused && !controlsDisabled ? "#4CAF50" : "#fff"}
-                  />
-                </Pressable>
-              )}
-            </SpatialNavigationFocusableView>
-
             <SpatialNavigationFocusableView onSelect={onPrevious}>
               {({ isFocused }) => (
                 <Pressable
@@ -191,9 +145,7 @@ const Player = ({
               )}
             </SpatialNavigationFocusableView>
 
-            <SpatialNavigationFocusableView
-              onSelect={() => onVolumeChange(-0.1)}
-            >
+            <SpatialNavigationFocusableView onSelect={onNext}>
               {({ isFocused }) => (
                 <Pressable
                   style={[
@@ -216,7 +168,9 @@ const Player = ({
               )}
             </SpatialNavigationFocusableView>
 
-            <SpatialNavigationFocusableView>
+            <SpatialNavigationFocusableView
+              onSelect={() => onVolumeChange(-0.1)}
+            >
               {({ isFocused }) => (
                 <Pressable
                   style={[
@@ -325,5 +279,104 @@ const Player = ({
     </View>
   </View>
 );
+
+const styles = StyleSheet.create({
+  playerColumn: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  playerArea: {
+    marginTop: 12,
+  },
+  metadataCard: {
+    marginTop: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    backgroundColor: "#1A1A1A",
+    borderWidth: 1,
+    borderColor: "#2A2A2A",
+  },
+  metadataTitle: {
+    fontSize: 20,
+    color: "#fff",
+    marginBottom: 4,
+  },
+  metadataSubtitle: {
+    fontSize: 16,
+    color: "#DDD",
+    marginBottom: 4,
+  },
+  metadataMeta: {
+    fontSize: 12,
+    color: "#AAA",
+  },
+  nowPlaying: {
+    fontSize: 18,
+    color: "#fff",
+    marginBottom: 6,
+  },
+  controlsMeta: {
+    fontSize: 12,
+    color: "#AAA",
+    marginBottom: 16,
+  },
+  playerControls: {
+    paddingHorizontal: 24,
+    paddingVertical: 18,
+    backgroundColor: "#1E1E1E",
+    borderTopWidth: 2,
+    borderTopColor: colorPrimaryGreen,
+    alignItems: "center",
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+  },
+  controlsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 18,
+  },
+  controlBtnRect: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: "#232323",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+  controlBtnRectWide: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: "#2F2F2F",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+  controlBtnFocused: {
+    borderColor: colorPrimaryGreen,
+    backgroundColor: "#2E2E2E",
+    transform: [{ scale: focusScale }],
+    shadowColor: "#4CAF50",
+    shadowOpacity: 0.7,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 8,
+  },
+  controlBtnDisabled: {
+    opacity: 0.4,
+  },
+  controlBtnActive: {
+    borderColor: colorPrimaryGreen,
+    backgroundColor: "#1E1E1E",
+  },
+  arabicText: {
+    textAlign: "right",
+    writingDirection: "rtl",
+  },
+});
 
 export default memo(Player);

@@ -1,10 +1,15 @@
 import React, { memo } from "react";
-import { FlatList, Pressable, Text, View } from "react-native";
+import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import type { FlatList as RNFlatList } from "react-native";
 import {
   SpatialNavigationFocusableView,
   SpatialNavigationView,
 } from "react-tv-space-navigation";
+import {
+  colorPrimaryGreen,
+  colorPrimaryGreenLight,
+  focusScale,
+} from "../constants/interaction-colors";
 
 const SURAH_ITEM_HEIGHT = 64;
 
@@ -16,21 +21,7 @@ type SurahItemData = {
   ayahCount: number;
 };
 
-type PlaylistStyles = {
-  playlistPanel: any;
-  playlistHeaderRow: any;
-  playlistTitle: any;
-  playlistBody: any;
-  playlistContent: any;
-  surahCard: any;
-  surahCardFocused: any;
-  surahCardSelected: any;
-  surahNumber: any;
-  surahName: any;
-};
-
 type PlaylistProps = {
-  styles: PlaylistStyles;
   playlistRef: React.RefObject<RNFlatList<SurahItemData> | null>;
   playlistData: SurahItemData[];
   selectedSurah: number | null;
@@ -41,11 +32,10 @@ type SurahItemProps = SurahItemData & {
   selected: boolean;
   preferredFocus: boolean;
   onPress: (id: number) => void;
-  styles: PlaylistStyles;
 };
 
 const SurahItem = memo(
-  ({ id, englishName, selected, onPress, styles }: SurahItemProps) => (
+  ({ id, englishName, selected, onPress }: SurahItemProps) => (
     <SpatialNavigationFocusableView onSelect={() => onPress(id)}>
       {({ isFocused }) => (
         <Pressable
@@ -69,7 +59,6 @@ const SurahItem = memo(
 );
 
 const Playlist = ({
-  styles,
   playlistRef,
   playlistData,
   selectedSurah,
@@ -107,7 +96,6 @@ const Playlist = ({
               selected={selectedSurah === item.id}
               preferredFocus={index === 0}
               onPress={onSurahPress}
-              styles={styles}
             />
           )}
         />
@@ -115,5 +103,75 @@ const Playlist = ({
     </View>
   </View>
 );
+
+const styles = StyleSheet.create({
+  playlistPanel: {
+    height: "100%",
+    marginLeft: 12,
+    width: 320,
+    backgroundColor: "#181818",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#262626",
+    overflow: "hidden",
+  },
+  playlistHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#262626",
+  },
+  playlistTitle: {
+    fontSize: 14,
+    color: "#fff",
+    fontWeight: "600",
+  },
+  playlistBody: {
+    flex: 1,
+  },
+  playlistContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+  },
+  surahCard: {
+    height: SURAH_ITEM_HEIGHT,
+    paddingHorizontal: 16,
+    marginBottom: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 12,
+    backgroundColor: "#181818",
+    borderWidth: 1,
+    borderColor: "#262626",
+  },
+  surahCardFocused: {
+    borderWidth: 2,
+    borderColor: colorPrimaryGreenLight,
+    transform: [{ scale: focusScale }],
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 8,
+  },
+  surahCardSelected: {
+    backgroundColor: colorPrimaryGreen,
+    borderColor: colorPrimaryGreen,
+  },
+  surahNumber: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#B0B0B0",
+    marginRight: 12,
+  },
+  surahName: {
+    fontSize: 14,
+    color: "#fff",
+    flexShrink: 1,
+  },
+});
 
 export default memo(Playlist);
