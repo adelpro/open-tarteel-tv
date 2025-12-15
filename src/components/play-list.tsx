@@ -49,8 +49,21 @@ const SurahItem = memo(
           accessibilityLabel={`Surah ${englishName} number ${id}`}
           onPress={() => onPress(id)}
         >
-          <Text style={styles.surahNumber}>{id}</Text>
-          <Text style={styles.surahName} numberOfLines={1}>
+          <Text
+            style={[
+              styles.surahNumber,
+              isFocused && !selected && styles.surahNumberFocused,
+            ]}
+          >
+            {id}
+          </Text>
+          <Text
+            style={[
+              styles.surahName,
+              isFocused && !selected && styles.surahNameFocused,
+            ]}
+            numberOfLines={1}
+          >
             {englishName}
           </Text>
         </Pressable>
@@ -172,6 +185,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#fff",
     flexShrink: 1,
+  },
+  surahNumberFocused: {
+    color: "#fff",
+  },
+  surahNameFocused: {
+    color: colorPrimaryGreenLight,
   },
 });
 
