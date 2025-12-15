@@ -91,9 +91,7 @@ class AudioService {
       } else if ((this.player as any)?.remove) {
         (this.player as any).remove();
       }
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn("Audio unload error", e);
+    } catch {
     } finally {
       this.player = null;
       this.currentUrl = null;

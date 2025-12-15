@@ -101,16 +101,7 @@ export default function AppNavigator() {
 
   return (
     <SpatialNavigationRoot>
-      <NavigationContainer
-        ref={navigationRef}
-        linking={linking}
-        onStateChange={() => {
-          const route = navigationRef.getCurrentRoute();
-          if (route) {
-            console.log(`Navigation to ${route.name}`);
-          }
-        }}
-      >
+      <NavigationContainer ref={navigationRef} linking={linking}>
         <Stack.Navigator
           initialRouteName="Home"
           screenOptions={{

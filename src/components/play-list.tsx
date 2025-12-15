@@ -48,37 +48,40 @@ const SurahItem = memo(
     styles,
   }: SurahItemProps) => (
     <SpatialNavigationFocusableView onSelect={() => onPress(id)}>
-      {({ isFocused }) => (
-        <Pressable
-          style={[
-            styles.surahCard,
-            selected && styles.surahCardSelected,
-            isFocused && styles.surahCardFocused,
-          ]}
-          hasTVPreferredFocus={preferredFocus}
-          accessibilityRole="button"
-          accessibilityLabel={`Surah ${englishName} number ${id}`}
-          onPress={() => onPress(id)}
-        >
-          <Text
+      {({ isFocused }) => {
+        return (
+          <Pressable
             style={[
-              styles.surahNumber,
-              isFocused && !selected && styles.surahNumberFocused,
+              styles.surahCard,
+              selected && styles.surahCardSelected,
+              isFocused && styles.surahCardFocused,
             ]}
+            hasTVPreferredFocus={preferredFocus}
+            accessibilityRole="button"
+            accessibilityLabel={`Surah ${englishName} number ${id}`}
+            onPress={() => onPress(id)}
+            focusable
           >
-            {id}
-          </Text>
-          <Text
-            style={[
-              styles.surahName,
-              isFocused && !selected && styles.surahNameFocused,
-            ]}
-            numberOfLines={1}
-          >
-            {englishName}
-          </Text>
-        </Pressable>
-      )}
+            <Text
+              style={[
+                styles.surahNumber,
+                isFocused && !selected && styles.surahNumberFocused,
+              ]}
+            >
+              {id}
+            </Text>
+            <Text
+              style={[
+                styles.surahName,
+                isFocused && !selected && styles.surahNameFocused,
+              ]}
+              numberOfLines={1}
+            >
+              {englishName}
+            </Text>
+          </Pressable>
+        );
+      }}
     </SpatialNavigationFocusableView>
   )
 );
@@ -89,9 +92,9 @@ type PlaylistProps = {
 
 const Playlist = ({ player }: PlaylistProps) => {
   const { playlistData, selectedSurah, handleSurahPress } = player;
-
   const isDark = useColorScheme() !== "light";
   const styles = createStyles(isDark);
+
   return (
     <View style={styles.playlistPanel}>
       <View style={styles.playlistHeaderRow}>
@@ -116,11 +119,7 @@ const Playlist = ({ player }: PlaylistProps) => {
             contentContainerStyle={styles.playlistContent}
             renderItem={({ item, index }) => (
               <SurahItem
-                id={item.id}
-                name={item.name}
-                englishName={item.englishName}
-                revelationType={item.revelationType}
-                ayahCount={item.ayahCount}
+                {...item}
                 selected={selectedSurah === item.id}
                 preferredFocus={index === 0}
                 onPress={handleSurahPress}
@@ -136,13 +135,12 @@ const Playlist = ({ player }: PlaylistProps) => {
 
 function createStyles(isDark: boolean) {
   const { cardBg, textPrimary, textSecondary, border } = getThemeColors(isDark);
-  const panelBg = cardBg;
   return StyleSheet.create({
     playlistPanel: {
       height: "100%",
       marginLeft: 12,
       width: 320,
-      backgroundColor: panelBg,
+      backgroundColor: cardBg,
       borderRadius: 12,
       borderWidth: 1,
       borderColor: border,
