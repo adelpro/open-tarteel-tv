@@ -1,14 +1,8 @@
-import React, { memo } from "react";
-import {
-  FlatList,
-  Pressable,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from "react-native";
+import React, { memo, useMemo, useRef, useEffect } from "react";
+import { StyleSheet, Text, useColorScheme, View } from "react-native";
 import {
   SpatialNavigationFocusableView,
+  SpatialNavigationVirtualizedList,
   SpatialNavigationView,
 } from "react-tv-space-navigation";
 import {
@@ -21,71 +15,6 @@ import type { PlayerState } from "../hooks/use-player";
 
 const SURAH_ITEM_HEIGHT = 64;
 
-type PlaylistStyles = ReturnType<typeof createStyles>;
-
-type SurahItemData = {
-  id: number;
-  name: string;
-  englishName: string;
-  revelationType: string;
-  ayahCount: number;
-};
-
-type SurahItemProps = SurahItemData & {
-  selected: boolean;
-  preferredFocus: boolean;
-  onPress: (id: number) => void;
-  styles: PlaylistStyles;
-};
-
-const SurahItem = memo(
-  ({
-    id,
-    englishName,
-    selected,
-    preferredFocus,
-    onPress,
-    styles,
-  }: SurahItemProps) => (
-    <SpatialNavigationFocusableView onSelect={() => onPress(id)}>
-      {({ isFocused }) => {
-        return (
-          <Pressable
-            style={[
-              styles.surahCard,
-              selected && styles.surahCardSelected,
-              isFocused && styles.surahCardFocused,
-            ]}
-            hasTVPreferredFocus={preferredFocus}
-            accessibilityRole="button"
-            accessibilityLabel={`Surah ${englishName} number ${id}`}
-            onPress={() => onPress(id)}
-            focusable
-          >
-            <Text
-              style={[
-                styles.surahNumber,
-                isFocused && !selected && styles.surahNumberFocused,
-              ]}
-            >
-              {id}
-            </Text>
-            <Text
-              style={[
-                styles.surahName,
-                isFocused && !selected && styles.surahNameFocused,
-              ]}
-              numberOfLines={1}
-            >
-              {englishName}
-            </Text>
-          </Pressable>
-        );
-      }}
-    </SpatialNavigationFocusableView>
-  )
-);
-
 type PlaylistProps = {
   player: PlayerState;
 };
@@ -95,6 +24,53 @@ const Playlist = ({ player }: PlaylistProps) => {
   const isDark = useColorScheme() !== "light";
   const styles = createStyles(isDark);
 
+  const memoizedData = useMemo(() => playlistData, [playlistData]);
+  const listRef = useRef<any>(null);
+
+  useEffect(() => {
+    const index = memoizedData.findIndex((s) => s.id === selectedSurah);
+    if (index >= 0 && listRef.current) {
+      listRef.current.focus(index);
+    }
+  }, [selectedSurah, memoizedData]);
+
+  const renderItem = ({ item }: { item: (typeof memoizedData)[0] }) => (
+    <SpatialNavigationFocusableView
+      onSelect={() => handleSurahPress(item.id)}
+      style={styles.surahCard}
+    >
+      {({ isFocused }) => (
+        <View
+          style={[
+            styles.surahCard,
+            selectedSurah === item.id && styles.surahCardSelected,
+            isFocused && styles.surahCardFocused,
+          ]}
+        >
+          <Text
+            style={[
+              styles.surahNumber,
+              isFocused &&
+                selectedSurah !== item.id &&
+                styles.surahNumberFocused,
+            ]}
+          >
+            {item.id}
+          </Text>
+          <Text
+            style={[
+              styles.surahName,
+              isFocused && selectedSurah !== item.id && styles.surahNameFocused,
+            ]}
+            numberOfLines={1}
+          >
+            {item.englishName}
+          </Text>
+        </View>
+      )}
+    </SpatialNavigationFocusableView>
+  );
+
   return (
     <View style={styles.playlistPanel}>
       <View style={styles.playlistHeaderRow}>
@@ -103,29 +79,14 @@ const Playlist = ({ player }: PlaylistProps) => {
 
       <View style={styles.playlistBody}>
         <SpatialNavigationView direction="vertical">
-          <FlatList
-            data={playlistData}
-            keyExtractor={(item) => item.id.toString()}
-            showsVerticalScrollIndicator={false}
-            getItemLayout={(_, index) => ({
-              length: SURAH_ITEM_HEIGHT,
-              offset: SURAH_ITEM_HEIGHT * index,
-              index,
-            })}
-            removeClippedSubviews={true}
-            initialNumToRender={8}
-            maxToRenderPerBatch={8}
-            windowSize={5}
-            contentContainerStyle={styles.playlistContent}
-            renderItem={({ item, index }) => (
-              <SurahItem
-                {...item}
-                selected={selectedSurah === item.id}
-                preferredFocus={index === 0}
-                onPress={handleSurahPress}
-                styles={styles}
-              />
-            )}
+          <SpatialNavigationVirtualizedList
+            ref={listRef}
+            data={memoizedData}
+            renderItem={renderItem}
+            itemSize={SURAH_ITEM_HEIGHT}
+            additionalItemsRendered={2}
+            orientation="vertical"
+            style={styles.playlistContent}
           />
         </SpatialNavigationView>
       </View>
@@ -134,7 +95,7 @@ const Playlist = ({ player }: PlaylistProps) => {
 };
 
 function createStyles(isDark: boolean) {
-  const { cardBg, textPrimary, textSecondary, border } = getThemeColors(isDark);
+  const { cardBg, textPrimary, textSecondary } = getThemeColors(isDark);
   return StyleSheet.create({
     playlistPanel: {
       height: "100%",
@@ -142,8 +103,6 @@ function createStyles(isDark: boolean) {
       width: 320,
       backgroundColor: cardBg,
       borderRadius: 12,
-      borderWidth: 1,
-      borderColor: border,
       overflow: "hidden",
     },
     playlistHeaderRow: {
@@ -152,8 +111,6 @@ function createStyles(isDark: boolean) {
       justifyContent: "space-between",
       paddingHorizontal: 16,
       paddingVertical: 10,
-      borderBottomWidth: 1,
-      borderBottomColor: border,
     },
     playlistTitle: {
       fontSize: 14,
@@ -165,19 +122,15 @@ function createStyles(isDark: boolean) {
     },
     playlistContent: {
       paddingTop: 8,
-      paddingHorizontal: 16,
       paddingBottom: 8,
+      paddingHorizontal: 0,
     },
     surahCard: {
       height: SURAH_ITEM_HEIGHT,
-      paddingHorizontal: 16,
-      marginBottom: 8,
       flexDirection: "row",
       alignItems: "center",
-      borderRadius: 12,
+      width: "100%",
       backgroundColor: cardBg,
-      borderWidth: 1,
-      borderColor: border,
     },
     surahCardFocused: {
       borderWidth: 2,
@@ -191,7 +144,6 @@ function createStyles(isDark: boolean) {
     },
     surahCardSelected: {
       backgroundColor: colorPrimaryGreen,
-      borderColor: colorPrimaryGreen,
     },
     surahNumber: {
       fontSize: 12,
@@ -208,7 +160,7 @@ function createStyles(isDark: boolean) {
       color: textPrimary,
     },
     surahNameFocused: {
-      color: colorPrimaryGreenLight,
+      color: colorPrimaryGreen,
     },
   });
 }
