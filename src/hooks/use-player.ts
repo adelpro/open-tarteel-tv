@@ -94,12 +94,16 @@ export function usePlayer() {
 
   const handlePlayPause = useCallback(async () => {
     try {
+      if (selectedSurah && !audioService.getCurrentUrl()) {
+        await handleSurahPress(selectedSurah);
+        return;
+      }
       await audioService.togglePlayPause();
       setIsPlaying(audioService.getIsPlaying());
     } catch (error) {
       console.error("Error toggling playback:", error);
     }
-  }, []);
+  }, [selectedSurah, handleSurahPress]);
 
   const handlePrevious = useCallback(async () => {
     if (!selectedSurah) return;
