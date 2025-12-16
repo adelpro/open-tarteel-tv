@@ -20,6 +20,7 @@ import {
 } from "../constants/interaction-colors";
 import { getThemeColors } from "../constants/theme";
 import type { PlayerState } from "../hooks/use-player";
+import MenuButton from "./menu-button";
 
 const isArabicText = (text: string) => /[\u0600-\u06FF]/.test(text);
 
@@ -114,8 +115,8 @@ const Player = ({ player }: PlayerProps) => {
           <AudioSpectrum playing={hasSelection && isPlaying} />
 
           <SpatialNavigationView
-            direction="horizontal"
             style={styles.controlsRow}
+            direction="horizontal"
           >
             {[
               { icon: "step-backward", onSelect: handlePrevious, size: 28 },
@@ -151,7 +152,9 @@ const Player = ({ player }: PlayerProps) => {
             ].map((btn, index) => (
               <SpatialNavigationFocusableView
                 key={index}
-                onSelect={btn.onSelect}
+                onSelect={() => {
+                  btn.onSelect();
+                }}
               >
                 {({ isFocused }) => (
                   <Pressable
@@ -252,7 +255,7 @@ function createStyles(isDark: boolean) {
     },
 
     controlBtnFocused: {
-      backgroundColor: "red",
+      backgroundColor: colorPrimaryGreenLight,
     },
     controlBtnDisabled: { opacity: 0.4 },
     controlBtnActive: {

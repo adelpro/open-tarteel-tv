@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useRef, useEffect } from "react";
+import React, { memo, useMemo, useEffect } from "react";
 import { StyleSheet, Text, useColorScheme, View } from "react-native";
 import {
   SpatialNavigationFocusableView,

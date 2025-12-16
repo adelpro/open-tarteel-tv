@@ -42,11 +42,6 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "expo-font",
-      "expo-audio",
-      "expo-video",
-      "@react-native-tvos/config-tv"
-    ]
+    "plugins": ["expo-font", "expo-audio", "@react-native-tvos/config-tv"]
   }
 }
