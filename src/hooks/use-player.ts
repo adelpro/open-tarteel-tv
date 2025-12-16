@@ -3,7 +3,7 @@ import { useRoute, useFocusEffect } from "@react-navigation/native";
 import { Reciter, Surah } from "../types";
 import { SURAHS } from "../constants/surahs";
 import { getAllReciters } from "../services/api";
-import { audioService } from "../services/audio-s-ervice";
+import { audioService } from "../services/audio-service";
 
 export function usePlayer() {
   const route = useRoute<any>();
