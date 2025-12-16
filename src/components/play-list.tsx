@@ -4,6 +4,7 @@ import {
   SpatialNavigationFocusableView,
   SpatialNavigationVirtualizedList,
   SpatialNavigationView,
+  SpatialNavigationVirtualizedListRef,
 } from "react-tv-space-navigation";
 import {
   colorPrimaryGreen,
@@ -17,7 +18,7 @@ const SURAH_ITEM_HEIGHT = 64;
 
 type PlaylistProps = {
   player: PlayerState;
-  listRef: React.RefObject<any>;
+  listRef: React.RefObject<SpatialNavigationVirtualizedListRef | null>;
 };
 
 const Playlist = ({ player, listRef }: PlaylistProps) => {

@@ -5,28 +5,26 @@ import Player from "../components/player";
 import Playlist from "../components/play-list";
 import { getThemeColors } from "../constants/theme";
 import { usePlayer } from "../hooks/use-player";
+import { SpatialNavigationVirtualizedListRef } from "react-tv-space-navigation";
 
 export default function PlayerScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme !== "light";
   const styles = createStyles(isDark);
-  const playlistRef = useRef<RNFlatList<any>>(null);
+  const playlistRef = useRef<SpatialNavigationVirtualizedListRef | null>(null);
 
   const player = usePlayer();
   const { playlistData, reciter, selectedSurah } = player;
 
   useEffect(() => {
-    if (!selectedSurah || !playlistRef.current) return;
+    if (!selectedSurah) return;
+
     const index = playlistData.findIndex((s) => s.id === selectedSurah);
-    if (index === -1) return;
-    try {
-      playlistRef.current.scrollToIndex({
-        index,
-        animated: true,
-        viewPosition: 0.05,
-      });
-    } catch {}
-  }, [selectedSurah, playlistData]);
+
+    if (index >= 0) {
+      playlistRef.current?.focus(index);
+    }
+  }, [playlistData, selectedSurah]);
 
   if (!reciter) {
     return (

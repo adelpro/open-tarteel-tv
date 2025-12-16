@@ -38,11 +38,7 @@ class AudioService {
             this.isPlaying = status.playing;
             if (status.didJustFinish) {
               this.isPlaying = false;
-              if (this.repeat && this.currentUrl) {
-                this.loadAndPlay(this.currentUrl);
-              } else if (this.onPlaybackEnded) {
-                this.onPlaybackEnded();
-              }
+              this.onPlaybackEnded?.();
             }
           }
         });

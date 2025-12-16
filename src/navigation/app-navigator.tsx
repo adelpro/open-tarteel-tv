@@ -10,10 +10,10 @@ import {
 } from "react-tv-space-navigation";
 import { useTVEventHandler, useColorScheme } from "react-native";
 
-import HomeScreen from "../screens/HomeScreen";
-import PlayerScreen from "../screens/PlayerScreen";
-import AboutScreen from "../screens/AboutScreen";
-import PrivacyScreen from "../screens/PrivacyScreen";
+import HomeScreen from "../screens/home-acreen";
+import PlayerScreen from "../screens/player-screen";
+import AboutScreen from "../screens/about-screen";
+import PrivacyScreen from "../screens/privacy-screen";
 
 const Stack = createNativeStackNavigator();
 

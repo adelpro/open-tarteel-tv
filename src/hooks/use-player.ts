@@ -3,7 +3,7 @@ import { useRoute, useFocusEffect } from "@react-navigation/native";
 import { Reciter, Surah } from "../types";
 import { SURAHS } from "../constants/surahs";
 import { getAllReciters } from "../services/api";
-import { audioService } from "../services/AudioService";
+import { audioService } from "../services/audio-s-ervice";
 
 export function usePlayer() {
   const route = useRoute<any>();
@@ -23,12 +23,6 @@ export function usePlayer() {
     () => SURAHS.slice().sort((a, b) => a.id - b.id),
     []
   );
-
-  useEffect(() => {
-    return () => {
-      audioService.unload();
-    };
-  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -52,7 +46,7 @@ export function usePlayer() {
       if (audioUrl) {
         try {
           await audioService.loadAndPlay(audioUrl);
-          setIsPlaying(true);
+          setIsPlaying(audioService.getIsPlaying());
         } catch (error) {
           console.error("Error playing audio:", error);
         }
@@ -123,13 +117,17 @@ export function usePlayer() {
 
   useEffect(() => {
     audioService.setOnPlaybackEnded(() => {
-      setIsPlaying(false);
-      handleNext();
+      if (repeat && selectedSurah) {
+        handleSurahPress(selectedSurah);
+      } else {
+        handleNext();
+      }
     });
+
     return () => {
       audioService.setOnPlaybackEnded(null);
     };
-  }, [handleNext]);
+  }, [handleNext, handleSurahPress, repeat, selectedSurah]);
 
   const handleVolumeChange = useCallback(
     (delta: number) => {
