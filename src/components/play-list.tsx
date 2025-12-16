@@ -28,6 +28,14 @@ const Playlist = ({ player, listRef }: PlaylistProps) => {
 
   const memoizedData = useMemo(() => playlistData, [playlistData]);
 
+  // Auto-select the first surah if none is selected
+  useEffect(() => {
+    if (selectedSurah === null && memoizedData.length > 0) {
+      handleSurahPress(memoizedData[0].id);
+    }
+  }, [selectedSurah, memoizedData, handleSurahPress]);
+
+  // Auto-focus the selected surah
   useEffect(() => {
     const index = memoizedData.findIndex((s) => s.id === selectedSurah);
     if (index >= 0 && listRef.current) {

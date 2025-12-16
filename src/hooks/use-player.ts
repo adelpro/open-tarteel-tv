@@ -1,169 +1,233 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRoute, useFocusEffect } from "@react-navigation/native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRoute, useFocusEffect, RouteProp } from "@react-navigation/native";
+import { AudioModule, createAudioPlayer, AudioPlayer } from "expo-audio";
 import { Reciter, Surah } from "../types";
 import { SURAHS } from "../constants/surahs";
 import { getAllReciters } from "../services/api";
-import { audioService } from "../services/audio-service";
+
+type PlayerScreenRouteProp = RouteProp<
+  { PlayerScreen: { reciter?: Reciter; reciterId?: number; surahId?: number } },
+  "PlayerScreen"
+>;
 
 export function usePlayer() {
-  const route = useRoute<any>();
+  const route = useRoute<PlayerScreenRouteProp>();
+
+  /** Audio player ref */
+  const playerRef = useRef<AudioPlayer | null>(null);
+  const currentUrlRef = useRef<string | null>(null);
+
+  const [position, setPosition] = useState(0);
+  const [duration, setDuration] = useState(0);
+
+  /** Core state */
   const [reciter, setReciter] = useState<Reciter | null>(
     route.params?.reciter ?? null
   );
   const [selectedSurah, setSelectedSurah] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(1);
-  const [repeat, setRepeat] = useState(false);
-  const [muted, setMuted] = useState(false);
-  const [previousVolume, setPreviousVolume] = useState(1);
   const [initialSurahFromDeepLink, setInitialSurahFromDeepLink] =
     useState(false);
 
+  /** Volume & mute */
+  const [volume, setVolume] = useState(1);
+  const [muted, setMuted] = useState(false);
+  const [previousVolume, setPreviousVolume] = useState(1);
+
+  /** Playback options */
+  const [repeat, setRepeat] = useState(false);
+
+  /** Sorted playlist */
   const playlistData: Surah[] = useMemo(
     () => SURAHS.slice().sort((a, b) => a.id - b.id),
     []
   );
 
-  useFocusEffect(
-    useCallback(() => {
-      return () => {
-        audioService.unload();
-      };
-    }, [])
-  );
+  /** Unload player */
+  const unloadAudio = useCallback(async () => {
+    if (!playerRef.current) return;
 
-  const handleSurahPress = useCallback(
-    async (surahId: number, reciterOverride?: Reciter | null) => {
-      const effectiveReciter = reciterOverride ?? reciter;
-      if (!effectiveReciter) {
-        return;
-      }
-      setSelectedSurah(surahId);
-      const audioUrl = effectiveReciter.moshaf.playlist.find(
-        (item) => parseInt(item.surahId) === surahId
-      )?.link;
+    try {
+      await playerRef.current.remove();
+    } catch (err) {
+      console.error("[usePlayer] Error unloading player:", err);
+    } finally {
+      playerRef.current = null;
+      currentUrlRef.current = null;
+      setIsPlaying(false);
+    }
+  }, []);
 
-      if (audioUrl) {
-        try {
-          await audioService.loadAndPlay(audioUrl);
-          setIsPlaying(audioService.getIsPlaying());
-        } catch (error) {
-          console.error("Error playing audio:", error);
+  /** Load and play audio */
+  const loadAndPlay = useCallback(
+    async (url: string) => {
+      try {
+        if (currentUrlRef.current === url && playerRef.current) {
+          await playerRef.current.play();
+          setIsPlaying(true);
+          return;
         }
+
+        await unloadAudio();
+
+        if (AudioModule?.setAudioModeAsync) {
+          await AudioModule.setAudioModeAsync({
+            playsInSilentModeIOS: true,
+            staysActiveInBackground: true,
+            shouldDuckAndroid: true,
+          } as any);
+        }
+
+        const player = createAudioPlayer({ uri: url });
+        playerRef.current = player;
+        currentUrlRef.current = url;
+
+        player.addListener?.("playbackStatusUpdate", (status) => {
+          if (!status) return;
+
+          setPosition(status.currentTime ?? 0);
+          setDuration(status.duration ?? 0);
+          setIsPlaying(status.playing);
+
+          if (status.didJustFinish) {
+            setIsPlaying(false);
+            onPlaybackEndRef.current?.();
+          }
+        });
+
+        if (player.volume !== undefined) player.volume = volume;
+
+        await player.play();
+        setIsPlaying(true);
+      } catch (err) {
+        console.error("[usePlayer] Error playing audio:", err);
+        throw err;
       }
     },
-    [reciter]
+    [unloadAudio, volume]
   );
 
+  /** Handle deep linking */
   useEffect(() => {
-    const maybeLoadFromDeepLink = async () => {
-      const reciterId: number | undefined = route.params?.reciterId;
-      const surahId: number | undefined = route.params?.surahId;
+    const loadFromDeepLink = async () => {
+      const reciterId = route.params?.reciterId;
+      const surahId = route.params?.surahId;
+
       if (!reciter && reciterId) {
-        const all = await getAllReciters();
-        const found = all.find((r) => r.id === reciterId) || null;
-        if (found) {
-          setReciter(found);
+        const reciters = await getAllReciters();
+        const foundReciter = reciters.find((r) => r.id === reciterId) || null;
+        if (foundReciter) {
+          setReciter(foundReciter);
           if (surahId) {
-            await handleSurahPress(surahId, found);
+            await handleSurahPress(surahId, foundReciter);
             setInitialSurahFromDeepLink(true);
           }
         }
       }
     };
-    maybeLoadFromDeepLink();
-  }, [reciter, route, handleSurahPress]);
+    loadFromDeepLink();
+  }, [reciter, route]);
 
+  /** Auto-select first surah if none selected */
   useEffect(() => {
-    if (!reciter || selectedSurah !== null || initialSurahFromDeepLink) {
-      return;
-    }
-    if (!playlistData.length) {
-      return;
-    }
-    const first = playlistData[0];
-    setSelectedSurah(first.id);
-    setIsPlaying(false);
+    if (!reciter || selectedSurah !== null || initialSurahFromDeepLink) return;
+    if (!playlistData.length) return;
+    setSelectedSurah(playlistData[0].id);
   }, [reciter, selectedSurah, initialSurahFromDeepLink, playlistData]);
 
-  const handlePlayPause = useCallback(async () => {
-    try {
-      if (selectedSurah && !audioService.getCurrentUrl()) {
-        await handleSurahPress(selectedSurah);
-        return;
-      }
-      await audioService.togglePlayPause();
-      setIsPlaying(audioService.getIsPlaying());
-    } catch (error) {
-      console.error("Error toggling playback:", error);
-    }
-  }, [selectedSurah, handleSurahPress]);
+  /** Play specific surah */
+  const handleSurahPress = useCallback(
+    async (surahId: number, reciterOverride?: Reciter | null) => {
+      const effectiveReciter = reciterOverride ?? reciter;
+      if (!effectiveReciter) return;
 
+      setSelectedSurah(surahId);
+
+      const audioUrl = effectiveReciter.moshaf.playlist.find(
+        (item) => parseInt(item.surahId) === surahId
+      )?.link;
+      if (!audioUrl)
+        return console.warn(`[usePlayer] No audio URL for surah ${surahId}`);
+
+      await loadAndPlay(audioUrl);
+    },
+    [reciter, loadAndPlay]
+  );
+
+  /** Play/pause */
+  const handlePlayPause = useCallback(async () => {
+    if (!selectedSurah) return;
+    if (!currentUrlRef.current) return handleSurahPress(selectedSurah);
+
+    if (isPlaying) {
+      await playerRef.current?.pause();
+      setIsPlaying(false);
+    } else {
+      await playerRef.current?.play();
+      setIsPlaying(true);
+    }
+  }, [selectedSurah, isPlaying, handleSurahPress]);
+
+  /** Previous/Next */
   const handlePrevious = useCallback(async () => {
     if (!selectedSurah) return;
-    const currentIndex = playlistData.findIndex((s) => s.id === selectedSurah);
-    if (currentIndex > 0) {
-      await handleSurahPress(playlistData[currentIndex - 1].id);
-    }
+    const index = playlistData.findIndex((s) => s.id === selectedSurah);
+    if (index > 0) await handleSurahPress(playlistData[index - 1].id);
   }, [selectedSurah, playlistData, handleSurahPress]);
 
   const handleNext = useCallback(async () => {
     if (!selectedSurah) return;
-    const currentIndex = playlistData.findIndex((s) => s.id === selectedSurah);
-    if (currentIndex < playlistData.length - 1) {
-      await handleSurahPress(playlistData[currentIndex + 1].id);
-    }
+    const index = playlistData.findIndex((s) => s.id === selectedSurah);
+    if (index < playlistData.length - 1)
+      await handleSurahPress(playlistData[index + 1].id);
   }, [selectedSurah, playlistData, handleSurahPress]);
 
+  /** Auto-play next or repeat */
+  const onPlaybackEndRef = useRef<(() => void) | null>(null);
   useEffect(() => {
-    audioService.setOnPlaybackEnded(() => {
-      if (repeat && selectedSurah) {
-        handleSurahPress(selectedSurah);
-      } else {
-        handleNext();
-      }
-    });
-
-    return () => {
-      audioService.setOnPlaybackEnded(null);
+    onPlaybackEndRef.current = () => {
+      if (repeat && selectedSurah) handleSurahPress(selectedSurah);
+      else handleNext();
     };
-  }, [handleNext, handleSurahPress, repeat, selectedSurah]);
+  }, [repeat, selectedSurah, handleSurahPress, handleNext]);
 
+  /** Volume control */
   const handleVolumeChange = useCallback(
     (delta: number) => {
-      const next = Math.min(1, Math.max(0, volume + delta));
-      setVolume(next);
-      audioService.setVolume(next);
-      if (next === 0 && !muted) {
+      const newVolume = Math.min(1, Math.max(0, volume + delta));
+      setVolume(newVolume);
+
+      if (playerRef.current) playerRef.current.volume = newVolume;
+
+      if (newVolume === 0 && !muted) {
         setMuted(true);
         setPreviousVolume(volume);
-      }
-      if (next > 0 && muted) {
+      } else if (newVolume > 0 && muted) {
         setMuted(false);
       }
     },
     [volume, muted]
   );
 
+  /** Toggle mute */
   const handleToggleMute = useCallback(() => {
     if (!muted) {
       setPreviousVolume(volume);
-      setMuted(true);
       setVolume(0);
-      audioService.setVolume(0);
+      setMuted(true);
+      if (playerRef.current) playerRef.current.volume = 0;
     } else {
-      const restore = previousVolume;
       setMuted(false);
-      setVolume(restore);
-      audioService.setVolume(restore);
+      setVolume(previousVolume);
+      if (playerRef.current) playerRef.current.volume = previousVolume;
     }
   }, [muted, previousVolume, volume]);
 
-  const handleToggleRepeat = useCallback(() => {
-    const next = !repeat;
-    setRepeat(next);
-    audioService.setRepeat(next);
-  }, [repeat]);
+  /** Toggle repeat */
+  const handleToggleRepeat = useCallback(() => setRepeat((prev) => !prev), []);
+
+  /** Clean up on screen blur */
+  useFocusEffect(useCallback(() => () => unloadAudio(), [unloadAudio]));
 
   return {
     playlistData,
@@ -171,8 +235,10 @@ export function usePlayer() {
     selectedSurah,
     isPlaying,
     volume,
-    repeat,
     muted,
+    repeat,
+    position,
+    duration,
     handleSurahPress,
     handlePlayPause,
     handlePrevious,

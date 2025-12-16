@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React, { memo, useMemo } from "react";
 import {
   Pressable,
   StyleSheet,
@@ -14,21 +14,18 @@ import { FontAwesome } from "@expo/vector-icons";
 import AudioSpectrum from "./audio-spectrum";
 import {
   colorPrimaryGreen,
-  colorPrimaryGreenDark,
   colorPrimaryGreenLight,
-  focusScale,
 } from "../constants/interaction-colors";
 import { getThemeColors } from "../constants/theme";
 import type { PlayerState } from "../hooks/use-player";
-import MenuButton from "./menu-button";
 
 const isArabicText = (text: string) => /[\u0600-\u06FF]/.test(text);
 
 type PlayerProps = { player: PlayerState };
 
-const Player = ({ player }: PlayerProps) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme !== "light";
+export const Player = ({ player }: PlayerProps) => {
+  const isDark = useColorScheme() !== "light";
+  const styles = createStyles(isDark);
 
   const {
     playlistData,
@@ -38,6 +35,8 @@ const Player = ({ player }: PlayerProps) => {
     volume,
     repeat,
     muted,
+    position,
+    duration,
     handlePlayPause,
     handlePrevious,
     handleNext,
@@ -48,12 +47,23 @@ const Player = ({ player }: PlayerProps) => {
 
   const hasSelection = selectedSurah !== null;
   const currentSurah = hasSelection
-    ? playlistData.find((s) => s.id === selectedSurah)
+    ? playlistData.find((s) => s.id === selectedSurah) ?? null
     : null;
-  const controlsDisabled = !hasSelection;
-  const isCurrentSurahNameArabic = isArabicText(currentSurah?.name ?? "");
 
-  const styles = createStyles(isDark);
+  const isCurrentSurahNameArabic = useMemo(
+    () => isArabicText(currentSurah?.name ?? ""),
+    [currentSurah?.name]
+  );
+
+  const formatTime = (sec: number) => {
+    const m = Math.floor(sec / 60)
+      .toString()
+      .padStart(2, "0");
+    const s = Math.floor(sec % 60)
+      .toString()
+      .padStart(2, "0");
+    return `${m}:${s}`;
+  };
 
   if (!reciter) {
     return (
@@ -105,6 +115,30 @@ const Player = ({ player }: PlayerProps) => {
               ? `Now Playing: ${currentSurah?.englishName ?? ""}`
               : "Select a surah to start playing"}
           </Text>
+
+          <AudioSpectrum playing={hasSelection && isPlaying} />
+
+          {/* Progress bar */}
+          {hasSelection && (
+            <View style={styles.progressContainer}>
+              <View style={styles.progressBarBackground}>
+                <View
+                  style={[
+                    styles.progressBarForeground,
+                    {
+                      width: duration
+                        ? `${(position / duration) * 100}%`
+                        : "0%",
+                    },
+                  ]}
+                />
+              </View>
+              <Text style={styles.progressText}>
+                {formatTime(position)} / {formatTime(duration)}
+              </Text>
+            </View>
+          )}
+
           <Text style={styles.controlsMeta}>
             {hasSelection
               ? `Volume ${Math.round(volume * 100)}% ${
@@ -112,7 +146,6 @@ const Player = ({ player }: PlayerProps) => {
                 } • Repeat ${repeat ? "On" : "Off"}`
               : "Playback controls will be enabled once a surah is selected"}
           </Text>
-          <AudioSpectrum playing={hasSelection && isPlaying} />
 
           <SpatialNavigationView
             style={styles.controlsRow}
@@ -149,36 +182,30 @@ const Player = ({ player }: PlayerProps) => {
                 size: 22,
                 active: repeat,
               },
-            ].map((btn, index) => (
+            ].map((btn) => (
               <SpatialNavigationFocusableView
-                key={index}
-                onSelect={() => {
-                  btn.onSelect();
-                }}
+                key={btn.icon}
+                onSelect={btn.onSelect}
               >
                 {({ isFocused }) => (
                   <Pressable
-                    onPress={btn.onSelect}
-                    focusable
                     accessibilityRole="button"
-                    disabled={controlsDisabled}
+                    disabled={!hasSelection}
                     style={[
                       styles.controlBtn,
                       btn.wide
                         ? styles.controlBtnRectWide
                         : styles.controlBtnRect,
                       btn.active && styles.controlBtnActive,
-                      isFocused &&
-                        !controlsDisabled &&
-                        styles.controlBtnFocused,
-                      controlsDisabled && styles.controlBtnDisabled,
+                      isFocused && styles.controlBtnFocused,
+                      !hasSelection && styles.controlBtnDisabled,
                     ]}
                   >
                     <FontAwesome
                       name={btn.icon as any}
                       size={btn.size}
                       color={
-                        btn.active || (isFocused && !controlsDisabled)
+                        btn.active || (isFocused && hasSelection)
                           ? colorPrimaryGreen
                           : "#fff"
                       }
@@ -216,7 +243,7 @@ function createStyles(isDark: boolean) {
     metadataSubtitle: { fontSize: 16, color: textSecondary, marginBottom: 4 },
     metadataMeta: { fontSize: 12, color: textSecondary },
     nowPlaying: { fontSize: 18, color: textPrimary, marginBottom: 6 },
-    controlsMeta: { fontSize: 12, color: textSecondary, marginBottom: 16 },
+    controlsMeta: { fontSize: 12, color: textSecondary, marginBottom: 8 },
     playerControls: {
       paddingHorizontal: 24,
       paddingVertical: 18,
@@ -238,11 +265,7 @@ function createStyles(isDark: boolean) {
       borderColor: "transparent",
       padding: 0,
     },
-
-    controlBtn: {
-      marginHorizontal: 8,
-    },
-
+    controlBtn: { marginHorizontal: 8 },
     controlBtnRect: {
       width: 52,
       height: 52,
@@ -253,10 +276,7 @@ function createStyles(isDark: boolean) {
       borderWidth: 2,
       borderColor: "transparent",
     },
-
-    controlBtnFocused: {
-      backgroundColor: colorPrimaryGreenLight,
-    },
+    controlBtnFocused: { backgroundColor: colorPrimaryGreenLight },
     controlBtnDisabled: { opacity: 0.4 },
     controlBtnActive: {
       borderColor: colorPrimaryGreen,
@@ -264,6 +284,25 @@ function createStyles(isDark: boolean) {
     },
     arabicText: { textAlign: "right", writingDirection: "rtl" },
     controlsRow: { flexDirection: "row", alignItems: "center" },
+
+    progressContainer: { width: "100%", marginVertical: 6 },
+    progressBarBackground: {
+      height: 4,
+      backgroundColor: "#555",
+      borderRadius: 2,
+      overflow: "hidden",
+    },
+    progressBarForeground: {
+      height: 4,
+      backgroundColor: colorPrimaryGreen,
+      borderRadius: 2,
+    },
+    progressText: {
+      marginTop: 4,
+      fontSize: 12,
+      color: textSecondary,
+      textAlign: "right",
+    },
   });
 }
 
