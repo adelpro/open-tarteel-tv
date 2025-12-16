@@ -6,6 +6,7 @@ class AudioService {
   private isPlaying: boolean = false;
   private volume: number = 1;
   private repeat: boolean = false;
+  private onPlaybackEnded: (() => void) | null = null;
 
   async loadAndPlay(url: string): Promise<void> {
     try {
@@ -39,6 +40,8 @@ class AudioService {
               this.isPlaying = false;
               if (this.repeat && this.currentUrl) {
                 this.loadAndPlay(this.currentUrl);
+              } else if (this.onPlaybackEnded) {
+                this.onPlaybackEnded();
               }
             }
           }
@@ -126,6 +129,10 @@ class AudioService {
 
   getRepeat(): boolean {
     return this.repeat;
+  }
+
+  setOnPlaybackEnded(callback: (() => void) | null): void {
+    this.onPlaybackEnded = callback;
   }
 }
 

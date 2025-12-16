@@ -121,6 +121,16 @@ export function usePlayer() {
     }
   }, [selectedSurah, playlistData, handleSurahPress]);
 
+  useEffect(() => {
+    audioService.setOnPlaybackEnded(() => {
+      setIsPlaying(false);
+      handleNext();
+    });
+    return () => {
+      audioService.setOnPlaybackEnded(null);
+    };
+  }, [handleNext]);
+
   const handleVolumeChange = useCallback(
     (delta: number) => {
       const next = Math.min(1, Math.max(0, volume + delta));
