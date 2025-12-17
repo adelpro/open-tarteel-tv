@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
+  DefaultFocus,
   SpatialNavigationScrollView,
   SpatialNavigationView,
 } from "react-tv-space-navigation";
@@ -208,12 +209,14 @@ export default function HomeScreen() {
       <SpatialNavigationScrollView>
         <View style={styles.content}>
           <View style={styles.filterRow}>
-            <FilterChip
-              label="All"
-              selected={selectedRiwaya === "all"}
-              onPress={() => setSelectedRiwaya("all")}
-              styles={styles}
-            />
+            <DefaultFocus>
+              <FilterChip
+                label="All"
+                selected={selectedRiwaya === "all"}
+                onPress={() => setSelectedRiwaya("all")}
+                styles={styles}
+              />
+            </DefaultFocus>
             <FilterChip
               label="Hafs"
               selected={selectedRiwaya === Riwaya.HAFS_A_ASIM}
