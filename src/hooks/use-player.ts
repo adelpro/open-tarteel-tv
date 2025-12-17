@@ -29,11 +29,6 @@ export function usePlayer() {
   const [initialSurahFromDeepLink, setInitialSurahFromDeepLink] =
     useState(false);
 
-  /** Volume & mute */
-  const [volume, setVolume] = useState(1);
-  const [muted, setMuted] = useState(false);
-  const [previousVolume, setPreviousVolume] = useState(1);
-
   /** Playback options */
   const [repeat, setRepeat] = useState(false);
 
@@ -95,8 +90,6 @@ export function usePlayer() {
           }
         });
 
-        if (player.volume !== undefined) player.volume = volume;
-
         await player.play();
         setIsPlaying(true);
       } catch (err) {
@@ -104,7 +97,7 @@ export function usePlayer() {
         throw err;
       }
     },
-    [unloadAudio, volume]
+    [unloadAudio]
   );
 
   /** Handle deep linking */
@@ -191,38 +184,6 @@ export function usePlayer() {
     };
   }, [repeat, selectedSurah, handleSurahPress, handleNext]);
 
-  /** Volume control */
-  const handleVolumeChange = useCallback(
-    (delta: number) => {
-      const newVolume = Math.min(1, Math.max(0, volume + delta));
-      setVolume(newVolume);
-
-      if (playerRef.current) playerRef.current.volume = newVolume;
-
-      if (newVolume === 0 && !muted) {
-        setMuted(true);
-        setPreviousVolume(volume);
-      } else if (newVolume > 0 && muted) {
-        setMuted(false);
-      }
-    },
-    [volume, muted]
-  );
-
-  /** Toggle mute */
-  const handleToggleMute = useCallback(() => {
-    if (!muted) {
-      setPreviousVolume(volume);
-      setVolume(0);
-      setMuted(true);
-      if (playerRef.current) playerRef.current.volume = 0;
-    } else {
-      setMuted(false);
-      setVolume(previousVolume);
-      if (playerRef.current) playerRef.current.volume = previousVolume;
-    }
-  }, [muted, previousVolume, volume]);
-
   /** Toggle repeat */
   const handleToggleRepeat = useCallback(() => setRepeat((prev) => !prev), []);
 
@@ -234,8 +195,6 @@ export function usePlayer() {
     reciter,
     selectedSurah,
     isPlaying,
-    volume,
-    muted,
     repeat,
     position,
     duration,
@@ -243,8 +202,7 @@ export function usePlayer() {
     handlePlayPause,
     handlePrevious,
     handleNext,
-    handleVolumeChange,
-    handleToggleMute,
+
     handleToggleRepeat,
   };
 }

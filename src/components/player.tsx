@@ -32,18 +32,38 @@ export const Player = ({ player }: PlayerProps) => {
     reciter,
     selectedSurah,
     isPlaying,
-    volume,
     repeat,
-    muted,
     position,
     duration,
     handlePlayPause,
     handlePrevious,
     handleNext,
-    handleVolumeChange,
-    handleToggleMute,
     handleToggleRepeat,
   } = player;
+
+  const PLAYER_CONTROLS = [
+    {
+      icon: "step-backward",
+      onSelect: handlePrevious,
+      size: 22,
+      key: "backward",
+    },
+    {
+      icon: isPlaying ? "pause" : "play",
+      onSelect: handlePlayPause,
+      size: 28,
+      wide: true,
+      key: "play-pause",
+    },
+    { icon: "step-forward", onSelect: handleNext, size: 28, key: "forward" },
+    {
+      icon: "repeat",
+      onSelect: handleToggleRepeat,
+      size: 22,
+      active: repeat,
+      key: "repeat",
+    },
+  ];
 
   const hasSelection = selectedSurah !== null;
   const currentSurah = hasSelection
@@ -139,58 +159,20 @@ export const Player = ({ player }: PlayerProps) => {
             </View>
           )}
 
-          <Text style={styles.controlsMeta}>
-            {hasSelection
-              ? `Volume ${Math.round(volume * 100)}% ${
-                  muted ? "(Muted)" : ""
-                } • Repeat ${repeat ? "On" : "Off"}`
-              : "Playback controls will be enabled once a surah is selected"}
-          </Text>
-
           <SpatialNavigationView
             style={styles.controlsRow}
             direction="horizontal"
           >
-            {[
-              { icon: "step-backward", onSelect: handlePrevious, size: 28 },
-              {
-                icon: isPlaying ? "pause" : "play",
-                onSelect: handlePlayPause,
-                size: 28,
-                wide: true,
-              },
-              { icon: "step-forward", onSelect: handleNext, size: 28 },
-              {
-                icon: "volume-down",
-                onSelect: () => handleVolumeChange(-0.1),
-                size: 24,
-              },
-              {
-                icon: "volume-up",
-                onSelect: () => handleVolumeChange(0.1),
-                size: 24,
-              },
-              {
-                icon: "volume-off",
-                onSelect: handleToggleMute,
-                size: 24,
-                active: muted,
-              },
-              {
-                icon: "repeat",
-                onSelect: handleToggleRepeat,
-                size: 22,
-                active: repeat,
-              },
-            ].map((btn) => (
+            {PLAYER_CONTROLS.map((btn) => (
               <SpatialNavigationFocusableView
-                key={btn.icon}
+                key={btn.key}
                 onSelect={btn.onSelect}
               >
                 {({ isFocused }) => (
                   <Pressable
                     accessibilityRole="button"
-                    disabled={!hasSelection}
+                    key={btn.key}
+                    //disabled={!hasSelection}
                     style={[
                       styles.controlBtn,
                       btn.wide
@@ -198,7 +180,7 @@ export const Player = ({ player }: PlayerProps) => {
                         : styles.controlBtnRect,
                       btn.active && styles.controlBtnActive,
                       isFocused && styles.controlBtnFocused,
-                      !hasSelection && styles.controlBtnDisabled,
+                      /*  !hasSelection && styles.controlBtnDisabled, */
                     ]}
                   >
                     <FontAwesome
