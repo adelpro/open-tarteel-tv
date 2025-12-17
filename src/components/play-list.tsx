@@ -1,15 +1,15 @@
-import React, { memo, useMemo, useEffect } from "react";
+import React, { memo, useEffect, useMemo } from "react";
 import { StyleSheet, Text, useColorScheme, View } from "react-native";
 import {
   SpatialNavigationFocusableView,
   SpatialNavigationVirtualizedList,
-  SpatialNavigationView,
   SpatialNavigationVirtualizedListRef,
+  SpatialNavigationView,
 } from "react-tv-space-navigation";
 import {
   colorPrimaryGreen,
+  colorPrimaryGreenDark,
   colorPrimaryGreenLight,
-  focusScale,
 } from "../constants/interaction-colors";
 import { getThemeColors } from "../constants/theme";
 import type { PlayerState } from "../hooks/use-player";
@@ -17,66 +17,74 @@ import type { PlayerState } from "../hooks/use-player";
 const SURAH_ITEM_HEIGHT = 64;
 
 type PlaylistProps = {
-  player: PlayerState;
   listRef: React.RefObject<SpatialNavigationVirtualizedListRef | null>;
+  player: PlayerState;
 };
 
 const Playlist = ({ player, listRef }: PlaylistProps) => {
-  const { playlistData, selectedSurah, handleSurahPress } = player;
+  const { handleSurahPress, playlistData, selectedSurah } = player;
   const isDark = useColorScheme() !== "light";
   const styles = createStyles(isDark);
 
   const memoizedData = useMemo(() => playlistData, [playlistData]);
 
-  // Auto-select the first surah if none is selected
   useEffect(() => {
     if (selectedSurah === null && memoizedData.length > 0) {
       handleSurahPress(memoizedData[0].id);
     }
-  }, [selectedSurah, memoizedData, handleSurahPress]);
+  }, [handleSurahPress, memoizedData, selectedSurah]);
 
-  // Auto-focus the selected surah
   useEffect(() => {
-    const index = memoizedData.findIndex((s) => s.id === selectedSurah);
+    const index = memoizedData.findIndex((surah) => surah.id === selectedSurah);
     if (index >= 0 && listRef.current) {
       listRef.current.focus(index);
     }
-  }, [selectedSurah, memoizedData]);
+  }, [memoizedData, selectedSurah]);
 
   const renderItem = ({ item }: { item: (typeof memoizedData)[0] }) => (
     <SpatialNavigationFocusableView
       onSelect={() => handleSurahPress(item.id)}
       style={styles.surahCard}
     >
-      {({ isFocused }) => (
-        <View
-          style={[
-            styles.surahCard,
-            selectedSurah === item.id && styles.surahCardSelected,
-            isFocused && styles.surahCardFocused,
-          ]}
-        >
-          <Text
+      {({ isFocused }) => {
+        const isActive = selectedSurah === item.id;
+        const showFocus = isFocused && !isActive;
+
+        return (
+          <View
             style={[
-              styles.surahNumber,
-              isFocused &&
-                selectedSurah !== item.id &&
-                styles.surahNumberFocused,
+              styles.surahCard,
+              isActive && styles.surahCardSelected,
+              showFocus && styles.surahCardFocused,
             ]}
           >
-            {item.id}
-          </Text>
-          <Text
-            style={[
-              styles.surahName,
-              isFocused && selectedSurah !== item.id && styles.surahNameFocused,
-            ]}
-            numberOfLines={1}
-          >
-            {item.englishName}
-          </Text>
-        </View>
-      )}
+            <View
+              style={[
+                styles.surahNumberWrapper,
+                showFocus && styles.surahNumberWrapperFocused,
+                isActive && styles.surahNumberWrapperSelected,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.surahNumber,
+                  showFocus && styles.surahNumberFocused,
+                  isActive && styles.surahNumberSelected,
+                ]}
+              >
+                {item.id}
+              </Text>
+            </View>
+
+            <Text
+              numberOfLines={1}
+              style={[styles.surahName, showFocus && styles.surahNameFocused]}
+            >
+              {item.englishName}
+            </Text>
+          </View>
+        );
+      }}
     </SpatialNavigationFocusableView>
   );
 
@@ -90,11 +98,11 @@ const Playlist = ({ player, listRef }: PlaylistProps) => {
         <SpatialNavigationView direction="vertical">
           <SpatialNavigationVirtualizedList
             ref={listRef}
-            data={memoizedData}
-            renderItem={renderItem}
-            itemSize={SURAH_ITEM_HEIGHT}
             additionalItemsRendered={2}
+            data={memoizedData}
+            itemSize={SURAH_ITEM_HEIGHT}
             orientation="vertical"
+            renderItem={renderItem}
             style={styles.playlistContent}
           />
         </SpatialNavigationView>
@@ -105,68 +113,90 @@ const Playlist = ({ player, listRef }: PlaylistProps) => {
 
 function createStyles(isDark: boolean) {
   const { cardBg, textPrimary, textSecondary } = getThemeColors(isDark);
+
   return StyleSheet.create({
     playlistPanel: {
-      height: "100%",
-      marginLeft: 12,
-      width: 320,
       backgroundColor: cardBg,
       borderRadius: 12,
+      height: "100%",
+      marginLeft: 12,
       overflow: "hidden",
+      width: 320,
     },
     playlistHeaderRow: {
-      flexDirection: "row",
       alignItems: "center",
+      flexDirection: "row",
       justifyContent: "space-between",
       paddingHorizontal: 16,
       paddingVertical: 10,
     },
     playlistTitle: {
-      fontSize: 14,
       color: textPrimary,
+      fontSize: 14,
       fontWeight: "600",
     },
     playlistBody: {
       flex: 1,
     },
     playlistContent: {
-      paddingTop: 8,
       paddingBottom: 8,
-      paddingHorizontal: 0,
+      paddingTop: 8,
     },
+
     surahCard: {
-      height: SURAH_ITEM_HEIGHT,
-      flexDirection: "row",
       alignItems: "center",
-      width: "100%",
       backgroundColor: cardBg,
+      flexDirection: "row",
+      height: SURAH_ITEM_HEIGHT,
+      paddingHorizontal: 8,
+      width: "100%",
     },
     surahCardFocused: {
-      borderWidth: 2,
-      borderColor: colorPrimaryGreenLight,
-      transform: [{ scale: focusScale }],
-      shadowColor: "#000",
-      shadowOpacity: 0.3,
-      shadowRadius: 10,
-      shadowOffset: { width: 0, height: 4 },
-      elevation: 8,
+      backgroundColor: isDark ? colorPrimaryGreenDark : colorPrimaryGreenLight,
+      borderColor: colorPrimaryGreen,
+      borderWidth: 1,
     },
     surahCardSelected: {
       backgroundColor: colorPrimaryGreen,
     },
+
+    // Number wrapper
+    surahNumberWrapper: {
+      alignItems: "center",
+      height: 28,
+      justifyContent: "center",
+      marginRight: 10,
+      width: 28,
+    },
+    surahNumberWrapperFocused: {
+      backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+      borderRadius: 14,
+    },
+    surahNumberWrapperSelected: {
+      backgroundColor: colorPrimaryGreen,
+      borderRadius: 14,
+    },
+
+    // Number text
     surahNumber: {
       fontSize: 12,
-      fontWeight: "600",
+      fontWeight: "500",
       color: textSecondary,
-      marginRight: 12,
-    },
-    surahName: {
-      fontSize: 14,
-      color: textPrimary,
-      flexShrink: 1,
+      textAlign: "center",
     },
     surahNumberFocused: {
+      color: colorPrimaryGreen,
+    },
+    surahNumberSelected: {
+      color: textSecondary,
+      fontWeight: "600",
+    },
+
+    // Surah name
+    surahName: {
       color: textPrimary,
+      flexShrink: 1,
+      fontSize: 14,
     },
     surahNameFocused: {
       color: colorPrimaryGreen,
