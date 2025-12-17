@@ -1,4 +1,4 @@
-import React, { memo, useState } from "react";
+import React, { memo, useRef, useState } from "react";
 import { TextInput, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SpatialNavigationFocusableView } from "react-tv-space-navigation";
@@ -23,10 +23,15 @@ const SearchInput = ({
   styles,
   isDark,
 }: SearchInputProps) => {
+  const inputRef = useRef<TextInput>(null);
   const [textFocused, setTextFocused] = useState(false);
 
   return (
-    <SpatialNavigationFocusableView onSelect={() => {}}>
+    <SpatialNavigationFocusableView
+      onSelect={() => {
+        inputRef.current?.focus();
+      }}
+    >
       {({ isFocused }) => (
         <View
           style={[
@@ -35,6 +40,7 @@ const SearchInput = ({
           ]}
         >
           <TextInput
+            ref={inputRef}
             style={styles.searchInput}
             value={value}
             onChangeText={onChangeText}
@@ -46,18 +52,17 @@ const SearchInput = ({
               setTextFocused(false);
               onFocusChange?.(false);
             }}
+            showSoftInputOnFocus
+            blurOnSubmit={false}
             placeholder="Search reciters..."
             placeholderTextColor={isDark ? "#888" : "#999"}
           />
+
           <Ionicons
             name="search"
             size={20}
             color={
-              textFocused || isFocused
-                ? "#4CAF50"
-                : isDark
-                ? "#888"
-                : "#999"
+              textFocused || isFocused ? "#4CAF50" : isDark ? "#888" : "#999"
             }
             style={styles.searchInputIcon}
           />
@@ -68,4 +73,3 @@ const SearchInput = ({
 };
 
 export default memo(SearchInput);
-

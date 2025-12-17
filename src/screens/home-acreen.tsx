@@ -10,6 +10,7 @@ import {
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
   DefaultFocus,
+  SpatialNavigationFocusableView,
   SpatialNavigationScrollView,
   SpatialNavigationView,
 } from "react-tv-space-navigation";
@@ -197,26 +198,35 @@ export default function HomeScreen() {
         />
       </View>
       <BrandHeader styles={styles} />
-      <View style={styles.searchContainer}>
-        <SearchInput
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          onFocusChange={setSearchFocused}
-          styles={styles}
-          isDark={isDark}
-        />
-      </View>
+
+      <SearchInput
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        onFocusChange={setSearchFocused}
+        styles={styles}
+        isDark={isDark}
+      />
+
       <SpatialNavigationScrollView>
         <View style={styles.content}>
           <View style={styles.filterRow}>
-            <DefaultFocus>
+            {searchFocused ? (
+              <DefaultFocus>
+                <FilterChip
+                  label="All"
+                  selected={selectedRiwaya === "all"}
+                  onPress={() => setSelectedRiwaya("all")}
+                  styles={styles}
+                />
+              </DefaultFocus>
+            ) : (
               <FilterChip
                 label="All"
                 selected={selectedRiwaya === "all"}
                 onPress={() => setSelectedRiwaya("all")}
                 styles={styles}
               />
-            </DefaultFocus>
+            )}
             <FilterChip
               label="Hafs"
               selected={selectedRiwaya === Riwaya.HAFS_A_ASIM}
