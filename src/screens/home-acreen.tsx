@@ -29,6 +29,7 @@ import {
   focusScale,
 } from "../constants/interaction-colors";
 import { getThemeColors } from "../constants/theme";
+import LanguageSwitch from "../components/language-switch";
 
 export default function HomeScreen() {
   const [reciters, setReciters] = useState<Reciter[]>([]);
@@ -194,6 +195,7 @@ export default function HomeScreen() {
           styles={styles}
           isDark={isDark}
         />
+        <LanguageSwitch styles={styles} isDark={isDark} />
       </View>
       <BrandHeader styles={styles} />
 
@@ -346,6 +348,7 @@ function createStyles(isDark: boolean, width: number) {
     },
     reciterCard: {
       width: "100%",
+      minWidth: 200,
       height: isVeryWide ? 140 : isWide ? 128 : isMedium ? 118 : 110,
       backgroundColor: cardBg,
       paddingVertical: isVeryWide ? 28 : isWide ? 24 : 20,
