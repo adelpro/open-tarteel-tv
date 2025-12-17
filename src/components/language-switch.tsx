@@ -1,24 +1,42 @@
-import React from "react";
-import { Pressable, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Pressable, Text, View, TextStyle, ViewStyle } from "react-native";
 import { SpatialNavigationFocusableView } from "react-tv-space-navigation";
 import { useTranslation } from "react-i18next";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 
 type LanguageSwitchProps = {
   styles: {
-    menuButton: any;
-    menuButtonFocused: any;
-    menuButtonText: any;
-    menuButtonContent: any;
+    menuButton: ViewStyle;
+    menuButtonFocused: ViewStyle;
+    menuButtonText: TextStyle;
+    menuButtonContent: TextStyle;
   };
   isDark: boolean;
 };
 
+const LANGUAGE_KEY = "app_language";
+
 const LanguageSwitch = ({ styles, isDark }: LanguageSwitchProps) => {
   const { t, i18n } = useTranslation();
+  const [currentLang, setCurrentLang] = useState(i18n.language);
 
-  const toggleLanguage = () => {
-    i18n.changeLanguage(i18n.language === "en" ? "ar" : "en");
+  // Load saved language on mount
+  useEffect(() => {
+    (async () => {
+      const savedLang = await AsyncStorage.getItem(LANGUAGE_KEY);
+      if (savedLang && savedLang !== i18n.language) {
+        await i18n.changeLanguage(savedLang);
+        setCurrentLang(savedLang);
+      }
+    })();
+  }, []);
+
+  const toggleLanguage = async () => {
+    const newLang = currentLang === "en" ? "ar" : "en";
+    await i18n.changeLanguage(newLang);
+    await AsyncStorage.setItem(LANGUAGE_KEY, newLang);
+    setCurrentLang(newLang);
   };
 
   return (

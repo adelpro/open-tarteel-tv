@@ -30,6 +30,7 @@ import {
 } from "../constants/interaction-colors";
 import { getThemeColors } from "../constants/theme";
 import LanguageSwitch from "../components/language-switch";
+import { t } from "i18next";
 
 export default function HomeScreen() {
   const [reciters, setReciters] = useState<Reciter[]>([]);
@@ -142,7 +143,7 @@ export default function HomeScreen() {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color="#4CAF50" />
-        <Text style={styles.loadingText}>Loading Reciters...</Text>
+        <Text style={styles.loadingText}>{t("Loading_Reciters")}</Text>
       </View>
     );
   }
@@ -152,10 +153,13 @@ export default function HomeScreen() {
       <View style={styles.centerContainer}>
         <View style={styles.errorContainer}>
           <Ionicons name="alert-circle" size={64} color="#FF6B6B" />
-          <Text style={styles.errorTitle}>Failed to Load Reciters</Text>
+          <Text style={styles.errorTitle}>{t("Failed_to_Load_Reciters")}</Text>
           <Text style={styles.errorMessage}>{error}</Text>
           <Text style={styles.retryCountText}>
-            Attempt {retryCount + 1} of {MAX_RETRIES + 1}
+            {t("attempt", {
+              current: retryCount + 1,
+              max: MAX_RETRIES + 1,
+            })}
           </Text>
           <RetryButton onPress={handleRetry} styles={styles} />
         </View>
@@ -168,9 +172,9 @@ export default function HomeScreen() {
       <View style={styles.centerContainer}>
         <View style={styles.errorContainer}>
           <Ionicons name="folder-outline" size={64} color="#999" />
-          <Text style={styles.errorTitle}>No Reciters Found</Text>
+          <Text style={styles.errorTitle}>{t("No_Reciters_Found_Title")}</Text>
           <Text style={styles.errorMessage}>
-            No reciter data available. Please check your connection.
+            {t("No_Reciters_Found_Content")}
           </Text>
           <RetryButton onPress={handleRetry} styles={styles} />
         </View>
@@ -182,14 +186,14 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <View style={styles.menuRow}>
         <MenuButton
-          label="About"
+          label={t("About")}
           iconName="information-circle-outline"
           onPress={() => navigation.navigate("About")}
           styles={styles}
           isDark={isDark}
         />
         <MenuButton
-          label="Privacy"
+          label={t("Privacy")}
           iconName="shield-checkmark-outline"
           onPress={() => navigation.navigate("Privacy")}
           styles={styles}
@@ -347,8 +351,6 @@ function createStyles(isDark: boolean, width: number) {
       marginVertical: 8,
     },
     reciterCard: {
-      width: "100%",
-      minWidth: 200,
       height: isVeryWide ? 140 : isWide ? 128 : isMedium ? 118 : 110,
       backgroundColor: cardBg,
       paddingVertical: isVeryWide ? 28 : isWide ? 24 : 20,
@@ -454,11 +456,17 @@ function createStyles(isDark: boolean, width: number) {
     },
     menuButton: {
       backgroundColor: cardBg,
-      paddingVertical: 10,
-      paddingHorizontal: 16,
+      height: 50,
+      width: 100,
+      paddingVertical: 5,
+      paddingHorizontal: 10,
       borderRadius: 8,
       borderWidth: 2,
       borderColor: border,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
     },
     menuButtonFocused: {
       backgroundColor: isDark ? colorPrimaryGreenDark : colorPrimaryGreenLight,
