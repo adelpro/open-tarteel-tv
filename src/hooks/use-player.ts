@@ -43,7 +43,7 @@ export function usePlayer() {
     if (!playerRef.current) return;
 
     try {
-      await playerRef.current.remove();
+      playerRef.current.remove();
     } catch (err) {
       console.error("[usePlayer] Error unloading player:", err);
     } finally {
