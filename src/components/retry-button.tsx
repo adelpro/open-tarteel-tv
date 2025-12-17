@@ -2,7 +2,7 @@ import React, { memo } from "react";
 import { Pressable, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SpatialNavigationFocusableView } from "react-tv-space-navigation";
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 type RetryButtonProps = {
   onPress: () => void;
@@ -16,6 +16,7 @@ type RetryButtonProps = {
 };
 
 const RetryButton = ({ onPress, styles }: RetryButtonProps) => {
+  const { t } = useTranslation();
   return (
     <SpatialNavigationFocusableView onSelect={onPress}>
       {({ isFocused }) => (

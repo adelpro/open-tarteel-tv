@@ -36,6 +36,7 @@ const LanguageSwitch = ({ styles, isDark }: LanguageSwitchProps) => {
     const newLang = currentLang === "en" ? "ar" : "en";
     await i18n.changeLanguage(newLang);
     await AsyncStorage.setItem(LANGUAGE_KEY, newLang);
+
     setCurrentLang(newLang);
   };
 

@@ -30,9 +30,11 @@ import {
 } from "../constants/interaction-colors";
 import { getThemeColors } from "../constants/theme";
 import LanguageSwitch from "../components/language-switch";
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 export default function HomeScreen() {
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.dir() === "rtl";
   const [reciters, setReciters] = useState<Reciter[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -184,7 +186,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.menuRow}>
+      <View style={[styles.menuRow, isRTL && { flexDirection: "row-reverse" }]}>
         <MenuButton
           label={t("About")}
           iconName="information-circle-outline"
@@ -457,7 +459,7 @@ function createStyles(isDark: boolean, width: number) {
     menuButton: {
       backgroundColor: cardBg,
       height: 50,
-      width: 100,
+      width: 120,
       paddingVertical: 5,
       paddingHorizontal: 10,
       borderRadius: 8,
