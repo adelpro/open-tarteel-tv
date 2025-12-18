@@ -31,9 +31,10 @@ import {
 import { getThemeColors } from "../constants/theme";
 import LanguageSwitch from "../components/language-switch";
 import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 
 export default function HomeScreen() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const isRTL = i18n.dir() === "rtl";
   const [reciters, setReciters] = useState<Reciter[]>([]);
   const [loading, setLoading] = useState(true);
@@ -186,13 +187,20 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={[styles.menuRow, isRTL && { flexDirection: "row-reverse" }]}>
+      <View
+        style={[
+          styles.menuRow,
+          isRTL ? { flexDirection: "row-reverse" } : { flexDirection: "row" },
+        ]}
+      >
         <MenuButton
           label={t("About")}
           iconName="information-circle-outline"
           onPress={() => navigation.navigate("About")}
           styles={styles}
           isDark={isDark}
+          accessibilityLabel={t("About")}
+          accessibilityRole="button"
         />
         <MenuButton
           label={t("Privacy")}
@@ -200,16 +208,22 @@ export default function HomeScreen() {
           onPress={() => navigation.navigate("Privacy")}
           styles={styles}
           isDark={isDark}
+          accessibilityLabel={t("Privacy")}
+          accessibilityRole="button"
         />
-        <LanguageSwitch styles={styles} isDark={isDark} />
+        <LanguageSwitch
+          styles={styles}
+          isDark={isDark}
+          accessibilityLabel={t("change_language")}
+          accessibilityRole="button"
+        />
       </View>
-      <BrandHeader styles={styles} />
+      <BrandHeader />
 
       <SearchInput
         value={searchQuery}
         onChangeText={setSearchQuery}
         onFocusChange={setSearchFocused}
-        styles={styles}
         isDark={isDark}
       />
 
@@ -287,6 +301,7 @@ export default function HomeScreen() {
 function createStyles(isDark: boolean, width: number) {
   const { bg, textPrimary, textSecondary, cardBg, border, focusBg } =
     getThemeColors(isDark);
+  const isRTL = i18n.dir() === "rtl";
   const isVeryWide = width >= 2800;
   const isWide = width >= 2200 && width < 2800;
   const isMedium = width >= 1600 && width < 2200;
@@ -319,27 +334,7 @@ function createStyles(isDark: boolean, width: number) {
       marginBottom: 12,
       textAlign: "left",
     },
-    brandRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 12,
-      marginBottom: 12,
-    },
-    brandLogo: {
-      width: 56,
-      height: 56,
-      borderRadius: 12,
-    },
-    brandTitle: {
-      fontSize: isVeryWide ? 34 : isWide ? 30 : isMedium ? 26 : 24,
-      fontWeight: "800",
-      color: colorPrimaryGreen,
-    },
-    brandSubtitle: {
-      fontSize: isVeryWide ? 20 : isWide ? 18 : 14,
-      color: textSecondary,
-      marginTop: 2,
-    },
+
     reciterRow: {
       flexDirection: "row",
       justifyContent: "flex-start",
@@ -378,38 +373,7 @@ function createStyles(isDark: boolean, width: number) {
       fontSize: isVeryWide ? 18 : isWide ? 16 : isMedium ? 15 : 14,
       color: textSecondary,
     },
-    searchContainer: {
-      marginBottom: 16,
-      alignItems: "center",
-      paddingHorizontal: 20,
-      width: "100%",
-    },
-    searchInput: {
-      backgroundColor: cardBg,
-      color: textPrimary,
-      flex: 1,
-      paddingVertical: isVeryWide ? 16 : isWide ? 14 : 12,
-      paddingHorizontal: isVeryWide ? 16 : isWide ? 14 : 12,
-      borderRadius: 8,
-      fontSize: 16,
-    },
-    searchInputContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: cardBg,
-      borderRadius: 8,
-      borderWidth: 2,
-      borderColor: border,
-      paddingHorizontal: 14,
-      width: "100%",
-    },
-    searchInputIcon: {
-      marginLeft: 10,
-    },
-    searchInputFocused: {
-      backgroundColor: focusBg,
-      borderColor: colorPrimaryGreen,
-    },
+
     filterRow: {
       flexDirection: "row",
       alignItems: "center",
@@ -451,7 +415,7 @@ function createStyles(isDark: boolean, width: number) {
       borderColor: colorPrimaryGreen,
     },
     menuRow: {
-      flexDirection: "row",
+      flexDirection: isRTL ? "row-reverse" : "row",
       justifyContent: "flex-end",
       gap: 12,
       marginBottom: 10,

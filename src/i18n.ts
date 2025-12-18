@@ -15,4 +15,6 @@ i18n.use(initReactI18next).init({
   react: { useSuspense: false }, // avoid Suspense issues in RN
 });
 
+export const isRTL = i18n.dir() === "rtl";
+
 export default i18n;

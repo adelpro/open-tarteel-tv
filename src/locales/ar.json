@@ -1,6 +1,6 @@
 {
-  "app": "Open Tarteel TV",
-  "description": "تلاوات القرآن الكريم - تجربة مثالية على التلفاز",
+  "app_name": "Open Tarteel TV",
+  "app_description": "تلاوات القرآن الكريم - تجربة مثالية على التلفاز",
   "change_language": "العربية",
 
   "Loading_Reciters": "تحميل القراء...",
@@ -11,6 +11,8 @@
   "No_Reciters_Found_Content": "لا يوجد بيانات قراء. يرجى التحقق من اتصالك.",
   "About": "حول التطبيق",
   "Privacy": "الخصوصية",
+
+  "search_placeholder": "البحث عن قراء",
 
   "home": "الرئيسية",
   "reciters": "القراء",

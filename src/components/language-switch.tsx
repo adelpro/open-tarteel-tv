@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Pressable, Text, View, TextStyle, ViewStyle } from "react-native";
+import {
+  Pressable,
+  Text,
+  View,
+  TextStyle,
+  ViewStyle,
+  PressableProps,
+} from "react-native";
 import { SpatialNavigationFocusableView } from "react-tv-space-navigation";
 import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -13,11 +20,15 @@ type LanguageSwitchProps = {
     menuButtonContent: TextStyle;
   };
   isDark: boolean;
-};
+} & Omit<PressableProps, "onPress">;
 
 const LANGUAGE_KEY = "app_language";
 
-const LanguageSwitch = ({ styles, isDark }: LanguageSwitchProps) => {
+const LanguageSwitch = ({
+  styles,
+  isDark,
+  ...pressableProps
+}: LanguageSwitchProps) => {
   const { t, i18n } = useTranslation();
   const [currentLang, setCurrentLang] = useState(i18n.language);
 
@@ -48,6 +59,7 @@ const LanguageSwitch = ({ styles, isDark }: LanguageSwitchProps) => {
           focusable
           accessibilityRole="button"
           accessibilityLabel={t("change_language")}
+          {...pressableProps}
         >
           <View style={styles.menuButtonContent}>
             <Ionicons

@@ -1,6 +1,6 @@
 {
-  "app": "Open Tarteel TV",
-  "description": "Quran Recitations - TV Optimized",
+  "app_name": "Open Tarteel TV",
+  "app_description": "Quran Recitations - TV Optimized",
   "change_language": "English",
 
   "Loading_Reciters": "Loading Reciters...",
@@ -11,6 +11,8 @@
   "No_Reciters_Found_Content": "No reciter data available. Please check your connection.",
   "About": "About",
   "Privacy": "Privacy",
+
+  "search_placeholder": "Search Reciters",
 
   "home": "Home",
   "reciters": "Reciters",
