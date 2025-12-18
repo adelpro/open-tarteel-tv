@@ -1,22 +1,45 @@
 import React, { memo } from "react";
-import { Pressable, Text } from "react-native";
+import { Pressable, StyleSheet, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SpatialNavigationFocusableView } from "react-tv-space-navigation";
 import { useTranslation } from "react-i18next";
+import { colorPrimaryGreen } from "../constants/interaction-colors";
 
 type RetryButtonProps = {
   onPress: () => void;
-  styles: {
-    retryButton: any;
-    retryButtonFocused: any;
-    retryButtonIcon: any;
-    retryButtonText: any;
-    retryButtonTextFocused: any;
-  };
 };
 
-const RetryButton = ({ onPress, styles }: RetryButtonProps) => {
+const RetryButton = ({ onPress }: RetryButtonProps) => {
   const { t } = useTranslation();
+
+  const styles = StyleSheet.create({
+    retryButton: {
+      backgroundColor: colorPrimaryGreen,
+      paddingVertical: 16,
+      paddingHorizontal: 32,
+      borderRadius: 8,
+      flexDirection: "row",
+      alignItems: "center",
+      borderWidth: 2,
+      borderColor: colorPrimaryGreen,
+    },
+    retryButtonFocused: {
+      backgroundColor: "#45a049",
+      borderColor: "#fff",
+      transform: [{ scale: 1.08 }],
+    },
+    retryButtonIcon: {
+      marginRight: 10,
+    },
+    retryButtonText: {
+      color: "#fff",
+      fontSize: 18,
+      fontWeight: "600",
+    },
+    retryButtonTextFocused: {
+      color: "#fff",
+    },
+  });
   return (
     <SpatialNavigationFocusableView onSelect={onPress}>
       {({ isFocused }) => (

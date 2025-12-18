@@ -4,7 +4,6 @@ import {
   PressableProps,
   StyleSheet,
   Text,
-  useWindowDimensions,
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,18 +15,12 @@ import {
   colorPrimaryGreenLight,
   focusScale,
 } from "../constants/interaction-colors";
-import { isRTL } from "../i18n";
+import i18n from "../i18n";
 
 type MenuButtonProps = {
   label: string;
   iconName?: keyof typeof Ionicons.glyphMap;
   onPress: () => void;
-  styles: {
-    menuButton: any;
-    menuButtonFocused: any;
-    menuButtonText: any;
-    menuButtonContent: any;
-  };
   isDark: boolean;
 } & Omit<PressableProps, "onPress">;
 
@@ -38,7 +31,9 @@ const MenuButton = ({
   isDark,
   ...pressableProps
 }: MenuButtonProps) => {
-  const { bg, textPrimary, cardBg, border, focusBg } = getThemeColors(isDark);
+  const { textPrimary, cardBg, border, focusBg } = getThemeColors(isDark);
+
+  const isRTL = i18n.dir() === "rtl";
 
   const styles = StyleSheet.create({
     menuRow: {
@@ -109,6 +104,7 @@ const MenuButton = ({
                 color={isFocused ? "#4CAF50" : isDark ? "#bbb" : "#666"}
               />
             ) : null}
+
             <Text style={styles.menuButtonText}>{label}</Text>
           </View>
         </Pressable>

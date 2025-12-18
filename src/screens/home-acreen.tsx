@@ -21,20 +21,13 @@ import RetryButton from "../components/retry-button";
 import SearchInput from "../components/search-input";
 import { getAllReciters } from "../services/api";
 import { Reciter, Riwaya } from "../types";
-import {
-  colorPrimaryGreen,
-  colorPrimaryGreenDark,
-  colorPrimaryGreenLight,
-  colorPrimaryGreenTint,
-  focusScale,
-} from "../constants/interaction-colors";
+import { colorPrimaryGreen } from "../constants/interaction-colors";
 import { getThemeColors } from "../constants/theme";
 import LanguageSwitch from "../components/language-switch";
 import { useTranslation } from "react-i18next";
-import i18n from "../i18n";
 
 export default function HomeScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const isRTL = i18n.dir() === "rtl";
   const [reciters, setReciters] = useState<Reciter[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,15 +37,102 @@ export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme !== "light";
   const { width } = useWindowDimensions();
-  const styles = createStyles(isDark, width);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRiwaya, setSelectedRiwaya] = useState<Riwaya | "all">("all");
   const [retryCount, setRetryCount] = useState(0);
   const [searchFocused, setSearchFocused] = useState(false);
   const MAX_RETRIES = 3;
 
+  const { bg, textPrimary, textSecondary } = getThemeColors(isDark);
+  const isVeryWide = width >= 2800;
+  const isWide = width >= 2200 && width < 2800;
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: bg,
+      padding: 20,
+    },
+    centerContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: bg,
+    },
+    loadingText: {
+      color: textPrimary,
+      marginTop: 10,
+      fontSize: isVeryWide ? 24 : isWide ? 20 : 16,
+    },
+    content: {
+      paddingBottom: 40,
+      paddingTop: 8,
+      overflow: "visible",
+    },
+    header: {
+      fontSize: 22,
+      fontWeight: "700",
+      color: colorPrimaryGreen,
+      marginBottom: 12,
+      textAlign: "left",
+    },
+    filterRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "flex-start",
+      flexWrap: "wrap",
+      marginBottom: 12,
+    },
+
+    reciterRow: {
+      flexDirection: isRTL ? "row-reverse" : "row",
+      justifyContent: "flex-start",
+      alignItems: "flex-start",
+      marginBottom: 16,
+      overflow: "visible",
+      paddingHorizontal: 20,
+    },
+    reciterItem: {
+      overflow: "visible",
+      marginVertical: 8,
+    },
+
+    retryCountText: {
+      fontSize: 14,
+      color: textSecondary,
+      marginBottom: 24,
+    },
+
+    menuRow: {
+      flexDirection: isRTL ? "row-reverse" : "row",
+      justifyContent: "flex-end",
+      gap: 12,
+      marginBottom: 10,
+    },
+
+    errorContainer: {
+      alignItems: "center",
+      paddingHorizontal: 40,
+    },
+    errorTitle: {
+      fontSize: isVeryWide ? 32 : isWide ? 28 : 24,
+      fontWeight: "700",
+      color: textPrimary,
+      marginTop: 20,
+      marginBottom: 12,
+    },
+    errorMessage: {
+      fontSize: isVeryWide ? 20 : isWide ? 18 : 16,
+      color: textSecondary,
+      textAlign: "center",
+      marginBottom: 24,
+      lineHeight: 24,
+    },
+  });
+
   useEffect(() => {
-    loadReciters();
+    const lang = i18n.language === "ar" ? "ar" : "en";
+    loadReciters(lang);
   }, []);
 
   useEffect(() => {
@@ -69,11 +149,11 @@ export default function HomeScreen() {
     }
   }, [route]);
 
-  const loadReciters = async () => {
+  const loadReciters = async (lang: string) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getAllReciters();
+      const data = await getAllReciters(lang);
       setReciters(data);
       setRetryCount(0);
       setError(null);
@@ -90,7 +170,8 @@ export default function HomeScreen() {
   };
   const handleRetry = () => {
     setRetryCount((prev: number) => prev + 1);
-    loadReciters();
+    const lang = i18n.language === "ar" ? "ar" : "en";
+    loadReciters(lang);
   };
 
   const handleReciterPress = useCallback(
@@ -164,7 +245,7 @@ export default function HomeScreen() {
               max: MAX_RETRIES + 1,
             })}
           </Text>
-          <RetryButton onPress={handleRetry} styles={styles} />
+          <RetryButton onPress={handleRetry} />
         </View>
       </View>
     );
@@ -179,7 +260,7 @@ export default function HomeScreen() {
           <Text style={styles.errorMessage}>
             {t("No_Reciters_Found_Content")}
           </Text>
-          <RetryButton onPress={handleRetry} styles={styles} />
+          <RetryButton onPress={handleRetry} />
         </View>
       </View>
     );
@@ -197,7 +278,6 @@ export default function HomeScreen() {
           label={t("About")}
           iconName="information-circle-outline"
           onPress={() => navigation.navigate("About")}
-          styles={styles}
           isDark={isDark}
           accessibilityLabel={t("About")}
           accessibilityRole="button"
@@ -206,13 +286,11 @@ export default function HomeScreen() {
           label={t("Privacy")}
           iconName="shield-checkmark-outline"
           onPress={() => navigation.navigate("Privacy")}
-          styles={styles}
           isDark={isDark}
           accessibilityLabel={t("Privacy")}
           accessibilityRole="button"
         />
         <LanguageSwitch
-          styles={styles}
           isDark={isDark}
           accessibilityLabel={t("change_language")}
           accessibilityRole="button"
@@ -228,38 +306,38 @@ export default function HomeScreen() {
       />
 
       <SpatialNavigationScrollView>
-        <View style={styles.content}>
-          <View style={styles.filterRow}>
+        <View style={[styles.content]}>
+          <View
+            style={[
+              styles.filterRow,
+              { flexDirection: isRTL ? "row-reverse" : "row" },
+            ]}
+          >
             <FilterChip
-              label="All"
+              label={t("filter_all")}
               selected={selectedRiwaya === "all"}
               onPress={() => setSelectedRiwaya("all")}
-              styles={styles}
             />
 
             <FilterChip
-              label="Hafs"
+              label={t("filter_hafs")}
               selected={selectedRiwaya === Riwaya.HAFS_A_ASIM}
               onPress={() => setSelectedRiwaya(Riwaya.HAFS_A_ASIM)}
-              styles={styles}
             />
             <FilterChip
-              label="Warsh"
+              label={t("filter_warsh")}
               selected={selectedRiwaya === Riwaya.WARSH_AN_NAFI}
               onPress={() => setSelectedRiwaya(Riwaya.WARSH_AN_NAFI)}
-              styles={styles}
             />
             <FilterChip
-              label="Qalun"
+              label={t("filter_qalun")}
               selected={selectedRiwaya === Riwaya.QALUN_AN_NAFI}
               onPress={() => setSelectedRiwaya(Riwaya.QALUN_AN_NAFI)}
-              styles={styles}
             />
             <FilterChip
-              label="Alduri"
+              label={t("filter_ad_duri")}
               selected={selectedRiwaya === Riwaya.ALDURI_AN_ALKAISSAI}
               onPress={() => setSelectedRiwaya(Riwaya.ALDURI_AN_ALKAISSAI)}
-              styles={styles}
             />
           </View>
           {reciterRows.map((row, rowIndex) => (
@@ -285,7 +363,6 @@ export default function HomeScreen() {
                         !searchFocused && rowIndex === 0 && cardIndex === 0
                       }
                       onPress={handleReciterPress}
-                      styles={styles}
                     />
                   </View>
                 ))}
@@ -296,222 +373,4 @@ export default function HomeScreen() {
       </SpatialNavigationScrollView>
     </View>
   );
-}
-
-function createStyles(isDark: boolean, width: number) {
-  const { bg, textPrimary, textSecondary, cardBg, border, focusBg } =
-    getThemeColors(isDark);
-  const isRTL = i18n.dir() === "rtl";
-  const isVeryWide = width >= 2800;
-  const isWide = width >= 2200 && width < 2800;
-  const isMedium = width >= 1600 && width < 2200;
-  return StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: bg,
-      padding: 20,
-    },
-    centerContainer: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      backgroundColor: bg,
-    },
-    loadingText: {
-      color: textPrimary,
-      marginTop: 10,
-      fontSize: isVeryWide ? 24 : isWide ? 20 : 16,
-    },
-    content: {
-      paddingBottom: 40,
-      paddingTop: 8,
-      overflow: "visible",
-    },
-    header: {
-      fontSize: 22,
-      fontWeight: "700",
-      color: colorPrimaryGreen,
-      marginBottom: 12,
-      textAlign: "left",
-    },
-
-    reciterRow: {
-      flexDirection: "row",
-      justifyContent: "flex-start",
-      alignItems: "flex-start",
-      marginBottom: 16,
-      overflow: "visible",
-      paddingHorizontal: 20,
-    },
-    reciterItem: {
-      overflow: "visible",
-      marginVertical: 8,
-    },
-    reciterCard: {
-      height: isVeryWide ? 140 : isWide ? 128 : isMedium ? 118 : 110,
-      backgroundColor: cardBg,
-      paddingVertical: isVeryWide ? 28 : isWide ? 24 : 20,
-      paddingHorizontal: isVeryWide ? 24 : isWide ? 20 : 16,
-      margin: 2,
-      borderRadius: 8,
-      borderWidth: 2,
-      borderColor: border,
-    },
-    reciterCardFocused: {
-      backgroundColor: isDark ? colorPrimaryGreenDark : colorPrimaryGreenLight,
-      borderColor: colorPrimaryGreen,
-      transform: [{ scale: focusScale }],
-      zIndex: 2,
-    },
-    reciterName: {
-      fontSize: isVeryWide ? 26 : isWide ? 24 : isMedium ? 20 : 18,
-      fontWeight: "bold",
-      color: textPrimary,
-      marginBottom: 5,
-    },
-    reciterDesc: {
-      fontSize: isVeryWide ? 18 : isWide ? 16 : isMedium ? 15 : 14,
-      color: textSecondary,
-    },
-
-    filterRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "flex-start",
-      flexWrap: "wrap",
-      marginBottom: 12,
-    },
-    filterChip: {
-      backgroundColor: cardBg,
-      paddingVertical: isVeryWide ? 12 : isWide ? 10 : 10,
-      paddingHorizontal: isVeryWide ? 20 : isWide ? 18 : 16,
-      borderRadius: 8,
-      borderWidth: 2,
-      borderColor: border,
-      margin: 4,
-      marginRight: 12,
-      marginBottom: 12,
-    },
-    filterChipText: {
-      color: textPrimary,
-      fontSize: 14,
-      fontWeight: "600",
-    },
-    filterChipTextSelected: {
-      color: "#fff",
-    },
-    filterChipFocused: {
-      backgroundColor: isDark ? colorPrimaryGreenDark : colorPrimaryGreenTint,
-      borderColor: colorPrimaryGreen,
-      transform: [{ scale: focusScale }],
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.15,
-      shadowRadius: 4,
-      elevation: 2,
-    },
-    filterChipSelected: {
-      backgroundColor: colorPrimaryGreen,
-      borderColor: colorPrimaryGreen,
-    },
-    menuRow: {
-      flexDirection: isRTL ? "row-reverse" : "row",
-      justifyContent: "flex-end",
-      gap: 12,
-      marginBottom: 10,
-    },
-    menuButton: {
-      backgroundColor: cardBg,
-      height: 50,
-      width: 120,
-      paddingVertical: 5,
-      paddingHorizontal: 10,
-      borderRadius: 8,
-      borderWidth: 2,
-      borderColor: border,
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 8,
-    },
-    menuButtonFocused: {
-      backgroundColor: isDark ? colorPrimaryGreenDark : colorPrimaryGreenLight,
-      borderColor: colorPrimaryGreen,
-      transform: [{ scale: focusScale }],
-    },
-    menuButtonText: {
-      color: textPrimary,
-      fontSize: 16,
-      fontWeight: "600",
-    },
-    menuButtonContent: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 8,
-    },
-    micButton: {
-      width: 42,
-      height: 42,
-      borderRadius: 8,
-      backgroundColor: cardBg,
-      justifyContent: "center",
-      alignItems: "center",
-      borderWidth: 2,
-      borderColor: border,
-    },
-    micButtonFocused: {
-      backgroundColor: focusBg,
-      borderColor: colorPrimaryGreen,
-      transform: [{ scale: focusScale }],
-    },
-    errorContainer: {
-      alignItems: "center",
-      paddingHorizontal: 40,
-    },
-    errorTitle: {
-      fontSize: isVeryWide ? 32 : isWide ? 28 : 24,
-      fontWeight: "700",
-      color: textPrimary,
-      marginTop: 20,
-      marginBottom: 12,
-    },
-    errorMessage: {
-      fontSize: isVeryWide ? 20 : isWide ? 18 : 16,
-      color: textSecondary,
-      textAlign: "center",
-      marginBottom: 24,
-      lineHeight: 24,
-    },
-    retryCountText: {
-      fontSize: 14,
-      color: textSecondary,
-      marginBottom: 24,
-    },
-    retryButton: {
-      backgroundColor: colorPrimaryGreen,
-      paddingVertical: 16,
-      paddingHorizontal: 32,
-      borderRadius: 8,
-      flexDirection: "row",
-      alignItems: "center",
-      borderWidth: 2,
-      borderColor: colorPrimaryGreen,
-    },
-    retryButtonFocused: {
-      backgroundColor: "#45a049",
-      borderColor: "#fff",
-      transform: [{ scale: 1.08 }],
-    },
-    retryButtonIcon: {
-      marginRight: 10,
-    },
-    retryButtonText: {
-      color: "#fff",
-      fontSize: 18,
-      fontWeight: "600",
-    },
-    retryButtonTextFocused: {
-      color: "#fff",
-    },
-  });
 }

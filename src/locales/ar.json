@@ -14,6 +14,12 @@
 
   "search_placeholder": "البحث عن قراء",
 
+  "filter_all": "الكل",
+  "filter_hafs": "حفص",
+  "filter_warsh": "ورش",
+  "filter_qalun": "قولون",
+  "filter_ad_duri": "الدوري",
+
   "home": "الرئيسية",
   "reciters": "القراء",
   "reciter": "القارئ",

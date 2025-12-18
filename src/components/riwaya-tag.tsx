@@ -1,6 +1,7 @@
 import React, { memo } from "react";
 import { Text, View } from "react-native";
 import { Riwaya } from "../types";
+import { useTranslation } from "react-i18next";
 
 type RiwayaTagProps = {
   riwaya: Riwaya;
@@ -23,13 +24,15 @@ const RIWAYA_TAG: Record<Riwaya, RiwayaTagConfig> = {
 
 const RiwayaTag = ({ riwaya }: RiwayaTagProps) => {
   const { label, backgroundColor } = RIWAYA_TAG[riwaya];
+  const { i18n } = useTranslation();
 
+  const isRTL = i18n.dir() === "rtl";
   return (
     <View
       style={{
         position: "absolute",
         top: 8,
-        right: 8,
+        [isRTL ? "start" : "end"]: 8,
         paddingHorizontal: 8,
         paddingVertical: 2,
         borderRadius: 4,

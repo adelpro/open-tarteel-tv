@@ -78,10 +78,13 @@ const retryFetch = async (
 };
 
 // Function to fetch reciters from MP3Quran API
-export async function getAllReciters(): Promise<Reciter[]> {
+export async function getAllReciters(lang: string): Promise<Reciter[]> {
+  if (lang !== "ar" && lang !== "en") {
+    throw new Error(`Invalid language: ${lang}`);
+  }
   try {
     const response = await retryFetch(
-      "https://www.mp3quran.net/api/v3/reciters?language=en"
+      `https://www.mp3quran.net/api/v3/reciters?language=${lang}`
     );
 
     const data: mp3QuranAPiResponse = await response.json();
