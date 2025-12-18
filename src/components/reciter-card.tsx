@@ -3,13 +3,11 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  TextStyle,
   useColorScheme,
   useWindowDimensions,
-  ViewStyle,
 } from "react-native";
 import { SpatialNavigationFocusableView } from "react-tv-space-navigation";
-import { Reciter, Riwaya } from "../types";
+import { Reciter } from "../types";
 import RiwayaTag from "./riwaya-tag";
 import { getThemeColors } from "../constants/theme";
 import { useTranslation } from "react-i18next";
@@ -26,19 +24,12 @@ type ReciterCardProps = {
   onPress: (reciter: Reciter) => void;
 };
 
-const RIWAYA_LABEL: Record<Riwaya, string> = {
-  [Riwaya.HAFS_A_ASIM]: "Hafs",
-  [Riwaya.WARSH_AN_NAFI]: "Warsh",
-  [Riwaya.QALUN_AN_NAFI]: "Qalun",
-  [Riwaya.ALDURI_AN_ALKAISSAI]: "Ad-Duri",
-};
-
 const ReciterCard = ({
   reciter,
   preferredFocus,
   onPress,
 }: ReciterCardProps) => {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const colorScheme = useColorScheme();
   const isDark = colorScheme !== "light";
   const { textPrimary, textSecondary, cardBg, border, focusBg } =
@@ -50,7 +41,7 @@ const ReciterCard = ({
   const isMedium = width >= 1600 && width < 2200;
   const styles = StyleSheet.create({
     reciterCard: {
-      height: isVeryWide ? 140 : isWide ? 128 : isMedium ? 118 : 110,
+      height: isVeryWide ? 150 : isWide ? 138 : isMedium ? 128 : 120,
       backgroundColor: cardBg,
       paddingVertical: isVeryWide ? 28 : isWide ? 24 : 20,
       paddingHorizontal: isVeryWide ? 24 : isWide ? 20 : 16,
@@ -70,6 +61,7 @@ const ReciterCard = ({
       fontWeight: "bold",
       color: textPrimary,
       marginBottom: 5,
+      marginTop: 10,
       textAlign: isRTL ? "right" : "left",
     },
     reciterDesc: {
@@ -100,7 +92,10 @@ const ReciterCard = ({
             numberOfLines={2}
             ellipsizeMode="tail"
           >
-            {reciter.moshaf.name} • {RIWAYA_LABEL[reciter.moshaf.riwaya]}
+            {`${reciter.moshaf.name} - ${reciter.moshaf.surah_total} ${i18n.t(
+              "surah_count",
+              { count: reciter.moshaf.surah_total }
+            )}`}
           </Text>
           <RiwayaTag riwaya={reciter.moshaf.riwaya} />
         </Pressable>
