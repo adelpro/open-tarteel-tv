@@ -9,6 +9,7 @@ import {
   SpatialNavigation,
 } from "react-tv-space-navigation";
 import { useTVEventHandler, useColorScheme } from "react-native";
+import { useTranslation } from "react-i18next";
 
 import HomeScreen from "../screens/home-acreen";
 import PlayerScreen from "../screens/player-screen";
@@ -70,6 +71,7 @@ const linking: LinkingOptions<any> = {
 };
 
 export default function AppNavigator() {
+  const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const isDark = colorScheme !== "light";
   useTVEventHandler((evt: any) => {
@@ -115,27 +117,27 @@ export default function AppNavigator() {
           <Stack.Screen
             name="Home"
             component={HomeScreen}
-            options={{ title: "Open Tarteel TV" }}
+            options={{ title: t("app_name") }}
           />
           <Stack.Screen
             name="Search"
             component={HomeScreen}
-            options={{ title: "Search" }}
+            options={{ title: t("search_title") }}
           />
           <Stack.Screen
             name="Player"
             component={PlayerScreen}
-            options={{ title: "Quran Player" }}
+            options={{ title: t("quran_player") }}
           />
           <Stack.Screen
             name="About"
             component={AboutScreen}
-            options={{ title: "About" }}
+            options={{ title: t("about.about_title") }}
           />
           <Stack.Screen
             name="Privacy"
             component={PrivacyScreen}
-            options={{ title: "Privacy Policy" }}
+            options={{ title: t("privacy.title") }}
           />
         </Stack.Navigator>
       </NavigationContainer>

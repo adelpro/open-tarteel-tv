@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from "react";
 import { View, Text, StyleSheet, useColorScheme } from "react-native";
-import type { FlatList as RNFlatList } from "react-native";
 import Player from "../components/player";
 import Playlist from "../components/play-list";
 import { getThemeColors } from "../constants/theme";

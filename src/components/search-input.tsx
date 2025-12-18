@@ -61,6 +61,7 @@ const SearchInput = ({
       borderColor: border,
       paddingHorizontal: 8,
       width: "100%",
+      marginBottom: 16,
     },
     searchInputIcon: {
       marginLeft: 10,

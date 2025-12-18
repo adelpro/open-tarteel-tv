@@ -12,19 +12,28 @@ type RiwayaTagConfig = {
   backgroundColor: string;
 };
 
-const RIWAYA_TAG: Record<Riwaya, RiwayaTagConfig> = {
-  [Riwaya.HAFS_A_ASIM]: { label: "Hafs", backgroundColor: "#2E7D32" },
-  [Riwaya.WARSH_AN_NAFI]: { label: "Warsh", backgroundColor: "#1565C0" },
-  [Riwaya.QALUN_AN_NAFI]: { label: "Qalun", backgroundColor: "#6A1B9A" },
-  [Riwaya.ALDURI_AN_ALKAISSAI]: {
-    label: "Ad-Duri",
-    backgroundColor: "#EF6C00",
-  },
-};
-
 const RiwayaTag = ({ riwaya }: RiwayaTagProps) => {
+  const { t, i18n } = useTranslation();
+
+  const RIWAYA_TAG: Record<Riwaya, RiwayaTagConfig> = {
+    [Riwaya.HAFS_A_ASIM]: {
+      label: t("riwaya.hafs"),
+      backgroundColor: "#2E7D32",
+    },
+    [Riwaya.WARSH_AN_NAFI]: {
+      label: t("riwaya.warsh"),
+      backgroundColor: "#1565C0",
+    },
+    [Riwaya.QALUN_AN_NAFI]: {
+      label: t("riwaya.qalun"),
+      backgroundColor: "#6A1B9A",
+    },
+    [Riwaya.ALDURI_AN_ALKAISSAI]: {
+      label: t("riwaya.alduri"),
+      backgroundColor: "#EF6C00",
+    },
+  };
   const { label, backgroundColor } = RIWAYA_TAG[riwaya];
-  const { i18n } = useTranslation();
 
   const isRTL = i18n.dir() === "rtl";
   return (

@@ -11,7 +11,8 @@
   "No_Reciters_Found_Content": "لا يوجد بيانات قراء. يرجى التحقق من اتصالك.",
   "About": "حول التطبيق",
   "Privacy": "الخصوصية",
-
+  "quran_player": "مشغل القرآن",
+  "search_title": "بحث",
   "search_placeholder": "البحث عن قراء",
 
   "filter_all": "الكل",
@@ -23,5 +24,38 @@
   "home": "الرئيسية",
   "reciters": "القراء",
   "reciter": "القارئ",
-  "playlist": "القائمة"
+  "playlist": "القائمة",
+
+  "riwaya": {
+    "hafs": "حفص",
+    "warsh": "ورش",
+    "qalun": "قولون",
+    "alduri": "الدوري"
+  },
+  "privacy": {
+    "title": "سياسة الخصوصية",
+    "info_collection_title": "جمع المعلومات",
+    "info_collection_desc": "تطبيق ترتيل لا يقوم بجمع أو تخزين أو نقل أي معلومات شخصية. يتم بث جميع المحتويات الصوتية مباشرة من مصادر خارجية.",
+    "data_usage_title": "استخدام البيانات",
+    "data_usage_desc": "يستخدم التطبيق الاتصال بالإنترنت فقط لبث صوت القرآن من mp3quran.net. لا يتم جمع أو مشاركة أي بيانات للمستخدم.",
+    "third_party_title": "خدمات الطرف الثالث",
+    "third_party_desc": "يستخدم هذا التطبيق خدمات الطرف الثالث التالية:",
+    "mp3_quran_api": "• mp3quran.net لبث الصوت",
+    "contact_title": "اتصل بنا",
+    "contact_desc": "للأسئلة أو الاستفسارات حول سياسة الخصوصية هذه، يرجى الاتصال بـ:",
+    "last_updated": "آخر تحديث: ديسمبر 2025"
+  },
+  "about": {
+    "title": "تطبيق ترتيل",
+    "description": "تطبيق لبث القرآن الكريم مخصص لأجهزة التلفاز",
+    "features_title": "المميزات",
+    "feature_tv": "• واجهة محسنة للتلفاز مع دعم جهاز التحكم عن بعد",
+    "feature_reciters": "• العديد من القراء المشهورين",
+    "feature_audio": "• بث صوتي عالي الجودة",
+    "feature_surahs": "• جميع السور الـ 114 متاحة",
+    "about_title": "حول التطبيق",
+    "about_desc": "تطبيق ترتيل هو تطبيق مبني باستخدام React Native و Expo لتوفير تجربة استماع مثالية للقرآن الكريم على منصات التلفاز.",
+    "created_by": "تم التطوير بواسطة adelpro",
+    "source_code": "المصدر: github.com/adelpro/open-tarteel-tv"
+  }
 }

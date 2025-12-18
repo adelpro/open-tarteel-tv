@@ -133,7 +133,7 @@ export default function HomeScreen() {
   useEffect(() => {
     const lang = i18n.language === "ar" ? "ar" : "en";
     loadReciters(lang);
-  }, []);
+  }, [i18n.language]);
 
   useEffect(() => {
     const rn = route.name as string | undefined;

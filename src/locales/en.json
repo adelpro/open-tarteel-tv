@@ -11,6 +11,8 @@
   "No_Reciters_Found_Content": "No reciter data available. Please check your connection.",
   "About": "About",
   "Privacy": "Privacy",
+  "quran_player": "Quran Player",
+  "search_title": "Search",
 
   "search_placeholder": "Search Reciters",
 
@@ -23,5 +25,38 @@
   "home": "Home",
   "reciters": "Reciters",
   "reciter": "Reciter",
-  "playlist": "Playlist"
+  "playlist": "Playlist",
+
+  "riwaya": {
+    "hafs": "Hafs",
+    "warsh": "Warsh",
+    "qalun": "Qalun",
+    "alduri": "Ad Duri"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "info_collection_title": "Information Collection",
+    "info_collection_desc": "Open Tarteel TV does not collect, store, or transmit any personal information. All audio content is streamed directly from third-party sources.",
+    "data_usage_title": "Data Usage",
+    "data_usage_desc": "The app uses internet connectivity solely to stream Quran audio from mp3quran.net API. No user data is collected or shared.",
+    "third_party_title": "Third-Party Services",
+    "third_party_desc": "This app uses the following third-party services:",
+    "mp3_quran_api": "• mp3quran.net API for audio streaming",
+    "contact_title": "Contact",
+    "contact_desc": "For questions or concerns about this privacy policy, please contact:",
+    "last_updated": "Last updated: December 2025"
+  },
+  "about": {
+    "title": "Open Tarteel TV",
+    "description": "Quran streaming application for TV devices",
+    "features_title": "Features",
+    "feature_tv": "• TV-optimized interface with remote control support",
+    "feature_reciters": "• Multiple renowned reciters",
+    "feature_audio": "• High-quality audio streaming",
+    "feature_surahs": "• All 114 Surahs available",
+    "about_title": "About",
+    "about_desc": "Open Tarteel TV is a React Native application built with Expo to provide an optimal Quran audio streaming experience on TV platforms.",
+    "created_by": "Created by adelpro",
+    "source_code": "Source: github.com/adelpro/open-tarteel-tv"
+  }
 }

@@ -1,63 +1,67 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView, useColorScheme } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  useColorScheme,
+} from "react-native";
+import { useTranslation } from "react-i18next";
 
 export default function PrivacyScreen() {
+  const { t, i18n } = useTranslation();
   const colorScheme = useColorScheme();
   const isDark = colorScheme !== "light";
-  const styles = createStyles(isDark);
+  const isRtl = i18n.dir() === "rtl";
+  const styles = createStyles(isDark, isRtl);
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.title}>Privacy Policy</Text>
+        <Text style={styles.title}>{t("privacy.title")}</Text>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Information Collection</Text>
-          <Text style={styles.text}>
-            Open Tarteel TV does not collect, store, or transmit any personal
-            information. All audio content is streamed directly from third-party
-            sources.
+          <Text style={styles.sectionTitle}>
+            {t("privacy.info_collection_title")}
           </Text>
+          <Text style={styles.text}>{t("privacy.info_collection_desc")}</Text>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Data Usage</Text>
-          <Text style={styles.text}>
-            The app uses internet connectivity solely to stream Quran audio from
-            mp3quran.net API. No user data is collected or shared.
+          <Text style={styles.sectionTitle}>
+            {t("privacy.data_usage_title")}
           </Text>
+          <Text style={styles.text}>{t("privacy.data_usage_desc")}</Text>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Third-Party Services</Text>
-          <Text style={styles.text}>
-            This app uses the following third-party services:
+          <Text style={styles.sectionTitle}>
+            {t("privacy.third_party_title")}
           </Text>
-          <Text style={styles.text}>
-            • mp3quran.net API for audio streaming
-          </Text>
+          <Text style={styles.text}>{t("privacy.third_party_desc")}</Text>
+          <Text style={styles.text}>{t("privacy.mp3_quran_api")}</Text>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Contact</Text>
-          <Text style={styles.text}>
-            For questions or concerns about this privacy policy, please contact:
-          </Text>
+          <Text style={styles.sectionTitle}>{t("privacy.contact_title")}</Text>
+          <Text style={styles.text}>{t("privacy.contact_desc")}</Text>
           <Text style={styles.linkText}>contact@quran.us.kg</Text>
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Last updated: December 2025</Text>
+          <Text style={styles.footerText}>{t("privacy.last_updated")}</Text>
         </View>
       </View>
     </ScrollView>
   );
 }
 
-function createStyles(isDark: boolean) {
+function createStyles(isDark: boolean, isRtl: boolean) {
   const bg = isDark ? "#121212" : "#FFFFFF";
   const textPrimary = isDark ? "#fff" : "#111";
   const textSecondary = isDark ? "#AAA" : "#555";
   const border = isDark ? "#333" : "#E0E0E0";
+  const textAlign = isRtl ? "right" : "left";
+
   return StyleSheet.create({
     container: {
       flex: 1,
@@ -71,6 +75,7 @@ function createStyles(isDark: boolean) {
       fontWeight: "bold",
       color: "#4CAF50",
       marginBottom: 30,
+      textAlign,
     },
     section: {
       marginBottom: 30,
@@ -80,17 +85,20 @@ function createStyles(isDark: boolean) {
       fontWeight: "bold",
       color: textPrimary,
       marginBottom: 15,
+      textAlign,
     },
     text: {
       fontSize: 16,
       color: isDark ? "#DDD" : "#333",
       marginBottom: 10,
       lineHeight: 24,
+      textAlign,
     },
     linkText: {
       fontSize: 16,
       color: "#4CAF50",
       marginTop: 10,
+      textAlign,
     },
     footer: {
       marginTop: 30,
@@ -101,6 +109,7 @@ function createStyles(isDark: boolean) {
     footerText: {
       fontSize: 14,
       color: isDark ? "#888" : "#666",
+      textAlign,
     },
   });
 }
