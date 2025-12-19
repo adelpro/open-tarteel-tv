@@ -45,7 +45,6 @@ const ReciterCard = ({
   viewCount,
   favoriteCount,
 }: ReciterCardProps) => {
-  console.log(`[ReciterCard] Rendering: ${reciter.name} (ID: ${reciter.id})`);
   const { i18n } = useTranslation();
   const colorScheme = useColorScheme();
   const isDark = colorScheme !== "light";
@@ -89,11 +88,6 @@ const ReciterCard = ({
   return (
     <SpatialNavigationFocusableView onSelect={() => onPress(reciter)}>
       {({ isFocused }) => {
-        if (reciter.id === 107) {
-          console.log(
-            `[ReciterCard] Render Function called for 107. Focused: ${isFocused}`
-          );
-        }
         return (
           <Pressable
             style={[styles.reciterCard, isFocused && styles.reciterCardFocused]}

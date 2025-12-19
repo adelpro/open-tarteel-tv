@@ -14,16 +14,16 @@ import {
 } from "react-tv-space-navigation";
 import { Ionicons } from "@expo/vector-icons";
 import BrandHeader from "../components/brand-header";
-import FilterChip from "../components/filter-chip";
-import MenuButton from "../components/menu-button";
 import ReciterCard from "../components/reciter-card";
 import RetryButton from "../components/retry-button";
 import SearchInput from "../components/search-input";
+import SectionFeatured from "../components/section-featured";
+import SectionFilters from "../components/section-filters";
+import SectionTopNav from "../components/section-top-nav";
 import { getAllReciters } from "../services/api";
 import { Reciter, Riwaya } from "../types";
 import { colorPrimary } from "../constants/interaction-colors";
 import { getThemeColors } from "../constants/theme";
-import LanguageSwitch from "../components/language-switch";
 import { useTranslation } from "react-i18next";
 import Fuse from "fuse.js";
 import { normalizeSearchText } from "../utils/search";
@@ -74,30 +74,6 @@ export default function HomeScreen() {
       paddingTop: 8,
       overflow: "visible",
     },
-    header: {
-      fontSize: 22,
-      fontWeight: "700",
-      color: colorPrimary,
-      marginBottom: 12,
-      textAlign: isRTL ? "right" : "left",
-    },
-    sectionTitle: {
-      fontSize: 24,
-      fontWeight: "700",
-      color: textPrimary,
-      marginTop: 24,
-      marginBottom: 16,
-      textAlign: isRTL ? "right" : "left",
-      paddingHorizontal: 20,
-    },
-    filterRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "flex-start",
-      flexWrap: "wrap",
-      marginBottom: 12,
-    },
-
     reciterRow: {
       flexDirection: isRTL ? "row-reverse" : "row",
       justifyContent: "flex-start",
@@ -111,19 +87,13 @@ export default function HomeScreen() {
       marginVertical: 8,
     },
 
-    retryCountText: {
-      fontSize: 14,
+    errorMessage: {
+      fontSize: isVeryWide ? 20 : isWide ? 18 : 16,
       color: textSecondary,
+      textAlign: "center",
       marginBottom: 24,
+      lineHeight: 24,
     },
-
-    menuRow: {
-      flexDirection: isRTL ? "row-reverse" : "row",
-      justifyContent: "flex-end",
-      gap: 12,
-      marginBottom: 10,
-    },
-
     errorContainer: {
       alignItems: "center",
       paddingHorizontal: 40,
@@ -135,12 +105,10 @@ export default function HomeScreen() {
       marginTop: 20,
       marginBottom: 12,
     },
-    errorMessage: {
-      fontSize: isVeryWide ? 20 : isWide ? 18 : 16,
+    retryCountText: {
+      fontSize: 14,
       color: textSecondary,
-      textAlign: "center",
       marginBottom: 24,
-      lineHeight: 24,
     },
   });
 
@@ -195,8 +163,6 @@ export default function HomeScreen() {
     [navigation]
   );
 
-  console.log(`[Home] Render - Width: ${width}, Reciters: ${reciters.length}`);
-
   const mostViewedReciters = useMemo(() => {
     if (!reciters.length) {
       return [];
@@ -223,11 +189,6 @@ export default function HomeScreen() {
       })
       .slice(0, 10);
 
-    console.log("[Home] Compute Most Viewed:", {
-      resultCount: viewed.length,
-      viewedIds: viewed.map((r) => r.id),
-      viewCountsKeys: Object.keys(viewCounts),
-    });
     return viewed;
   }, [reciters, viewCounts]);
 
@@ -255,11 +216,6 @@ export default function HomeScreen() {
       })
       .slice(0, 10);
 
-    console.log("[Home] Compute Most Favorited:", {
-      resultCount: favorited.length,
-      favoritedIds: favorited.map((r) => r.id),
-      favoriteCountsKeys: Object.keys(favoriteCounts),
-    });
     return favorited;
   }, [reciters, favoriteCounts]);
 
@@ -378,181 +334,54 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <View
-        style={[
-          styles.menuRow,
-          isRTL ? { flexDirection: "row-reverse" } : { flexDirection: "row" },
-        ]}
-      >
-        <MenuButton
-          label={t("About")}
-          iconName="information-circle-outline"
-          onPress={() => navigation.navigate("About")}
-          isDark={isDark}
-          accessibilityLabel={t("About")}
-          accessibilityRole="button"
-        />
-        <MenuButton
-          label={t("Privacy")}
-          iconName="shield-checkmark-outline"
-          onPress={() => navigation.navigate("Privacy")}
-          isDark={isDark}
-          accessibilityLabel={t("Privacy")}
-          accessibilityRole="button"
-        />
-        <LanguageSwitch
-          isDark={isDark}
-          accessibilityLabel={t("change_language")}
-          accessibilityRole="button"
-        />
-      </View>
+      <SectionTopNav isRTL={isRTL} isDark={isDark} />
       <BrandHeader />
 
       <SpatialNavigationScrollView>
         <View style={[styles.content]}>
-          <SearchInput
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            onFocusChange={setSearchFocused}
-            isDark={isDark}
-          />
-
-          {mostViewedReciters.length > 0 && (
-            <View style={{ marginVertical: 12 }}>
-              <Text style={styles.sectionTitle}>
-                {t("most_viewed")} ({mostViewedReciters.length})
-              </Text>
-              <View
-                style={{
-                  height: isVeryWide ? 220 : isWide ? 200 : 180,
-                  backgroundColor: "rgba(0,255,0,0.05)", // Very faint green to check area
-                }}
-              >
-                <SpatialNavigationScrollView
-                  horizontal
-                  style={{ flex: 1 }}
-                  contentContainerStyle={{
-                    paddingHorizontal: 20,
-                    flexDirection: "row", // Handle RTL with order or start/end
-                  }}
-                >
-                  {(isRTL
-                    ? [...mostViewedReciters].reverse()
-                    : mostViewedReciters
-                  ).map((reciter, index) => (
-                    <View
-                      key={`mv-${reciter.id}-${index}`}
-                      style={[
-                        styles.reciterItem,
-                        {
-                          width: Math.max(itemWidth, 220),
-                          marginRight: 12,
-                          borderWidth: 2,
-                          borderColor: "red",
-                        },
-                      ]}
-                    >
-                      <ReciterCard
-                        reciter={reciter}
-                        preferredFocus={false}
-                        onPress={handleReciterPress}
-                        viewCount={viewCounts[String(reciter.id)]}
-                        favoriteCount={favoriteCounts[String(reciter.id)]}
-                      />
-                    </View>
-                  ))}
-                </SpatialNavigationScrollView>
-              </View>
-            </View>
-          )}
-
-          {mostFavoritedReciters.length > 0 && (
-            <View style={{ marginVertical: 12 }}>
-              <Text style={styles.sectionTitle}>
-                {t("most_favorited")} ({mostFavoritedReciters.length})
-              </Text>
-              <View
-                style={{
-                  height: isVeryWide ? 220 : isWide ? 180 : 160,
-                  backgroundColor: "rgba(0,0,255,0.05)", // Very faint blue
-                }}
-              >
-                <SpatialNavigationScrollView
-                  horizontal
-                  style={{ flex: 1 }}
-                  contentContainerStyle={{
-                    paddingHorizontal: 20,
-                    flexDirection: "row",
-                  }}
-                >
-                  {(isRTL
-                    ? [...mostFavoritedReciters].reverse()
-                    : mostFavoritedReciters
-                  ).map((reciter, index) => (
-                    <View
-                      key={`mf-${reciter.id}-${index}`}
-                      style={[
-                        styles.reciterItem,
-                        {
-                          width: Math.max(itemWidth, 220),
-                          marginRight: 12,
-                          borderWidth: 2,
-                          borderColor: "blue",
-                        },
-                      ]}
-                    >
-                      <ReciterCard
-                        reciter={reciter}
-                        preferredFocus={false}
-                        onPress={handleReciterPress}
-                        viewCount={viewCounts[String(reciter.id)]}
-                        favoriteCount={favoriteCounts[String(reciter.id)]}
-                      />
-                    </View>
-                  ))}
-                </SpatialNavigationScrollView>
-              </View>
-            </View>
-          )}
-
           <SpatialNavigationView
-            direction="horizontal"
-            style={{
-              ...styles.filterRow,
-              direction: isRTL ? "rtl" : "ltr",
-              flexDirection: "row",
-              justifyContent: "flex-start",
-              width: "100%",
-              paddingHorizontal: 20,
-              marginTop: 10,
-            }}
+            direction="vertical"
+            style={{ marginBottom: 16 }}
           >
-            <FilterChip
-              label={t("filter_all")}
-              selected={selectedRiwaya === "all"}
-              onPress={() => setSelectedRiwaya("all")}
-            />
-            <FilterChip
-              label={t("filter_hafs")}
-              selected={selectedRiwaya === Riwaya.HAFS_A_ASIM}
-              onPress={() => setSelectedRiwaya(Riwaya.HAFS_A_ASIM)}
-            />
-            <FilterChip
-              label={t("filter_warsh")}
-              selected={selectedRiwaya === Riwaya.WARSH_AN_NAFI}
-              onPress={() => setSelectedRiwaya(Riwaya.WARSH_AN_NAFI)}
-            />
-            <FilterChip
-              label={t("filter_qalun")}
-              selected={selectedRiwaya === Riwaya.QALUN_AN_NAFI}
-              onPress={() => setSelectedRiwaya(Riwaya.QALUN_AN_NAFI)}
-            />
-            <FilterChip
-              label={t("filter_ad_duri")}
-              selected={selectedRiwaya === Riwaya.ALDURI_AN_ALKAISSAI}
-              onPress={() => setSelectedRiwaya(Riwaya.ALDURI_AN_ALKAISSAI)}
+            <SearchInput
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              onFocusChange={setSearchFocused}
+              isDark={isDark}
             />
           </SpatialNavigationView>
+
+          <SectionFeatured
+            title={`${t("most_viewed")} (${mostViewedReciters.length})`}
+            reciters={mostViewedReciters}
+            itemWidth={itemWidth}
+            isRTL={isRTL}
+            viewCounts={viewCounts}
+            favoriteCounts={favoriteCounts}
+            onReciterPress={handleReciterPress}
+            isVeryWide={isVeryWide}
+            isWide={isWide}
+            textPrimary={textPrimary}
+          />
+
+          <SectionFeatured
+            title={`${t("most_favorited")} (${mostFavoritedReciters.length})`}
+            reciters={mostFavoritedReciters}
+            itemWidth={itemWidth}
+            isRTL={isRTL}
+            viewCounts={viewCounts}
+            favoriteCounts={favoriteCounts}
+            onReciterPress={handleReciterPress}
+            isVeryWide={isVeryWide}
+            isWide={isWide}
+            textPrimary={textPrimary}
+          />
+
+          <SectionFilters
+            selectedRiwaya={selectedRiwaya}
+            onSelectRiwaya={setSelectedRiwaya}
+            isRTL={isRTL}
+          />
 
           {reciterRows.map((row, rowIndex) => (
             <SpatialNavigationView
