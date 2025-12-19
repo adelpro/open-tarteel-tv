@@ -25,6 +25,8 @@ import { colorPrimary } from "../constants/interaction-colors";
 import { getThemeColors } from "../constants/theme";
 import LanguageSwitch from "../components/language-switch";
 import { useTranslation } from "react-i18next";
+import Fuse from "fuse.js";
+import { normalizeSearchText } from "../utils/search";
 
 export default function HomeScreen() {
   const { t, i18n } = useTranslation();
@@ -183,17 +185,45 @@ export default function HomeScreen() {
   );
 
   const filteredReciters = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    return reciters.filter((r) => {
-      const byText =
-        q.length === 0 ||
-        r.name.toLowerCase().includes(q) ||
-        r.moshaf.name.toLowerCase().includes(q);
-      const byRiwaya =
-        selectedRiwaya === "all" || r.moshaf.riwaya === selectedRiwaya;
-      return byText && byRiwaya;
+    const searchLanguage = i18n.language === "ar" ? "ar" : "en";
+
+    const matchesRiwaya = (reciter: Reciter) =>
+      selectedRiwaya === "all" || reciter.moshaf.riwaya === selectedRiwaya;
+
+    const baseList = reciters.filter(matchesRiwaya);
+
+    const normalizedQuery = normalizeSearchText(searchQuery, searchLanguage);
+    if (!normalizedQuery.length) {
+      return baseList;
+    }
+
+    type ReciterSearchItem = Reciter & {
+      searchName: string;
+      searchMoshafName: string;
+    };
+
+    const items: ReciterSearchItem[] = baseList.map((reciter) => ({
+      ...reciter,
+      searchName: normalizeSearchText(reciter.name, searchLanguage),
+      searchMoshafName: normalizeSearchText(
+        reciter.moshaf.name,
+        searchLanguage
+      ),
+    }));
+
+    const fuse = new Fuse(items, {
+      keys: [
+        { name: "searchName", weight: 0.6 },
+        { name: "searchMoshafName", weight: 0.4 },
+      ],
+      threshold: 0.4,
+      ignoreLocation: true,
+      minMatchCharLength: 1,
     });
-  }, [reciters, searchQuery, selectedRiwaya]);
+
+    const results = fuse.search(normalizedQuery);
+    return results.map((entry) => entry.item);
+  }, [reciters, searchQuery, selectedRiwaya, i18n.language]);
 
   const cardsPerRow = useMemo(() => {
     if (width >= 2800) return 6;
