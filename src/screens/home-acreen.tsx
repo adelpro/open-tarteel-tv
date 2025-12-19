@@ -44,7 +44,8 @@ export default function HomeScreen() {
   const [searchFocused, setSearchFocused] = useState(false);
   const MAX_RETRIES = 3;
 
-  const { bg, textPrimary, textSecondary } = getThemeColors(isDark);
+  const { bg, textPrimary, textSecondary, errorPrimary } =
+    getThemeColors(isDark);
   const isVeryWide = width >= 2800;
   const isWide = width >= 2200 && width < 2800;
   const styles = StyleSheet.create({
@@ -226,7 +227,7 @@ export default function HomeScreen() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#4CAF50" />
+        <ActivityIndicator size="large" color={colorPrimary} />
         <Text style={styles.loadingText}>{t("Loading_Reciters")}</Text>
       </View>
     );
@@ -236,7 +237,7 @@ export default function HomeScreen() {
     return (
       <View style={styles.centerContainer}>
         <View style={styles.errorContainer}>
-          <Ionicons name="alert-circle" size={64} color="#FF6B6B" />
+          <Ionicons name="alert-circle" size={64} color={errorPrimary} />
           <Text style={styles.errorTitle}>{t("Failed_to_Load_Reciters")}</Text>
           <Text style={styles.errorMessage}>{error}</Text>
           <Text style={styles.retryCountText}>
@@ -255,7 +256,7 @@ export default function HomeScreen() {
     return (
       <View style={styles.centerContainer}>
         <View style={styles.errorContainer}>
-          <Ionicons name="folder-outline" size={64} color="#999" />
+          <Ionicons name="folder-outline" size={64} color={textSecondary} />
           <Text style={styles.errorTitle}>{t("No_Reciters_Found_Title")}</Text>
           <Text style={styles.errorMessage}>
             {t("No_Reciters_Found_Content")}

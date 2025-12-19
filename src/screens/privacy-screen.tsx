@@ -7,13 +7,65 @@ import {
   useColorScheme,
 } from "react-native";
 import { useTranslation } from "react-i18next";
+import { getThemeColors } from "../constants/theme";
 
 export default function PrivacyScreen() {
   const { t, i18n } = useTranslation();
+  const isRTL = i18n.dir() === "rtl";
   const colorScheme = useColorScheme();
   const isDark = colorScheme !== "light";
-  const isRtl = i18n.dir() === "rtl";
-  const styles = createStyles(isDark, isRtl);
+  const { textPrimary, textSecondary, border, cardBg } = getThemeColors(isDark);
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: cardBg,
+    },
+    content: {
+      padding: 40,
+    },
+    title: {
+      fontSize: 36,
+      fontWeight: "bold",
+      color: textPrimary,
+      marginBottom: 30,
+      textAlign: isRTL ? "right" : "left",
+    },
+    section: {
+      marginBottom: 30,
+    },
+    sectionTitle: {
+      fontSize: 24,
+      fontWeight: "bold",
+      color: textPrimary,
+      marginBottom: 15,
+      textAlign: isRTL ? "right" : "left",
+    },
+    text: {
+      fontSize: 16,
+      color: textPrimary,
+      marginBottom: 10,
+      lineHeight: 24,
+      textAlign: isRTL ? "right" : "left",
+    },
+    linkText: {
+      fontSize: 16,
+      color: textPrimary,
+      marginTop: 10,
+      textAlign: isRTL ? "right" : "left",
+    },
+    footer: {
+      marginTop: 30,
+      paddingTop: 20,
+      borderTopWidth: 1,
+      borderTopColor: border,
+    },
+    footerText: {
+      fontSize: 14,
+      color: textSecondary,
+      textAlign: isRTL ? "right" : "left",
+    },
+  });
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
@@ -53,63 +105,4 @@ export default function PrivacyScreen() {
       </View>
     </ScrollView>
   );
-}
-
-function createStyles(isDark: boolean, isRtl: boolean) {
-  const bg = isDark ? "#121212" : "#FFFFFF";
-  const textPrimary = isDark ? "#fff" : "#111";
-  const textSecondary = isDark ? "#AAA" : "#555";
-  const border = isDark ? "#333" : "#E0E0E0";
-  const textAlign = isRtl ? "right" : "left";
-
-  return StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: bg,
-    },
-    content: {
-      padding: 40,
-    },
-    title: {
-      fontSize: 36,
-      fontWeight: "bold",
-      color: "#4CAF50",
-      marginBottom: 30,
-      textAlign,
-    },
-    section: {
-      marginBottom: 30,
-    },
-    sectionTitle: {
-      fontSize: 24,
-      fontWeight: "bold",
-      color: textPrimary,
-      marginBottom: 15,
-      textAlign,
-    },
-    text: {
-      fontSize: 16,
-      color: isDark ? "#DDD" : "#333",
-      marginBottom: 10,
-      lineHeight: 24,
-      textAlign,
-    },
-    linkText: {
-      fontSize: 16,
-      color: "#4CAF50",
-      marginTop: 10,
-      textAlign,
-    },
-    footer: {
-      marginTop: 30,
-      paddingTop: 20,
-      borderTopWidth: 1,
-      borderTopColor: border,
-    },
-    footerText: {
-      fontSize: 14,
-      color: isDark ? "#888" : "#666",
-      textAlign,
-    },
-  });
 }

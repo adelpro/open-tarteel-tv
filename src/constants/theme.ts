@@ -5,6 +5,7 @@ export type AppThemeColors = {
   cardBg: string;
   border: string;
   focusBg: string;
+  errorPrimary: string;
 };
 
 export function getThemeColors(isDark: boolean): AppThemeColors {
@@ -14,6 +15,8 @@ export function getThemeColors(isDark: boolean): AppThemeColors {
   const cardBg = isDark ? "#1E1E1E" : "#EFEFEF";
   const border = isDark ? "#333" : "#D0D0D0";
   const focusBg = isDark ? "#2E2E2E" : "#E0E0E0";
+  const errorPrimary = isDark ? "#dc2626" : "#fee2e2";
+
   return {
     bg,
     textPrimary,
@@ -21,5 +24,6 @@ export function getThemeColors(isDark: boolean): AppThemeColors {
     cardBg,
     border,
     focusBg,
+    errorPrimary,
   };
 }
