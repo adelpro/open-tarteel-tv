@@ -11,7 +11,7 @@ import {
 import { useTVEventHandler, useColorScheme } from "react-native";
 import { useTranslation } from "react-i18next";
 
-import HomeScreen from "../screens/home-acreen";
+import HomeScreen from "../screens/home-screen";
 import PlayerScreen from "../screens/player-screen";
 import AboutScreen from "../screens/about-screen";
 import PrivacyScreen from "../screens/privacy-screen";
