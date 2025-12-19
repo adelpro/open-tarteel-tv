@@ -70,6 +70,5 @@ If you add tests:
 
 ## Attribution and License
 
-By contributing, you agree that your contributions will be licensed under the same license as the project (**Apache 2.0**).  
+By contributing, you agree that your contributions will be licensed under the same license as the project (**MIT**).  
 You will be credited via the project history (git commit authorship, pull request records) and any contributor lists the project may maintain.
-

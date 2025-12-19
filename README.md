@@ -3,7 +3,7 @@
 [![Expo](https://img.shields.io/badge/Expo-54.0-000020.svg)](https://expo.dev/)
 [![React Native TV](https://img.shields.io/badge/React%20Native-TV%20OS-61dafb.svg)](https://github.com/react-native-tvos/react-native-tvos)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](./LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
 
 Open Tarteel TV is a modern, open-source TV app for browsing and listening to Quran recitations on TV platforms (Android TV, tvOS).  
@@ -38,13 +38,15 @@ Key packages are declared in `package.json:1` and used throughout `src/`.
 
 ## Getting Started
 
-### Prerequisites
+### 1. Prerequisites
 
 - Node.js (LTS recommended)
 - Yarn (`corepack enable` or `npm install -g yarn`)
 - Android TV emulator / device, or Apple TV simulator / device
 
-### Install dependencies
+### 2. Install packages
+
+Install all dependencies before running the app:
 
 ```bash
 yarn install
@@ -52,7 +54,7 @@ yarn install
 
 > The project uses Expo and React Native TV support via `react-native-tvos`.
 
-### Run on Android TV
+### 3. Run on Android TV
 
 ```bash
 yarn android
@@ -60,19 +62,11 @@ yarn android
 
 This runs `expo run:android` for TV (see `package.json:5-13`).
 
-### Run on tvOS
+### 4. Run on tvOS
 
 ```bash
 yarn ios
 ```
-
-### Run in development web mode (optional)
-
-```bash
-yarn web
-```
-
-> Web mode is mainly for quick UI checks; TV navigation is best tested on an actual TV target.
 
 ---
 
@@ -162,7 +156,7 @@ More details are in [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
 ## License
 
-This project is licensed under the **Apache License 2.0**.  
+This project is licensed under the **MIT License**.  
 This means:
 
 - You **can use** the code, including in **commercial** projects
