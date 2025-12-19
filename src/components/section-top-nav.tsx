@@ -20,6 +20,7 @@ const SectionTopNav = ({ isRTL, isDark }: TopNavigationProps) => {
       flexDirection: "row",
       justifyContent: isRTL ? "flex-start" : "flex-end",
       gap: 10,
+      marginBottom: 20,
     },
   });
 

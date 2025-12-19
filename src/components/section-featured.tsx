@@ -63,15 +63,11 @@ const SectionFeatured = ({
           style={{ flex: 1 }}
           contentContainerStyle={{
             paddingHorizontal: 20,
-            flexDirection: isRTL ? "row-reverse" : "row",
+            direction: isRTL ? "rtl" : "ltr",
+            justifyContent: "flex-start",
           }}
         >
-          <SpatialNavigationView
-            direction="horizontal"
-            style={{
-              flexDirection: isRTL ? "row-reverse" : "row",
-            }}
-          >
+          <SpatialNavigationView direction="horizontal">
             {reciters.map((reciter, index) => (
               <View
                 key={`${title}-${reciter.id}-${index}`}
