@@ -75,7 +75,7 @@ const SectionFeatured = ({
                   styles.reciterItem,
                   {
                     width: Math.max(itemWidth, 220),
-                    marginRight: 12,
+                    marginEnd: 12,
                   },
                 ]}
               >

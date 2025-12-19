@@ -48,7 +48,6 @@ export function usePlayer() {
       )?.link;
 
       if (!audioUrl) {
-        console.warn(`[usePlayer] No audio URL for surah ${surahId}`);
         return;
       }
 
@@ -61,7 +60,7 @@ export function usePlayer() {
         currentUrlRef.current = audioUrl;
         player.play();
       } catch (error) {
-        console.error("Error playing audio", error);
+        // Error playing audio
       }
     },
     [reciter, player, isPlaying]

@@ -27,7 +27,8 @@ import { getThemeColors } from "../constants/theme";
 import { useTranslation } from "react-i18next";
 import Fuse from "fuse.js";
 import { normalizeSearchText } from "../utils/search";
-import { useGlobalStats } from "../hooks/use-global-stats";
+import { useFavorites } from "../hooks/use-favorites";
+import { useViewCounts } from "../hooks/use-view-counts";
 
 export default function HomeScreen() {
   const { t, i18n } = useTranslation();
@@ -40,7 +41,8 @@ export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme !== "light";
   const { width } = useWindowDimensions();
-  const { viewCounts, favoriteCounts } = useGlobalStats();
+  const { viewCounts } = useViewCounts();
+  const { favoriteCounts } = useFavorites();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRiwaya, setSelectedRiwaya] = useState<Riwaya | "all">("all");

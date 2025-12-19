@@ -9,7 +9,7 @@ import {
   SpatialNavigationVirtualizedListRef,
 } from "react-tv-space-navigation";
 
-import { syncView } from "../services/gun-service";
+import { useViewCounts } from "../hooks/use-view-counts";
 
 export default function PlayerScreen() {
   const colorScheme = useColorScheme();
@@ -17,14 +17,15 @@ export default function PlayerScreen() {
   const styles = createStyles(isDark);
   const playlistRef = useRef<SpatialNavigationVirtualizedListRef | null>(null);
 
+  const { incrementView } = useViewCounts();
   const player = usePlayer();
   const { playlistData, reciter, selectedSurah } = player;
 
   useEffect(() => {
     if (reciter?.id) {
-      syncView(reciter.id.toString());
+      incrementView(reciter.id.toString());
     }
-  }, [reciter?.id]);
+  }, [reciter?.id, incrementView]);
 
   useEffect(() => {
     if (!selectedSurah) return;

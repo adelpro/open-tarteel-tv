@@ -1,14 +1,26 @@
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { syncFavorite } from "../services/gun-service";
+import {
+  syncFavorite,
+  subscribeToFavoriteCounts,
+} from "../services/gun-service";
 
 const FAVORITES_STORAGE_KEY = "@open_tarteel_favorites";
 
 export function useFavorites() {
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [favoriteCounts, setFavoriteCounts] = useState<Record<string, number>>(
+    {}
+  );
 
   useEffect(() => {
     loadFavorites();
+
+    const unsub = subscribeToFavoriteCounts((key, count) => {
+      setFavoriteCounts((prev) => ({ ...prev, [key]: count }));
+    });
+
+    return () => unsub();
   }, []);
 
   const loadFavorites = async () => {
@@ -18,7 +30,7 @@ export function useFavorites() {
         setFavorites(JSON.parse(stored));
       }
     } catch (e) {
-      console.error("Failed to load favorites", e);
+      // Failed to load favorites
     }
   };
 
@@ -44,9 +56,9 @@ export function useFavorites() {
       // Sync with global Gun store
       syncFavorite(id, !currentlyFavorited);
     } catch (e) {
-      console.error("Failed to toggle favorite", e);
+      // Failed to toggle favorite
     }
   };
 
-  return { favorites, isFavorited, toggleFavorite };
+  return { favorites, isFavorited, toggleFavorite, favoriteCounts };
 }

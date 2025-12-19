@@ -61,10 +61,7 @@ const retryFetch = async (
       throw new Error(`HTTP ${response.status}`);
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
-      console.warn(
-        `Fetch attempt ${attempt}/${maxAttempts} failed:`,
-        lastError.message
-      );
+      // Silent fail for retry attempt
 
       if (attempt < maxAttempts) {
         // Exponential backoff: 1s, 2s, 4s
@@ -115,7 +112,7 @@ export async function getAllReciters(lang: string): Promise<Reciter[]> {
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
-    console.error("Error fetching reciters:", errorMessage);
+    // Failed to fetch reciters
     throw error; // Re-throw so HomeScreen can handle it
   }
 }
