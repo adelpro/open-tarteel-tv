@@ -389,10 +389,7 @@ export default function HomeScreen() {
             <SpatialNavigationView
               key={`row-${rowIndex}`}
               direction="horizontal"
-              style={{
-                ...styles.reciterRow,
-                flexDirection: isRTL ? "row-reverse" : "row",
-              }}
+              style={styles.reciterRow}
             >
               {row.map((reciter, cardIndex) => (
                 <View

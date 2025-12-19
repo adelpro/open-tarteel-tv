@@ -3,11 +3,9 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  TextStyle,
   useColorScheme,
   useWindowDimensions,
   View,
-  ViewStyle,
 } from "react-native";
 import { SpatialNavigationFocusableView } from "react-tv-space-navigation";
 import { Reciter, Riwaya } from "../types";
@@ -57,6 +55,8 @@ const ReciterCard = ({
   const isMedium = width >= 1600 && width < 2200;
   const styles = StyleSheet.create({
     reciterCard: {
+      position: "relative",
+      direction: isRTL ? "rtl" : "ltr",
       height: isVeryWide ? 140 : isWide ? 128 : isMedium ? 118 : 110,
       backgroundColor: cardBg,
       paddingVertical: isVeryWide ? 28 : isWide ? 24 : 20,
@@ -77,12 +77,12 @@ const ReciterCard = ({
       fontWeight: "bold",
       color: textPrimary,
       marginBottom: 5,
-      textAlign: isRTL ? "right" : "left",
+      width: "100%",
     },
     reciterDesc: {
       fontSize: isVeryWide ? 18 : isWide ? 16 : isMedium ? 15 : 14,
       color: textSecondary,
-      textAlign: isRTL ? "right" : "left",
+      width: "100%",
     },
   });
   return (
@@ -112,9 +112,9 @@ const ReciterCard = ({
             </Text>
             <View
               style={{
-                flexDirection: "row",
+                flexDirection: "row-reverse",
                 alignItems: "center",
-                marginTop: 4,
+                marginTop: 8,
               }}
             >
               {viewCount !== undefined && (
@@ -122,7 +122,6 @@ const ReciterCard = ({
                   style={{
                     flexDirection: "row",
                     alignItems: "center",
-                    marginRight: 12,
                   }}
                 >
                   <Ionicons
@@ -133,13 +132,14 @@ const ReciterCard = ({
                   <Text
                     style={[
                       styles.reciterDesc,
-                      { marginLeft: 4, fontSize: 12 },
+                      { marginEnd: 4, fontSize: 12, width: "auto" },
                     ]}
                   >
                     {viewCount}
                   </Text>
                 </View>
               )}
+
               {favoriteCount !== undefined && (
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
                   <Ionicons
@@ -150,7 +150,7 @@ const ReciterCard = ({
                   <Text
                     style={[
                       styles.reciterDesc,
-                      { marginLeft: 4, fontSize: 12 },
+                      { marginEnd: 4, fontSize: 12, width: "auto" },
                     ]}
                   >
                     {favoriteCount}

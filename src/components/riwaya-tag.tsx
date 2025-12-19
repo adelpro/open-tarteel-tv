@@ -41,7 +41,7 @@ const RiwayaTag = ({ riwaya }: RiwayaTagProps) => {
       style={{
         position: "absolute",
         top: 8,
-        [isRTL ? "start" : "end"]: 8,
+        end: 8,
         paddingHorizontal: 8,
         paddingVertical: 2,
         borderRadius: 4,
