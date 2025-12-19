@@ -21,7 +21,7 @@ import RetryButton from "../components/retry-button";
 import SearchInput from "../components/search-input";
 import { getAllReciters } from "../services/api";
 import { Reciter, Riwaya } from "../types";
-import { colorPrimaryGreen } from "../constants/interaction-colors";
+import { colorPrimary } from "../constants/interaction-colors";
 import { getThemeColors } from "../constants/theme";
 import LanguageSwitch from "../components/language-switch";
 import { useTranslation } from "react-i18next";
@@ -72,7 +72,7 @@ export default function HomeScreen() {
     header: {
       fontSize: 22,
       fontWeight: "700",
-      color: colorPrimaryGreen,
+      color: colorPrimary,
       marginBottom: 12,
       textAlign: "left",
     },

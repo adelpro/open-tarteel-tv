@@ -13,8 +13,8 @@ import {
 import { FontAwesome } from "@expo/vector-icons";
 import AudioSpectrum from "./audio-spectrum";
 import {
-  colorPrimaryGreen,
-  colorPrimaryGreenLight,
+  colorPrimary,
+  colorPrimaryLight,
 } from "../constants/interaction-colors";
 import { getThemeColors } from "../constants/theme";
 import type { PlayerState } from "../hooks/use-player";
@@ -188,7 +188,7 @@ export const Player = ({ player }: PlayerProps) => {
                       size={btn.size}
                       color={
                         btn.active || (isFocused && hasSelection)
-                          ? colorPrimaryGreen
+                          ? colorPrimary
                           : "#fff"
                       }
                     />
@@ -231,7 +231,7 @@ function createStyles(isDark: boolean) {
       paddingVertical: 18,
       backgroundColor: panelBg,
       borderTopWidth: 2,
-      borderTopColor: colorPrimaryGreen,
+      borderTopColor: colorPrimary,
       alignItems: "center",
       borderBottomLeftRadius: 8,
       borderBottomRightRadius: 8,
@@ -258,10 +258,10 @@ function createStyles(isDark: boolean) {
       borderWidth: 2,
       borderColor: "transparent",
     },
-    controlBtnFocused: { backgroundColor: colorPrimaryGreenLight },
+    controlBtnFocused: { backgroundColor: colorPrimaryLight },
     controlBtnDisabled: { opacity: 0.4 },
     controlBtnActive: {
-      borderColor: colorPrimaryGreen,
+      borderColor: colorPrimary,
       backgroundColor: panelBg,
     },
     arabicText: { textAlign: "right", writingDirection: "rtl" },
@@ -276,7 +276,7 @@ function createStyles(isDark: boolean) {
     },
     progressBarForeground: {
       height: 4,
-      backgroundColor: colorPrimaryGreen,
+      backgroundColor: colorPrimary,
       borderRadius: 2,
     },
     progressText: {

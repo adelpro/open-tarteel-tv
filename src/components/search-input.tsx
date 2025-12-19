@@ -4,10 +4,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { SpatialNavigationFocusableView } from "react-tv-space-navigation";
 import { useTranslation } from "react-i18next";
 import {
-  colorPrimaryGreen,
-  colorPrimaryGreenDark,
-  colorPrimaryGreenLight,
-  colorPrimaryGreenTint,
+  colorPrimary,
+  colorPrimaryDark,
+  colorPrimaryLight,
+  colorPrimaryTint,
   focusScale,
 } from "../constants/interaction-colors";
 import { getThemeColors } from "../constants/theme";
@@ -68,7 +68,7 @@ const SearchInput = ({
     },
     searchInputFocused: {
       backgroundColor: focusBg,
-      borderColor: colorPrimaryGreen,
+      borderColor: colorPrimary,
     },
   });
 
@@ -107,7 +107,11 @@ const SearchInput = ({
             name="search"
             size={20}
             color={
-              textFocused || isFocused ? "#4CAF50" : isDark ? "#888" : "#999"
+              textFocused || isFocused
+                ? colorPrimary
+                : isDark
+                ? colorPrimaryLight
+                : colorPrimaryDark
             }
             style={styles.searchInputIcon}
           />

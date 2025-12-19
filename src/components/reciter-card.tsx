@@ -14,9 +14,9 @@ import RiwayaTag from "./riwaya-tag";
 import { getThemeColors } from "../constants/theme";
 import { useTranslation } from "react-i18next";
 import {
-  colorPrimaryGreen,
-  colorPrimaryGreenDark,
-  colorPrimaryGreenLight,
+  colorPrimary,
+  colorPrimaryDark,
+  colorPrimaryLight,
   focusScale,
 } from "../constants/interaction-colors";
 
@@ -60,8 +60,8 @@ const ReciterCard = ({
       borderColor: border,
     },
     reciterCardFocused: {
-      backgroundColor: isDark ? colorPrimaryGreenDark : colorPrimaryGreenLight,
-      borderColor: colorPrimaryGreen,
+      backgroundColor: isDark ? colorPrimaryDark : colorPrimaryLight,
+      borderColor: colorPrimary,
       transform: [{ scale: focusScale }],
       zIndex: 2,
     },

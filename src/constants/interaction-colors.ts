@@ -1,7 +1,6 @@
-export const colorPrimaryGreen = "#4CAF50";
-export const colorPrimaryGreenDark = "#2E7D32";
-export const colorPrimaryGreenLight = "#C8E6C9";
-export const colorPrimaryGreenTint = "#E8F5E9";
+export const colorPrimary = "#0190dd";
+export const colorPrimaryDark = "#07507f";
+export const colorPrimaryLight = "#DBEAFE";
+export const colorPrimaryTint = "#EFF6FF";
 
 export const focusScale = 1.05;
-

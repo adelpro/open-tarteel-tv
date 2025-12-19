@@ -7,9 +7,9 @@ import {
   SpatialNavigationView,
 } from "react-tv-space-navigation";
 import {
-  colorPrimaryGreen,
-  colorPrimaryGreenDark,
-  colorPrimaryGreenLight,
+  colorPrimary,
+  colorPrimaryDark,
+  colorPrimaryLight,
 } from "../constants/interaction-colors";
 import { getThemeColors } from "../constants/theme";
 import type { PlayerState } from "../hooks/use-player";
@@ -152,12 +152,12 @@ function createStyles(isDark: boolean) {
       width: "100%",
     },
     surahCardFocused: {
-      backgroundColor: isDark ? colorPrimaryGreenDark : colorPrimaryGreenLight,
-      borderColor: colorPrimaryGreen,
+      backgroundColor: isDark ? colorPrimaryDark : colorPrimaryLight,
+      borderColor: colorPrimary,
       borderWidth: 1,
     },
     surahCardSelected: {
-      backgroundColor: colorPrimaryGreen,
+      backgroundColor: colorPrimary,
     },
 
     // Number wrapper
@@ -173,7 +173,7 @@ function createStyles(isDark: boolean) {
       borderRadius: 14,
     },
     surahNumberWrapperSelected: {
-      backgroundColor: colorPrimaryGreen,
+      backgroundColor: colorPrimary,
       borderRadius: 14,
     },
 
@@ -185,7 +185,7 @@ function createStyles(isDark: boolean) {
       textAlign: "center",
     },
     surahNumberFocused: {
-      color: colorPrimaryGreen,
+      color: colorPrimary,
     },
     surahNumberSelected: {
       color: textSecondary,
@@ -199,7 +199,7 @@ function createStyles(isDark: boolean) {
       fontSize: 14,
     },
     surahNameFocused: {
-      color: colorPrimaryGreen,
+      color: colorPrimary,
     },
   });
 }

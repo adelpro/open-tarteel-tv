@@ -9,9 +9,9 @@ import {
 import { SpatialNavigationFocusableView } from "react-tv-space-navigation";
 import { getThemeColors } from "../constants/theme";
 import {
-  colorPrimaryGreen,
-  colorPrimaryGreenDark,
-  colorPrimaryGreenTint,
+  colorPrimary,
+  colorPrimaryDark,
+  colorPrimaryTint,
   focusScale,
 } from "../constants/interaction-colors";
 
@@ -50,8 +50,8 @@ const FilterChip = ({ label, selected, onPress }: FilterChipProps) => {
       color: "#fff",
     },
     filterChipFocused: {
-      backgroundColor: isDark ? colorPrimaryGreenDark : colorPrimaryGreenTint,
-      borderColor: colorPrimaryGreen,
+      backgroundColor: isDark ? colorPrimaryDark : colorPrimaryTint,
+      borderColor: colorPrimary,
       transform: [{ scale: focusScale }],
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 2 },
@@ -60,8 +60,8 @@ const FilterChip = ({ label, selected, onPress }: FilterChipProps) => {
       elevation: 2,
     },
     filterChipSelected: {
-      backgroundColor: colorPrimaryGreen,
-      borderColor: colorPrimaryGreen,
+      backgroundColor: colorPrimary,
+      borderColor: colorPrimary,
     },
   });
 

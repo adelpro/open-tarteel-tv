@@ -10,9 +10,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { SpatialNavigationFocusableView } from "react-tv-space-navigation";
 import { getThemeColors } from "../constants/theme";
 import {
-  colorPrimaryGreen,
-  colorPrimaryGreenDark,
-  colorPrimaryGreenLight,
+  colorPrimary,
+  colorPrimaryDark,
+  colorPrimaryLight,
   focusScale,
 } from "../constants/interaction-colors";
 import i18n from "../i18n";
@@ -57,8 +57,8 @@ const MenuButton = ({
       gap: 8,
     },
     menuButtonFocused: {
-      backgroundColor: isDark ? colorPrimaryGreenDark : colorPrimaryGreenLight,
-      borderColor: colorPrimaryGreen,
+      backgroundColor: isDark ? colorPrimaryDark : colorPrimaryLight,
+      borderColor: colorPrimary,
       transform: [{ scale: focusScale }],
     },
     menuButtonText: {
@@ -83,7 +83,7 @@ const MenuButton = ({
     },
     micButtonFocused: {
       backgroundColor: focusBg,
-      borderColor: colorPrimaryGreen,
+      borderColor: colorPrimary,
       transform: [{ scale: focusScale }],
     },
   });
@@ -101,7 +101,13 @@ const MenuButton = ({
               <Ionicons
                 name={iconName}
                 size={18}
-                color={isFocused ? "#4CAF50" : isDark ? "#bbb" : "#666"}
+                color={
+                  isFocused
+                    ? colorPrimary
+                    : isDark
+                    ? colorPrimaryLight
+                    : colorPrimaryDark
+                }
               />
             ) : null}
 
