@@ -27,6 +27,7 @@ import LanguageSwitch from "../components/language-switch";
 import { useTranslation } from "react-i18next";
 import Fuse from "fuse.js";
 import { normalizeSearchText } from "../utils/search";
+import { useGlobalStats } from "../hooks/use-global-stats";
 
 export default function HomeScreen() {
   const { t, i18n } = useTranslation();
@@ -39,6 +40,7 @@ export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme !== "light";
   const { width } = useWindowDimensions();
+  const { viewCounts, favoriteCounts } = useGlobalStats();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRiwaya, setSelectedRiwaya] = useState<Riwaya | "all">("all");
@@ -77,7 +79,16 @@ export default function HomeScreen() {
       fontWeight: "700",
       color: colorPrimary,
       marginBottom: 12,
-      textAlign: "left",
+      textAlign: isRTL ? "right" : "left",
+    },
+    sectionTitle: {
+      fontSize: 24,
+      fontWeight: "700",
+      color: textPrimary,
+      marginTop: 24,
+      marginBottom: 16,
+      textAlign: isRTL ? "right" : "left",
+      paddingHorizontal: 20,
     },
     filterRow: {
       flexDirection: "row",
@@ -183,6 +194,74 @@ export default function HomeScreen() {
     },
     [navigation]
   );
+
+  console.log(`[Home] Render - Width: ${width}, Reciters: ${reciters.length}`);
+
+  const mostViewedReciters = useMemo(() => {
+    if (!reciters.length) {
+      return [];
+    }
+
+    const uniqueById = new Map<string, Reciter>();
+    reciters.forEach((r) => {
+      const idStr = String(r.id);
+      if (!uniqueById.has(idStr)) {
+        uniqueById.set(idStr, r);
+      }
+    });
+
+    const viewed = Array.from(uniqueById.values())
+      .filter((r) => {
+        const idStr = String(r.id);
+        const count = viewCounts[idStr] || 0;
+        return count > 0;
+      })
+      .sort((a, b) => {
+        const countB = viewCounts[String(b.id)] || 0;
+        const countA = viewCounts[String(a.id)] || 0;
+        return countB - countA;
+      })
+      .slice(0, 10);
+
+    console.log("[Home] Compute Most Viewed:", {
+      resultCount: viewed.length,
+      viewedIds: viewed.map((r) => r.id),
+      viewCountsKeys: Object.keys(viewCounts),
+    });
+    return viewed;
+  }, [reciters, viewCounts]);
+
+  const mostFavoritedReciters = useMemo(() => {
+    if (!reciters.length) return [];
+
+    const uniqueById = new Map<string, Reciter>();
+    reciters.forEach((r) => {
+      const idStr = String(r.id);
+      if (!uniqueById.has(idStr)) {
+        uniqueById.set(idStr, r);
+      }
+    });
+
+    const favorited = Array.from(uniqueById.values())
+      .filter((r) => {
+        const idStr = String(r.id);
+        const count = favoriteCounts[idStr] || 0;
+        return count > 0;
+      })
+      .sort((a, b) => {
+        const countB = favoriteCounts[String(b.id)] || 0;
+        const countA = favoriteCounts[String(a.id)] || 0;
+        return countB - countA;
+      })
+      .slice(0, 10);
+
+    console.log("[Home] Compute Most Favorited:", {
+      resultCount: favorited.length,
+      favoritedIds: favorited.map((r) => r.id),
+      favoriteCountsKeys: Object.keys(favoriteCounts),
+    });
+    return favorited;
+  }, [reciters, favoriteCounts]);
 
   const filteredReciters = useMemo(() => {
     const searchLanguage = i18n.language === "ar" ? "ar" : "en";
@@ -329,27 +408,130 @@ export default function HomeScreen() {
       </View>
       <BrandHeader />
 
-      <SearchInput
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-        onFocusChange={setSearchFocused}
-        isDark={isDark}
-      />
-
       <SpatialNavigationScrollView>
         <View style={[styles.content]}>
-          <View
-            style={[
-              styles.filterRow,
-              { flexDirection: isRTL ? "row-reverse" : "row" },
-            ]}
+          <SearchInput
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            onFocusChange={setSearchFocused}
+            isDark={isDark}
+          />
+
+          {mostViewedReciters.length > 0 && (
+            <View style={{ marginVertical: 12 }}>
+              <Text style={styles.sectionTitle}>
+                {t("most_viewed")} ({mostViewedReciters.length})
+              </Text>
+              <View
+                style={{
+                  height: isVeryWide ? 220 : isWide ? 200 : 180,
+                  backgroundColor: "rgba(0,255,0,0.05)", // Very faint green to check area
+                }}
+              >
+                <SpatialNavigationScrollView
+                  horizontal
+                  style={{ flex: 1 }}
+                  contentContainerStyle={{
+                    paddingHorizontal: 20,
+                    flexDirection: "row", // Handle RTL with order or start/end
+                  }}
+                >
+                  {(isRTL
+                    ? [...mostViewedReciters].reverse()
+                    : mostViewedReciters
+                  ).map((reciter, index) => (
+                    <View
+                      key={`mv-${reciter.id}-${index}`}
+                      style={[
+                        styles.reciterItem,
+                        {
+                          width: Math.max(itemWidth, 220),
+                          marginRight: 12,
+                          borderWidth: 2,
+                          borderColor: "red",
+                        },
+                      ]}
+                    >
+                      <ReciterCard
+                        reciter={reciter}
+                        preferredFocus={false}
+                        onPress={handleReciterPress}
+                        viewCount={viewCounts[String(reciter.id)]}
+                        favoriteCount={favoriteCounts[String(reciter.id)]}
+                      />
+                    </View>
+                  ))}
+                </SpatialNavigationScrollView>
+              </View>
+            </View>
+          )}
+
+          {mostFavoritedReciters.length > 0 && (
+            <View style={{ marginVertical: 12 }}>
+              <Text style={styles.sectionTitle}>
+                {t("most_favorited")} ({mostFavoritedReciters.length})
+              </Text>
+              <View
+                style={{
+                  height: isVeryWide ? 220 : isWide ? 180 : 160,
+                  backgroundColor: "rgba(0,0,255,0.05)", // Very faint blue
+                }}
+              >
+                <SpatialNavigationScrollView
+                  horizontal
+                  style={{ flex: 1 }}
+                  contentContainerStyle={{
+                    paddingHorizontal: 20,
+                    flexDirection: "row",
+                  }}
+                >
+                  {(isRTL
+                    ? [...mostFavoritedReciters].reverse()
+                    : mostFavoritedReciters
+                  ).map((reciter, index) => (
+                    <View
+                      key={`mf-${reciter.id}-${index}`}
+                      style={[
+                        styles.reciterItem,
+                        {
+                          width: Math.max(itemWidth, 220),
+                          marginRight: 12,
+                          borderWidth: 2,
+                          borderColor: "blue",
+                        },
+                      ]}
+                    >
+                      <ReciterCard
+                        reciter={reciter}
+                        preferredFocus={false}
+                        onPress={handleReciterPress}
+                        viewCount={viewCounts[String(reciter.id)]}
+                        favoriteCount={favoriteCounts[String(reciter.id)]}
+                      />
+                    </View>
+                  ))}
+                </SpatialNavigationScrollView>
+              </View>
+            </View>
+          )}
+
+          <SpatialNavigationView
+            direction="horizontal"
+            style={{
+              ...styles.filterRow,
+              direction: isRTL ? "rtl" : "ltr",
+              flexDirection: "row",
+              justifyContent: "flex-start",
+              width: "100%",
+              paddingHorizontal: 20,
+              marginTop: 10,
+            }}
           >
             <FilterChip
               label={t("filter_all")}
               selected={selectedRiwaya === "all"}
               onPress={() => setSelectedRiwaya("all")}
             />
-
             <FilterChip
               label={t("filter_hafs")}
               selected={selectedRiwaya === Riwaya.HAFS_A_ASIM}
@@ -370,34 +552,39 @@ export default function HomeScreen() {
               selected={selectedRiwaya === Riwaya.ALDURI_AN_ALKAISSAI}
               onPress={() => setSelectedRiwaya(Riwaya.ALDURI_AN_ALKAISSAI)}
             />
-          </View>
+          </SpatialNavigationView>
+
           {reciterRows.map((row, rowIndex) => (
             <SpatialNavigationView
               key={`row-${rowIndex}`}
               direction="horizontal"
+              style={{
+                ...styles.reciterRow,
+                flexDirection: isRTL ? "row-reverse" : "row",
+              }}
             >
-              <View style={styles.reciterRow}>
-                {row.map((reciter, cardIndex) => (
-                  <View
-                    style={[
-                      styles.reciterItem,
-                      {
-                        width: itemWidth,
-                        marginRight: cardIndex === row.length - 1 ? 0 : 12,
-                      },
-                    ]}
-                    key={`${reciter.id}-${reciter.moshaf.id}`}
-                  >
-                    <ReciterCard
-                      reciter={reciter}
-                      preferredFocus={
-                        !searchFocused && rowIndex === 0 && cardIndex === 0
-                      }
-                      onPress={handleReciterPress}
-                    />
-                  </View>
-                ))}
-              </View>
+              {row.map((reciter, cardIndex) => (
+                <View
+                  style={[
+                    styles.reciterItem,
+                    {
+                      width: itemWidth,
+                      marginRight: cardIndex === row.length - 1 ? 0 : 12,
+                    },
+                  ]}
+                  key={`${reciter.id}-${reciter.moshaf.id}`}
+                >
+                  <ReciterCard
+                    reciter={reciter}
+                    preferredFocus={
+                      !searchFocused && rowIndex === 0 && cardIndex === 0
+                    }
+                    onPress={handleReciterPress}
+                    viewCount={viewCounts[reciter.id.toString()]}
+                    favoriteCount={favoriteCounts[reciter.id.toString()]}
+                  />
+                </View>
+              ))}
             </SpatialNavigationView>
           ))}
         </View>

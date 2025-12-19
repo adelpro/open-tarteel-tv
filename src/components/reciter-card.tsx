@@ -6,6 +6,7 @@ import {
   TextStyle,
   useColorScheme,
   useWindowDimensions,
+  View,
   ViewStyle,
 } from "react-native";
 import { SpatialNavigationFocusableView } from "react-tv-space-navigation";
@@ -20,10 +21,14 @@ import {
   focusScale,
 } from "../constants/interaction-colors";
 
+import { Ionicons } from "@expo/vector-icons";
+
 type ReciterCardProps = {
   reciter: Reciter;
   preferredFocus: boolean;
   onPress: (reciter: Reciter) => void;
+  viewCount?: number;
+  favoriteCount?: number;
 };
 
 const RIWAYA_LABEL: Record<Riwaya, string> = {
@@ -37,7 +42,10 @@ const ReciterCard = ({
   reciter,
   preferredFocus,
   onPress,
+  viewCount,
+  favoriteCount,
 }: ReciterCardProps) => {
+  console.log(`[ReciterCard] Rendering: ${reciter.name} (ID: ${reciter.id})`);
   const { i18n } = useTranslation();
   const colorScheme = useColorScheme();
   const isDark = colorScheme !== "light";
@@ -80,33 +88,88 @@ const ReciterCard = ({
   });
   return (
     <SpatialNavigationFocusableView onSelect={() => onPress(reciter)}>
-      {({ isFocused }) => (
-        <Pressable
-          style={[styles.reciterCard, isFocused && styles.reciterCardFocused]}
-          focusable
-          hasTVPreferredFocus={preferredFocus}
-          accessibilityRole="button"
-          accessibilityLabel={`Reciter ${reciter.name}, Moshaf ${reciter.moshaf.name}`}
-        >
-          <Text
-            style={styles.reciterName}
-            numberOfLines={1}
-            ellipsizeMode="tail"
+      {({ isFocused }) => {
+        if (reciter.id === 107) {
+          console.log(
+            `[ReciterCard] Render Function called for 107. Focused: ${isFocused}`
+          );
+        }
+        return (
+          <Pressable
+            style={[styles.reciterCard, isFocused && styles.reciterCardFocused]}
+            focusable
+            hasTVPreferredFocus={preferredFocus}
+            accessibilityRole="button"
+            accessibilityLabel={`Reciter ${reciter.name}, Moshaf ${reciter.moshaf.name}`}
           >
-            {reciter.name}
-          </Text>
-          <Text
-            style={styles.reciterDesc}
-            numberOfLines={2}
-            ellipsizeMode="tail"
-          >
-            {reciter.moshaf.name} • {RIWAYA_LABEL[reciter.moshaf.riwaya]}
-          </Text>
-          <RiwayaTag riwaya={reciter.moshaf.riwaya} />
-        </Pressable>
-      )}
+            <Text
+              style={styles.reciterName}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {reciter.name}
+            </Text>
+            <Text
+              style={styles.reciterDesc}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {reciter.moshaf.name} • {RIWAYA_LABEL[reciter.moshaf.riwaya]}
+            </Text>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginTop: 4,
+              }}
+            >
+              {viewCount !== undefined && (
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginRight: 12,
+                  }}
+                >
+                  <Ionicons
+                    name="eye-outline"
+                    size={14}
+                    color={textSecondary}
+                  />
+                  <Text
+                    style={[
+                      styles.reciterDesc,
+                      { marginLeft: 4, fontSize: 12 },
+                    ]}
+                  >
+                    {viewCount}
+                  </Text>
+                </View>
+              )}
+              {favoriteCount !== undefined && (
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <Ionicons
+                    name="heart-outline"
+                    size={14}
+                    color={textSecondary}
+                  />
+                  <Text
+                    style={[
+                      styles.reciterDesc,
+                      { marginLeft: 4, fontSize: 12 },
+                    ]}
+                  >
+                    {favoriteCount}
+                  </Text>
+                </View>
+              )}
+            </View>
+            <RiwayaTag riwaya={reciter.moshaf.riwaya} />
+          </Pressable>
+        );
+      }}
     </SpatialNavigationFocusableView>
   );
 };
 
-export default memo(ReciterCard);
+export default ReciterCard;

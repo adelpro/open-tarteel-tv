@@ -21,11 +21,14 @@ import type { PlayerState } from "../hooks/use-player";
 
 const isArabicText = (text: string) => /[\u0600-\u06FF]/.test(text);
 
+import { useFavorites } from "../hooks/use-favorites";
+
 type PlayerProps = { player: PlayerState };
 
 export const Player = ({ player }: PlayerProps) => {
   const isDark = useColorScheme() !== "light";
   const styles = createStyles(isDark);
+  const { isFavorited, toggleFavorite } = useFavorites();
 
   const {
     playlistData,
@@ -40,6 +43,8 @@ export const Player = ({ player }: PlayerProps) => {
     handleNext,
     handleToggleRepeat,
   } = player;
+
+  const favorited = reciter ? isFavorited(reciter.id.toString()) : false;
 
   const PLAYER_CONTROLS = [
     {
@@ -56,6 +61,13 @@ export const Player = ({ player }: PlayerProps) => {
       key: "play-pause",
     },
     { icon: "step-forward", onSelect: handleNext, size: 28, key: "forward" },
+    {
+      icon: favorited ? "heart" : "heart-o",
+      onSelect: () => reciter && toggleFavorite(reciter.id.toString()),
+      size: 22,
+      active: favorited,
+      key: "favorite",
+    },
     {
       icon: "repeat",
       onSelect: handleToggleRepeat,

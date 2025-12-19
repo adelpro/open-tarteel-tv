@@ -8,6 +8,8 @@ import { StatusBar } from "expo-status-bar";
 import AppNavigator from "./src/navigation/app-navigator";
 import { I18nextProvider } from "react-i18next";
 
+import { GlobalStatsProvider } from "./src/hooks/use-global-stats";
+
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
@@ -39,10 +41,12 @@ export default function App() {
 
   return (
     <I18nextProvider i18n={i18n}>
-      <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-        <AppNavigator />
-        <StatusBar style="light" />
-      </View>
+      <GlobalStatsProvider>
+        <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+          <AppNavigator />
+          <StatusBar style="light" />
+        </View>
+      </GlobalStatsProvider>
     </I18nextProvider>
   );
 }

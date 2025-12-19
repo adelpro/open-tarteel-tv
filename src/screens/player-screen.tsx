@@ -9,6 +9,8 @@ import {
   SpatialNavigationVirtualizedListRef,
 } from "react-tv-space-navigation";
 
+import { syncView } from "../services/gun-service";
+
 export default function PlayerScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme !== "light";
@@ -17,6 +19,12 @@ export default function PlayerScreen() {
 
   const player = usePlayer();
   const { playlistData, reciter, selectedSurah } = player;
+
+  useEffect(() => {
+    if (reciter?.id) {
+      syncView(reciter.id.toString());
+    }
+  }, [reciter?.id]);
 
   useEffect(() => {
     if (!selectedSurah) return;
