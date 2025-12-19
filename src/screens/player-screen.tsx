@@ -4,7 +4,10 @@ import Player from "../components/player";
 import Playlist from "../components/play-list";
 import { getThemeColors } from "../constants/theme";
 import { usePlayer } from "../hooks/use-player";
-import { SpatialNavigationVirtualizedListRef } from "react-tv-space-navigation";
+import {
+  SpatialNavigationView,
+  SpatialNavigationVirtualizedListRef,
+} from "react-tv-space-navigation";
 
 export default function PlayerScreen() {
   const colorScheme = useColorScheme();
@@ -35,11 +38,10 @@ export default function PlayerScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.mainContent}>
+      <SpatialNavigationView direction="horizontal" style={styles.mainContent}>
         <Player player={player} />
-
         <Playlist player={player} listRef={playlistRef} />
-      </View>
+      </SpatialNavigationView>
     </View>
   );
 }
