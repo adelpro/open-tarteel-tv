@@ -62,7 +62,6 @@ const SectionFeatured = ({
           horizontal
           style={{ flex: 1 }}
           contentContainerStyle={{
-            width: "100%",
             paddingHorizontal: 20,
             direction: isRTL ? "rtl" : "ltr",
           }}
@@ -70,7 +69,6 @@ const SectionFeatured = ({
           <SpatialNavigationView
             direction="horizontal"
             style={{
-              width: "100%",
               alignItems: "center",
             }}
           >
