@@ -60,16 +60,28 @@ const SectionFeatured = ({
       >
         <SpatialNavigationScrollView
           horizontal
-          style={{ flex: 1 }}
-          contentContainerStyle={{
-            paddingHorizontal: 20,
-            direction: isRTL ? "rtl" : "ltr",
-          }}
+          style={
+            {
+              //direction: isRTL ? "rtl" : "ltr",
+              //flexDirection: isRTL ? "row-reverse" : "row",
+            }
+          }
+          contentContainerStyle={
+            {
+              //paddingHorizontal: 10,
+              //direction: isRTL ? "rtl" : "ltr",
+              //justifyContent: isRTL ? "flex-start" : "flex-end",
+              //backgroundColor: "red",
+            }
+          }
         >
           <SpatialNavigationView
             direction="horizontal"
             style={{
+              flexDirection: "row",
+              direction: isRTL ? "rtl" : "ltr",
               alignItems: "center",
+              justifyContent: "flex-start",
             }}
           >
             {reciters.map((reciter, index) => (

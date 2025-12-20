@@ -73,23 +73,6 @@ export default function HomeScreen() {
       marginTop: 10,
       fontSize: isVeryWide ? 24 : isWide ? 20 : 16,
     },
-    content: {
-      paddingBottom: 40,
-      paddingTop: 8,
-      overflow: "visible",
-    },
-    reciterRow: {
-      flexDirection: isRTL ? "row-reverse" : "row",
-      justifyContent: "flex-start",
-      alignItems: "flex-start",
-      overflow: "visible",
-      paddingHorizontal: 20,
-      flexWrap: "wrap",
-    },
-    reciterItem: {
-      overflow: "visible",
-      marginVertical: 8,
-    },
 
     errorMessage: {
       fontSize: isVeryWide ? 20 : isWide ? 18 : 16,
@@ -318,7 +301,7 @@ export default function HomeScreen() {
       <BrandHeader />
 
       <SpatialNavigationScrollView>
-        <SpatialNavigationView direction="vertical" style={[styles.content]}>
+        <SpatialNavigationView direction="vertical">
           <SearchInput
             value={searchQuery}
             onChangeText={setSearchQuery}
