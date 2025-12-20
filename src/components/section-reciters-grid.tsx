@@ -1,9 +1,6 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import {
-  SpatialNavigationScrollView,
-  SpatialNavigationView,
-} from "react-tv-space-navigation";
+import { SpatialNavigationView } from "react-tv-space-navigation";
 import ReciterCard from "./reciter-card";
 import { Reciter } from "../types";
 
@@ -17,6 +14,17 @@ type SectionRecitersGridProps = {
   isRTL: boolean;
 };
 
+const styles = StyleSheet.create({
+  reciterRow: {
+    marginBottom: 16,
+    overflow: "visible",
+    paddingHorizontal: 20,
+  },
+  reciterItem: {
+    overflow: "visible",
+  },
+});
+
 const SectionRecitersGrid = ({
   reciterRows,
   itemWidth,
@@ -24,29 +32,9 @@ const SectionRecitersGrid = ({
   searchFocused,
   viewCounts,
   favoriteCounts,
-  isRTL,
 }: SectionRecitersGridProps) => {
-  const styles = StyleSheet.create({
-    reciterRow: {
-      marginBottom: 16,
-      overflow: "visible",
-      paddingHorizontal: 20,
-    },
-    reciterItem: {
-      overflow: "visible",
-      marginVertical: 8,
-    },
-  });
-
   return (
-    <SpatialNavigationScrollView
-      horizontal
-      style={{ flex: 1 }}
-      contentContainerStyle={{
-        width: "100%",
-        paddingHorizontal: 20,
-      }}
-    >
+    <SpatialNavigationView direction="vertical">
       {reciterRows.map((row, rowIndex) => (
         <SpatialNavigationView
           key={`row-${rowIndex}`}
@@ -77,7 +65,7 @@ const SectionRecitersGrid = ({
           ))}
         </SpatialNavigationView>
       ))}
-    </SpatialNavigationScrollView>
+    </SpatialNavigationView>
   );
 };
 

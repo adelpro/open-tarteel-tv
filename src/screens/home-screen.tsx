@@ -29,6 +29,8 @@ import Fuse from "fuse.js";
 import { normalizeSearchText } from "../utils/search";
 import { useFavorites } from "../hooks/use-favorites";
 import { useViewCounts } from "../hooks/use-view-counts";
+import { useReciterGridLayout } from "../hooks/use-reciter-grid-layout";
+import SectionRecitersGrid from "../components/section-reciters-grid";
 
 export default function HomeScreen() {
   const { t, i18n } = useTranslation();
@@ -80,9 +82,9 @@ export default function HomeScreen() {
       flexDirection: isRTL ? "row-reverse" : "row",
       justifyContent: "flex-start",
       alignItems: "flex-start",
-      marginBottom: 16,
       overflow: "visible",
       paddingHorizontal: 20,
+      flexWrap: "wrap",
     },
     reciterItem: {
       overflow: "visible",
@@ -262,34 +264,10 @@ export default function HomeScreen() {
     return results.map((entry) => entry.item);
   }, [reciters, searchQuery, selectedRiwaya, i18n.language]);
 
-  const cardsPerRow = useMemo(() => {
-    if (width >= 2800) return 6;
-    if (width >= 2200) return 5;
-    if (width >= 1600) return 4;
-    return 3;
-  }, [width]);
-
-  const itemWidth = useMemo(() => {
-    const contentPadding = 20;
-    const rowPadding = 20;
-    const rowGap = 12;
-    const available = width - contentPadding * 2 - rowPadding * 2;
-    const gutters = rowGap * (cardsPerRow - 1);
-    const w = (available - gutters) / cardsPerRow;
-    return w > 0 ? Math.floor(w) : 0;
-  }, [width, cardsPerRow]);
-
-  const reciterRows = useMemo(() => {
-    const rows: Reciter[][] = [];
-    filteredReciters.forEach((reciter, index) => {
-      const rowIndex = Math.floor(index / cardsPerRow);
-      if (!rows[rowIndex]) {
-        rows[rowIndex] = [];
-      }
-      rows[rowIndex].push(reciter);
-    });
-    return rows;
-  }, [filteredReciters, cardsPerRow]);
+  const { cardsPerRow, itemWidth, reciterRows } = useReciterGridLayout(
+    filteredReciters,
+    width
+  );
 
   if (loading) {
     return (
@@ -340,18 +318,13 @@ export default function HomeScreen() {
       <BrandHeader />
 
       <SpatialNavigationScrollView>
-        <View style={[styles.content]}>
-          <SpatialNavigationView
-            direction="vertical"
-            style={{ marginBottom: 16 }}
-          >
-            <SearchInput
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              onFocusChange={setSearchFocused}
-              isDark={isDark}
-            />
-          </SpatialNavigationView>
+        <SpatialNavigationView direction="vertical" style={[styles.content]}>
+          <SearchInput
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            onFocusChange={setSearchFocused}
+            isDark={isDark}
+          />
 
           <SectionFeatured
             title={`${t("most_viewed")} (${mostViewedReciters.length})`}
@@ -385,37 +358,16 @@ export default function HomeScreen() {
             isRTL={isRTL}
           />
 
-          {reciterRows.map((row, rowIndex) => (
-            <SpatialNavigationView
-              key={`row-${rowIndex}`}
-              direction="horizontal"
-              style={styles.reciterRow}
-            >
-              {row.map((reciter, cardIndex) => (
-                <View
-                  style={[
-                    styles.reciterItem,
-                    {
-                      width: itemWidth,
-                      marginRight: cardIndex === row.length - 1 ? 0 : 12,
-                    },
-                  ]}
-                  key={`${reciter.id}-${reciter.moshaf.id}`}
-                >
-                  <ReciterCard
-                    reciter={reciter}
-                    preferredFocus={
-                      !searchFocused && rowIndex === 0 && cardIndex === 0
-                    }
-                    onPress={handleReciterPress}
-                    viewCount={viewCounts[reciter.id.toString()]}
-                    favoriteCount={favoriteCounts[reciter.id.toString()]}
-                  />
-                </View>
-              ))}
-            </SpatialNavigationView>
-          ))}
-        </View>
+          <SectionRecitersGrid
+            reciterRows={reciterRows}
+            itemWidth={itemWidth}
+            onReciterPress={handleReciterPress}
+            searchFocused={searchFocused}
+            viewCounts={viewCounts}
+            favoriteCounts={favoriteCounts}
+            isRTL={isRTL}
+          />
+        </SpatialNavigationView>
       </SpatialNavigationScrollView>
     </View>
   );
