@@ -17,8 +17,9 @@ const SectionTopNav = ({ isRTL, isDark }: TopNavigationProps) => {
 
   const styles = StyleSheet.create({
     menuRow: {
-      flexDirection: "row",
-      justifyContent: isRTL ? "flex-start" : "flex-end",
+      direction: isRTL ? "rtl" : "ltr",
+      flexDirection: isRTL ? "row-reverse" : "row",
+      justifyContent: "flex-end",
       gap: 10,
       marginBottom: 20,
     },
@@ -54,7 +55,8 @@ const SectionTopNav = ({ isRTL, isDark }: TopNavigationProps) => {
   return (
     <View>
       <SpatialNavigationView direction="horizontal" style={styles.menuRow}>
-        {isRTL ? [...buttons].reverse() : buttons}
+        {/*isRTL ? [...buttons].reverse() : buttons*/}
+        {buttons}
       </SpatialNavigationView>
     </View>
   );
