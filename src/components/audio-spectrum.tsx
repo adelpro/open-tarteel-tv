@@ -1,5 +1,6 @@
 import React, { memo, useEffect, useRef } from "react";
 import { Animated, Easing, StyleSheet, View } from "react-native";
+import { colorPrimary } from "../constants/interaction-colors";
 
 type AudioSpectrumProps = {
   playing: boolean;
@@ -76,7 +77,7 @@ const styles = StyleSheet.create({
     width: 6,
     height: 40,
     borderRadius: 3,
-    backgroundColor: "#4CAF50",
+    backgroundColor: colorPrimary,
     opacity: 0.9,
   },
 });

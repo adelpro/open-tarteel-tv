@@ -22,21 +22,29 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-
       "predictiveBackGestureEnabled": false,
       "package": "com.opentarteel.tv",
       "intentFilters": [
         {
           "action": "MAIN",
-          "category": ["LEANBACK_LAUNCHER"]
+          "category": [
+            "LEANBACK_LAUNCHER"
+          ]
         },
         {
           "action": "VIEW",
-          "category": ["DEFAULT", "BROWSABLE"],
+          "category": [
+            "DEFAULT",
+            "BROWSABLE"
+          ],
           "data": {
             "scheme": "opentarteeltv"
           }
         }
+      ],
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
       ]
     },
     "web": {
@@ -64,6 +72,11 @@
           }
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "ef23db08-6063-4383-8690-3e0785f1fd8e"
+      }
+    }
   }
 }
