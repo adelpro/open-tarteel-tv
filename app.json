@@ -27,24 +27,38 @@
       "intentFilters": [
         {
           "action": "MAIN",
-          "category": [
-            "LEANBACK_LAUNCHER"
-          ]
+          "category": ["LEANBACK_LAUNCHER"]
         },
         {
           "action": "VIEW",
-          "category": [
-            "DEFAULT",
-            "BROWSABLE"
-          ],
+          "category": ["DEFAULT", "BROWSABLE"],
           "data": {
             "scheme": "opentarteeltv"
           }
         }
       ],
-      "permissions": [
-        "android.permission.RECORD_AUDIO",
-        "android.permission.MODIFY_AUDIO_SETTINGS"
+      "permissions": [],
+      "usesFeature": [
+        {
+          "name": "android.hardware.touchscreen",
+          "required": false
+        },
+        {
+          "name": "android.hardware.screen.portrait",
+          "required": false
+        },
+        {
+          "name": "android.hardware.microphone",
+          "required": false
+        },
+        {
+          "name": "android.hardware.faketouch",
+          "required": false
+        },
+        {
+          "name": "android.software.leanback",
+          "required": true
+        }
       ]
     },
     "web": {
