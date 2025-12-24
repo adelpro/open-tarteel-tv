@@ -6,8 +6,9 @@
     "start": "expo start",
     "android": "expo run:android -d",
     "ios": "expo run:ios",
-    "web": "expo start --web",
     "prebuild:tv:android": "cross-env EXPO_TV=1 npx expo prebuild --clean --platform android",
+    "build:tv:android": "cross-env EXPO_TV=1 npx expo build:android",
+    "build:tv:ios": "cross-env EXPO_TV=1 npx expo build:ios",
     "prebuild:tv:ios": "cross-env EXPO_TV=1 npx expo prebuild --clean --platform ios",
     "run:tv:android": "cross-env EXPO_TV=1 npx expo run:android -d",
     "run:tv:ios": "cross-env EXPO_TV=1 npx expo run:ios"
