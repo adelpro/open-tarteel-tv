@@ -8,8 +8,9 @@
     "ios": "expo run:ios",
     "prebuild:tv:android": "cross-env EXPO_TV=1 npx expo prebuild --clean --platform android",
     "build:tv:android": "cross-env EXPO_TV=1 npx expo build:android",
-    "build:tv:ios": "cross-env EXPO_TV=1 npx expo build:ios",
+    "build:tv:android:local": "pnpm prebuild:tv:android && cd android && gradlew bundleRelease",
     "prebuild:tv:ios": "cross-env EXPO_TV=1 npx expo prebuild --clean --platform ios",
+    "build:tv:ios": "cross-env EXPO_TV=1 npx expo build:ios",
     "run:tv:android": "cross-env EXPO_TV=1 npx expo run:android -d",
     "run:tv:ios": "cross-env EXPO_TV=1 npx expo run:ios"
   },
