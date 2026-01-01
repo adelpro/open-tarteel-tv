@@ -24,46 +24,10 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.opentarteel.tv",
-      "intentFilters": [
-        {
-          "action": "MAIN",
-          "category": ["LEANBACK_LAUNCHER"]
-        },
-        {
-          "action": "VIEW",
-          "category": ["DEFAULT", "BROWSABLE"],
-          "data": {
-            "scheme": "opentarteeltv"
-          }
-        }
-      ],
-      "permissions": [],
-      "usesFeature": [
-        {
-          "name": "android.hardware.touchscreen",
-          "required": false
-        },
-        {
-          "name": "android.hardware.screen.portrait",
-          "required": false
-        },
-        {
-          "name": "android.hardware.microphone",
-          "required": false
-        },
-        {
-          "name": "android.hardware.faketouch",
-          "required": false
-        },
-        {
-          "name": "android.software.leanback",
-          "required": true
-        }
-      ]
+      "permissions": []
+
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
+ 
     "plugins": [
       "expo-font",
       "expo-audio",
