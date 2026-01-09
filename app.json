@@ -23,7 +23,7 @@
         "backgroundColor": "#ffffff"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.opentarteel.tv",
+      "package": "kg.us.quran.tarteel.twa",
       "permissions": []
 
     },
@@ -38,7 +38,7 @@
           "androidTVRequired": true,
           "androidTVIcon": "./assets/icon.png",
           "androidTVBanner": "./assets/tv-banner.png",
-          "appleTVIdentifier": "com.opentarteel.tv",
+          "appleTVIdentifier": "kg.us.quran.tarteel.twa",
           "appleTVImages": {
             "icon": "./assets/tv/icon-1280x768.png",
             "iconSmall": "./assets/tv/icon-400x240.png",
