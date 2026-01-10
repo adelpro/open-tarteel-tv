@@ -25,9 +25,8 @@
       "predictiveBackGestureEnabled": false,
       "package": "kg.us.quran.tarteel.twa",
       "permissions": []
-
     },
- 
+
     "plugins": [
       "expo-font",
       "expo-audio",
@@ -49,7 +48,8 @@
             "topShelfWide2x": "./assets/tv/topshelf-4640x1440.png"
           }
         }
-      ]
+      ],
+      "./plugins/with-android-tv-manifest"
     ],
     "extra": {
       "eas": {
