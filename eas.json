@@ -18,8 +18,6 @@
       }
     },
     "production": {
-      "buildType": "app-bundle",
-
       "autoIncrement": true,
       "env": {
         "EXPO_TV": "1"
