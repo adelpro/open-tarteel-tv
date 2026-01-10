@@ -13,7 +13,23 @@ const withTVManifest = (config) => {
       androidManifest["uses-feature"] = [];
     }
 
-    // List of features to explicitly mark as not required
+    // 1. ADD: Explicitly require Leanback (Critical for TV Play Store)
+    const leanbackFeature = androidManifest['uses-feature'].find(
+      (f) => f.$['android:name'] === 'android.software.leanback'
+    );
+
+    if (leanbackFeature) {
+      leanbackFeature.$['android:required'] = 'true';
+    } else {
+      androidManifest['uses-feature'].push({
+        $: {
+          'android:name': 'android.software.leanback',
+          'android:required': 'true',
+        },
+      });
+    }
+
+    // 2. DISABLE: Features that are unsupported on TV (Prevent install errors)
     const featuresToDisable = [
       "android.hardware.screen.portrait",
       "android.hardware.microphone",
@@ -37,16 +53,6 @@ const withTVManifest = (config) => {
         },
       });
     });
-
-    // OPTIONAL: If you do NOT need to record audio (only play),
-    // strictly remove the RECORD_AUDIO permission to be safe.
-    if (androidManifest["uses-permission"]) {
-      androidManifest["uses-permission"] = androidManifest[
-        "uses-permission"
-      ].filter(
-        (perm) => perm.$["android:name"] !== "android.permission.RECORD_AUDIO"
-      );
-    }
 
     return config;
   });

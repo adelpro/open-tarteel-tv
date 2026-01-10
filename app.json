@@ -22,9 +22,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "predictiveBackGestureEnabled": false,
-      "package": "kg.us.quran.tarteel.twa",
-      "permissions": []
+      "package": "kg.us.quran.tarteel.twa"
     },
 
     "plugins": [
