@@ -79,12 +79,13 @@ export async function getAllReciters(lang: string): Promise<Reciter[]> {
   if (lang !== "ar" && lang !== "en") {
     throw new Error(`Invalid language: ${lang}`);
   }
+
+  // mp3quran api uses "eng" for english and "ar" for arabic
+  const mp3quranLang = lang === "en" ? "eng" : "ar";
   try {
-    console.log("Fetching reciters for language: ", lang);
     const response = await retryFetch(
-      `https://www.mp3quran.net/api/v3/reciters?language=${lang}`
+      `https://www.mp3quran.net/api/v3/reciters?language=${mp3quranLang}`
     );
-    console.log("Response: ", response);
 
     const data: mp3QuranAPiResponse = await response.json();
     const reciters: Reciter[] = [];
