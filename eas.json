@@ -6,14 +6,24 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_TV": "1"
+      }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_TV": "1"
+      }
     },
     "production": {
       "buildType": "app-bundle",
-      "autoIncrement": true
+
+      "autoIncrement": true,
+      "env": {
+        "EXPO_TV": "1"
+      }
     }
   },
   "submit": {
