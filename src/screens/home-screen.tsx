@@ -14,7 +14,6 @@ import {
 } from "react-tv-space-navigation";
 import { Ionicons } from "@expo/vector-icons";
 import BrandHeader from "../components/brand-header";
-import ReciterCard from "../components/reciter-card";
 import RetryButton from "../components/retry-button";
 import SearchInput from "../components/search-input";
 import SectionFeatured from "../components/section-featured";
@@ -48,9 +47,7 @@ export default function HomeScreen() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRiwaya, setSelectedRiwaya] = useState<Riwaya | "all">("all");
-  const [retryCount, setRetryCount] = useState(0);
   const [searchFocused, setSearchFocused] = useState(false);
-  const MAX_RETRIES = 3;
 
   const { bg, textPrimary, textSecondary, errorPrimary } =
     getThemeColors(isDark);
@@ -92,11 +89,6 @@ export default function HomeScreen() {
       marginTop: 20,
       marginBottom: 12,
     },
-    retryCountText: {
-      fontSize: 14,
-      color: textSecondary,
-      marginBottom: 24,
-    },
   });
 
   useEffect(() => {
@@ -124,7 +116,6 @@ export default function HomeScreen() {
     try {
       const data = await getAllReciters(lang);
       setReciters(data);
-      setRetryCount(0);
       setError(null);
     } catch (err) {
       const errorMsg =
@@ -138,7 +129,6 @@ export default function HomeScreen() {
     }
   };
   const handleRetry = () => {
-    setRetryCount((prev: number) => prev + 1);
     const lang = i18n.language === "ar" ? "ar" : "en";
     loadReciters(lang);
   };
@@ -247,7 +237,7 @@ export default function HomeScreen() {
     return results.map((entry) => entry.item);
   }, [reciters, searchQuery, selectedRiwaya, i18n.language]);
 
-  const { cardsPerRow, itemWidth, reciterRows } = useReciterGridLayout(
+  const { itemWidth, reciterRows } = useReciterGridLayout(
     filteredReciters,
     width
   );
@@ -268,12 +258,6 @@ export default function HomeScreen() {
           <Ionicons name="alert-circle" size={64} color={errorPrimary} />
           <Text style={styles.errorTitle}>{t("Failed_to_Load_Reciters")}</Text>
           <Text style={styles.errorMessage}>{error}</Text>
-          <Text style={styles.retryCountText}>
-            {t("attempt", {
-              current: retryCount + 1,
-              max: MAX_RETRIES + 1,
-            })}
-          </Text>
           <RetryButton onPress={handleRetry} />
         </View>
       </View>
