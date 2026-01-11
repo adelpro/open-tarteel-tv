@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "open-tarteel-tv",
+    "name": "Open Tarteel TV",
     "slug": "open-tarteel-tv",
     "version": "1.0.0",
     "orientation": "landscape",
@@ -8,11 +8,6 @@
     "scheme": "opentarteeltv",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "ios": {
       "supportsTablet": false
     },
@@ -29,21 +24,33 @@
       "expo-font",
       "expo-audio",
       [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#EFEFEF",
+          "image": "./assets/splash-icon.png",
+          "dark": {
+            "image": "./assets/splash-icon.png",
+            "backgroundColor": "#1E1E1E"
+          },
+          "imageWidth": 200
+        }
+      ],
+      [
         "@react-native-tvos/config-tv",
         {
           "isTV": true,
           "androidTVRequired": true,
-          "androidTVIcon": "./assets/icon.png",
-          "androidTVBanner": "./assets/tv-banner.png",
+          "androidTVIcon": "./assets/android-tv/512x512.png",
+          "androidTVBanner": "./assets/android-tv/tv-banner.png",
           "appleTVIdentifier": "kg.us.quran.tarteel.twa",
           "appleTVImages": {
-            "icon": "./assets/tv/icon-1280x768.png",
-            "iconSmall": "./assets/tv/icon-400x240.png",
-            "iconSmall2x": "./assets/tv/icon-800x480.png",
-            "topShelf": "./assets/tv/topshelf-1920x720.png",
-            "topShelf2x": "./assets/tv/topshelf-3840x1440.png",
-            "topShelfWide": "./assets/tv/topshelf-2320x720.png",
-            "topShelfWide2x": "./assets/tv/topshelf-4640x1440.png"
+            "icon": "./assets/tv-os/1280x768.png",
+            "iconSmall": "./assets/tv-os/400x240.png",
+            "iconSmall2x": "./assets/tv-os/800x480.png",
+            "topShelf": "./assets/tv-os/1920x720.png",
+            "topShelf2x": "./assets/tv-os/3840x1440.png",
+            "topShelfWide": "./assets/tv-os/2320x720.png",
+            "topShelfWide2x": "./assets/tv-os/4640x1440.png"
           }
         }
       ],

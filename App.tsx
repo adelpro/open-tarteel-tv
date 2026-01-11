@@ -8,8 +8,13 @@ import { StatusBar } from "expo-status-bar";
 import AppNavigator from "./src/navigation/app-navigator";
 import { I18nextProvider } from "react-i18next";
 
-// Keep the splash screen visible while we fetch resources
-SplashScreen.preventAutoHideAsync();
+// Instruct SplashScreen not to hide yet, we want to do this manually
+SplashScreen.preventAutoHideAsync().catch(() => {
+  /* reloading the app might trigger some race conditions, ignore them */
+});
+
+// Add fade animation to splash screen
+SplashScreen.setOptions({ fade: true, duration: 1000 });
 
 export default function App() {
   const [appIsReady, setAppIsReady] = useState(false);

@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Splash screen animation
+
+### Fixed
+
+- assets background and dimention fix for android tv, ios tv and app icon
+
+## [1.2.0] - 2025-12-20
+
+### Added
+
 - Voice search and fazed search
 - Pinned reciters
 
