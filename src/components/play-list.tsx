@@ -13,6 +13,7 @@ import {
 } from "../constants/interaction-colors";
 import { getThemeColors } from "../constants/theme";
 import type { PlayerState } from "../hooks/use-player";
+import { useTranslation } from "react-i18next";
 
 const SURAH_ITEM_HEIGHT = 64;
 
@@ -24,6 +25,9 @@ type PlaylistProps = {
 const Playlist = ({ player, listRef }: PlaylistProps) => {
   const { handleSurahPress, playlistData, selectedSurah } = player;
   const isDark = useColorScheme() !== "light";
+  const { i18n } = useTranslation();
+  
+  const isArabic = i18n.language === "ar";
   const styles = createStyles(isDark);
 
   const memoizedData = useMemo(() => playlistData, [playlistData]);
@@ -56,6 +60,7 @@ const Playlist = ({ player, listRef }: PlaylistProps) => {
               styles.surahCard,
               isActive && styles.surahCardSelected,
               showFocus && styles.surahCardFocused,
+              isArabic && styles.surahCardArabic,
             ]}
           >
             <View
@@ -63,6 +68,7 @@ const Playlist = ({ player, listRef }: PlaylistProps) => {
                 styles.surahNumberWrapper,
                 showFocus && styles.surahNumberWrapperFocused,
                 isActive && styles.surahNumberWrapperSelected,
+
               ]}
             >
               <Text
@@ -80,7 +86,7 @@ const Playlist = ({ player, listRef }: PlaylistProps) => {
               numberOfLines={1}
               style={[styles.surahName, showFocus && styles.surahNameFocused]}
             >
-              {item.englishName}
+              {isArabic ? item.name : item.englishName}
             </Text>
           </View>
         );
@@ -175,6 +181,10 @@ function createStyles(isDark: boolean) {
     surahNumberWrapperSelected: {
       backgroundColor: colorPrimary,
       borderRadius: 14,
+    },
+
+    surahCardArabic: {
+      flexDirection: "row-reverse",
     },
 
     // Number text

@@ -49,6 +49,17 @@ export default function HomeScreen() {
   const [selectedRiwaya, setSelectedRiwaya] = useState<Riwaya | "all">("all");
   const [searchFocused, setSearchFocused] = useState(false);
 
+  const { favorites } = useFavorites(); // local favorites
+
+  const myFavoritedReciters = useMemo(() => {
+    if (!reciters.length || !favorites.length) return [];
+    const favSet = new Set(favorites);
+
+    return reciters
+      .filter((r) => favSet.has(String(r.id)))
+      .sort((a, b) => a.name.localeCompare(b.name, i18n.language));
+  }, [reciters, favorites, i18n.language]);
+
   const { bg, textPrimary, textSecondary, errorPrimary } =
     getThemeColors(isDark);
   const isVeryWide = width >= 2800;
@@ -137,7 +148,7 @@ export default function HomeScreen() {
     (reciter: Reciter) => {
       navigation.navigate("Player", { reciter });
     },
-    [navigation]
+    [navigation],
   );
 
   const mostViewedReciters = useMemo(() => {
@@ -202,13 +213,19 @@ export default function HomeScreen() {
     const matchesRiwaya = (reciter: Reciter) =>
       selectedRiwaya === "all" || reciter.moshaf.riwaya === selectedRiwaya;
 
-    const baseList = reciters.filter(matchesRiwaya);
+    // 1. Get base list filtered by Riwaya
+    let baseList = reciters.filter(matchesRiwaya);
 
     const normalizedQuery = normalizeSearchText(searchQuery, searchLanguage);
+
+    // 2. If NO search query, sort alphabetically and return
     if (!normalizedQuery.length) {
-      return baseList;
+      return baseList.sort((a, b) => {
+        return a.name.localeCompare(b.name, i18n.language);
+      });
     }
 
+    // 3. If THERE IS a search query, run Fuse.js (keep relevance order, don't alphabetical sort)
     type ReciterSearchItem = Reciter & {
       searchName: string;
       searchMoshafName: string;
@@ -219,7 +236,7 @@ export default function HomeScreen() {
       searchName: normalizeSearchText(reciter.name, searchLanguage),
       searchMoshafName: normalizeSearchText(
         reciter.moshaf.name,
-        searchLanguage
+        searchLanguage,
       ),
     }));
 
@@ -239,7 +256,7 @@ export default function HomeScreen() {
 
   const { itemWidth, reciterRows } = useReciterGridLayout(
     filteredReciters,
-    width
+    width,
   );
 
   if (loading) {
@@ -291,6 +308,19 @@ export default function HomeScreen() {
             onChangeText={setSearchQuery}
             onFocusChange={setSearchFocused}
             isDark={isDark}
+          />
+
+          <SectionFeatured
+            title={`${t("my_favorites")} (${myFavoritedReciters.length})`}
+            reciters={myFavoritedReciters}
+            itemWidth={itemWidth}
+            isRTL={isRTL}
+            viewCounts={viewCounts}
+            favoriteCounts={favoriteCounts}
+            onReciterPress={handleReciterPress}
+            isVeryWide={isVeryWide}
+            isWide={isWide}
+            textPrimary={textPrimary}
           />
 
           <SectionFeatured
