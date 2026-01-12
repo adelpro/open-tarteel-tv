@@ -34,46 +34,51 @@ const SectionFeatured = ({
 }: FeaturedSectionProps) => {
   if (reciters.length === 0) return null;
 
+  // Calculate strict heights to remove empty space below cards
+  // Base card height approx 180-220. We add ~30px buffer for Focus Scale effect.
+  const containerHeight = isVeryWide ? 250 : isWide ? 230 : 210;
+  const cardWidth = Math.max(itemWidth, 220);
+
   const styles = StyleSheet.create({
+    container: {
+      // Removed marginVertical to stop huge gaps.
+      // Only adding marginBottom separates this row from the next one.
+      marginBottom: 15,
+    },
     sectionTitle: {
-      fontSize: 24,
+      fontSize: isVeryWide ? 26 : 22,
       fontWeight: "700",
       color: textPrimary,
-      marginTop: 24,
-      marginBottom: 16,
+      // Removed marginTop (relying on container spacing)
+      marginTop: 0,
+      // Brought title closer to the cards
+      marginBottom: 8,
       textAlign: isRTL ? "right" : "left",
-      paddingHorizontal: 20,
+      paddingHorizontal: 20, // Aligns with the cards
+      opacity: 0.9,
     },
     reciterItem: {
+      // Allow the focus animation to overlap boundaries without being clipped
       overflow: "visible",
-      marginVertical: 8,
+      // Vertical margin for the shadow/scale effect
+      marginVertical: 10,
+    },
+    scrollContent: {
+      paddingHorizontal: 20,
+      // Helps with focus clipping
+      flexGrow: 1,
     },
   });
 
   return (
-    <SpatialNavigationView direction="vertical" style={{ marginVertical: 12 }}>
+    <SpatialNavigationView direction="vertical" style={styles.container}>
       <Text style={styles.sectionTitle}>{title}</Text>
-      <View
-        style={{
-          height: isVeryWide ? 220 : isWide ? 200 : 180,
-        }}
-      >
+
+      <View style={{ height: containerHeight }}>
         <SpatialNavigationScrollView
           horizontal
-          style={
-            {
-              //direction: isRTL ? "rtl" : "ltr",
-              //flexDirection: isRTL ? "row-reverse" : "row",
-            }
-          }
-          contentContainerStyle={
-            {
-              //paddingHorizontal: 10,
-              //direction: isRTL ? "rtl" : "ltr",
-              //justifyContent: isRTL ? "flex-start" : "flex-end",
-              //backgroundColor: "red",
-            }
-          }
+          offsetFromStart={20} // Keeps the focused item slightly to the right/left
+          style={{ height: "100%" }}
         >
           <SpatialNavigationView
             direction="horizontal"
@@ -82,6 +87,7 @@ const SectionFeatured = ({
               direction: isRTL ? "rtl" : "ltr",
               alignItems: "center",
               justifyContent: "flex-start",
+              paddingHorizontal: 20, // Add padding inside the scroll view
             }}
           >
             {reciters.map((reciter, index) => (
@@ -90,8 +96,8 @@ const SectionFeatured = ({
                 style={[
                   styles.reciterItem,
                   {
-                    width: Math.max(itemWidth, 220),
-                    marginEnd: 12,
+                    width: cardWidth,
+                    marginEnd: 12, // Gap between cards
                   },
                 ]}
               >
