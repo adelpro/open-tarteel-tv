@@ -20,6 +20,7 @@ import {
 
 import { Ionicons } from "@expo/vector-icons";
 import { useItemHeight } from "../hooks/ise-item-height";
+import SourceTag from "./source-tag";
 
 type ReciterCardProps = {
   reciter: Reciter;
@@ -111,11 +112,12 @@ const ReciterCard = ({
             >
               {reciter.moshaf.name} • {RIWAYA_LABEL[reciter.moshaf.riwaya]}
             </Text>
+
             <View
               style={{
                 flexDirection: "row-reverse",
                 alignItems: "center",
-                marginTop: 8,
+                marginTop: 10,
               }}
             >
               {viewCount !== undefined && (
@@ -159,7 +161,20 @@ const ReciterCard = ({
                 </View>
               )}
             </View>
-            <RiwayaTag riwaya={reciter.moshaf.riwaya} />
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                position: "absolute",
+                margin: 2,
+                top: 4,
+                end: 4,
+                gap: 2,
+              }}
+            >
+              <RiwayaTag riwaya={reciter.moshaf.riwaya} />
+              <SourceTag source={reciter.source} />
+            </View>
           </Pressable>
         );
       }}

@@ -121,11 +121,12 @@ export default function HomeScreen() {
     }
   }, [route]);
 
-  const loadReciters = async (lang: string) => {
+  const loadReciters = async (lang: "ar" | "en") => {
     setLoading(true);
     setError(null);
     try {
       const data = await getAllReciters(lang);
+
       setReciters(data);
       setError(null);
     } catch (err) {

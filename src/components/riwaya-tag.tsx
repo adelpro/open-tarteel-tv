@@ -39,12 +39,10 @@ const RiwayaTag = ({ riwaya }: RiwayaTagProps) => {
   return (
     <View
       style={{
-        position: "absolute",
-        top: 8,
-        end: 8,
         paddingHorizontal: 8,
         paddingVertical: 2,
         borderRadius: 4,
+        height: 20,
         backgroundColor,
       }}
       accessibilityRole="text"
