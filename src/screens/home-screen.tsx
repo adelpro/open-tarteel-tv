@@ -148,7 +148,7 @@ export default function HomeScreen() {
     (reciter: Reciter) => {
       navigation.navigate("Player", { reciter });
     },
-    [navigation],
+    [navigation]
   );
 
   const mostViewedReciters = useMemo(() => {
@@ -236,7 +236,7 @@ export default function HomeScreen() {
       searchName: normalizeSearchText(reciter.name, searchLanguage),
       searchMoshafName: normalizeSearchText(
         reciter.moshaf.name,
-        searchLanguage,
+        searchLanguage
       ),
     }));
 
@@ -254,9 +254,9 @@ export default function HomeScreen() {
     return results.map((entry) => entry.item);
   }, [reciters, searchQuery, selectedRiwaya, i18n.language]);
 
-  const { itemWidth, reciterRows } = useReciterGridLayout(
+  const { cardsPerRow, itemWidth } = useReciterGridLayout(
     filteredReciters,
-    width,
+    width
   );
 
   if (loading) {
@@ -356,13 +356,13 @@ export default function HomeScreen() {
           />
 
           <SectionRecitersGrid
-            reciterRows={reciterRows}
+            reciters={filteredReciters}
+            cardsPerRow={cardsPerRow}
             itemWidth={itemWidth}
             onReciterPress={handleReciterPress}
-            searchFocused={searchFocused}
+            preferredFirstFocus={!searchFocused}
             viewCounts={viewCounts}
             favoriteCounts={favoriteCounts}
-            isRTL={isRTL}
           />
         </SpatialNavigationView>
       </SpatialNavigationScrollView>

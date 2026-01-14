@@ -12,6 +12,13 @@ export function useReciterGridLayout(
     return 3;
   }, [width]);
 
+  const rowHeight = useMemo(() => {
+    // Card height + focus scale buffer
+    if (width >= 2800) return 260;
+    if (width >= 2200) return 240;
+    return 220;
+  }, [width]);
+
   const itemWidth = useMemo(() => {
     const contentPadding = 20;
     const rowPadding = 20;
@@ -34,5 +41,5 @@ export function useReciterGridLayout(
     return rows;
   }, [filteredReciters, cardsPerRow]);
 
-  return { cardsPerRow, itemWidth, reciterRows };
+  return { cardsPerRow, itemWidth, reciterRows, rowHeight };
 }
