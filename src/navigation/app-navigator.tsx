@@ -71,7 +71,9 @@ const linking: LinkingOptions<any> = {
 };
 
 export default function AppNavigator() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  const isRTL = i18n.language === "ar";
   const colorScheme = useColorScheme();
   const isDark = colorScheme !== "light";
   useTVEventHandler((evt: any) => {
@@ -86,10 +88,10 @@ export default function AppNavigator() {
         cb("down");
         break;
       case "left":
-        cb("left");
+        isRTL ? cb("right") : cb("left");
         break;
       case "right":
-        cb("right");
+        isRTL ? cb("left") : cb("right");
         break;
       case "select":
       case "playPause":

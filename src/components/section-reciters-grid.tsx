@@ -5,6 +5,7 @@ import { SpatialNavigationVirtualizedGrid } from "react-tv-space-navigation";
 import ReciterCard from "./reciter-card";
 import type { Reciter } from "../types";
 import { useItemHeight } from "../hooks/ise-item-height";
+import { useTranslation } from "react-i18next";
 
 type SectionRecitersGridProps = {
   reciters: Reciter[];
@@ -34,7 +35,8 @@ export default function SectionRecitersGrid({
   favoriteCounts,
 }: SectionRecitersGridProps) {
   const { itemHeight } = useItemHeight();
-
+  const { i18n } = useTranslation();
+  const isRTL = i18n.dir() === "rtl";
   const renderItem = useCallback(
     ({ item, index }: { item: Reciter; index: number }) => (
       <View
@@ -63,9 +65,20 @@ export default function SectionRecitersGrid({
   return (
     <SpatialNavigationVirtualizedGrid<Reciter>
       data={reciters}
+      style={{
+        width: "100%",
+        justifyContent: isRTL ? "flex-start" : "flex-end",
+        direction: isRTL ? "rtl" : "ltr",
+        flexDirection: isRTL ? "row-reverse" : "row",
+      }}
       numberOfColumns={cardsPerRow}
       itemHeight={ITEM_HEIGHT}
       renderItem={renderItem}
+      rowContainerStyle={{
+        flexDirection: isRTL ? "row-reverse" : "row",
+        flex: 1,
+        paddingHorizontal: 10,
+      }}
     />
   );
 }

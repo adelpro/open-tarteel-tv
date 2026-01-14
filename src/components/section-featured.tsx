@@ -7,6 +7,7 @@ import {
 import ReciterCard from "./reciter-card";
 import { Reciter } from "../types";
 import { useItemHeight } from "../hooks/ise-item-height";
+import { useTranslation } from "react-i18next";
 
 type FeaturedSectionProps = {
   title: string;
@@ -30,7 +31,6 @@ const SectionFeatured = ({
   favoriteCounts,
   onReciterPress,
   isVeryWide,
-  isWide,
   textPrimary,
 }: FeaturedSectionProps) => {
   if (reciters.length === 0) return null;
@@ -41,7 +41,13 @@ const SectionFeatured = ({
 
   const styles = StyleSheet.create({
     container: {
-      marginBottom: 15,
+      marginBottom: 5,
+    },
+    contentContainer: {
+      height: containerHeight,
+      justifyContent: isRTL ? "flex-start" : "flex-end",
+      direction: isRTL ? "rtl" : "ltr",
+      flexDirection: isRTL ? "row-reverse" : "row",
     },
     sectionTitle: {
       fontSize: isVeryWide ? 26 : 22,
@@ -49,14 +55,12 @@ const SectionFeatured = ({
       color: textPrimary,
       marginBottom: 8,
       textAlign: isRTL ? "right" : "left",
-      paddingHorizontal: 20,
+      paddingHorizontal: 10,
       opacity: 0.9,
     },
     scrollContent: {
       flexDirection: "row",
-      direction: isRTL ? "rtl" : "ltr",
-      alignItems: "center",
-      justifyContent: "flex-start",
+      flex: 1,
       paddingHorizontal: 20,
     },
   });
@@ -65,12 +69,8 @@ const SectionFeatured = ({
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>{title}</Text>
 
-      <View style={{ height: containerHeight }}>
-        <SpatialNavigationScrollView
-          horizontal
-          offsetFromStart={20}
-          style={{ height: "100%" }}
-        >
+      <View style={styles.contentContainer}>
+        <SpatialNavigationScrollView horizontal offsetFromStart={20}>
           <SpatialNavigationView
             direction="horizontal"
             style={styles.scrollContent}
