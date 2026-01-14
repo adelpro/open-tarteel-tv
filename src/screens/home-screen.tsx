@@ -26,10 +26,10 @@ import { getThemeColors } from "../constants/theme";
 import { useTranslation } from "react-i18next";
 import Fuse from "fuse.js";
 import { normalizeSearchText } from "../utils/search";
-import { useFavorites } from "../hooks/use-favorites";
 import { useViewCounts } from "../hooks/use-view-counts";
 import { useReciterGridLayout } from "../hooks/use-reciter-grid-layout";
 import SectionRecitersGrid from "../components/section-reciters-grid";
+import { useFavorites } from "../context/favorites.context";
 
 export default function HomeScreen() {
   const { t, i18n } = useTranslation();
@@ -148,7 +148,7 @@ export default function HomeScreen() {
     (reciter: Reciter) => {
       navigation.navigate("Player", { reciter });
     },
-    [navigation],
+    [navigation]
   );
 
   const mostViewedReciters = useMemo(() => {
@@ -236,7 +236,7 @@ export default function HomeScreen() {
       searchName: normalizeSearchText(reciter.name, searchLanguage),
       searchMoshafName: normalizeSearchText(
         reciter.moshaf.name,
-        searchLanguage,
+        searchLanguage
       ),
     }));
 
@@ -256,7 +256,7 @@ export default function HomeScreen() {
 
   const { itemWidth, reciterRows } = useReciterGridLayout(
     filteredReciters,
-    width,
+    width
   );
 
   if (loading) {

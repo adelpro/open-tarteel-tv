@@ -18,10 +18,9 @@ import {
 } from "../constants/interaction-colors";
 import { getThemeColors } from "../constants/theme";
 import type { PlayerState } from "../hooks/use-player";
+import { useFavorites } from "../context/favorites.context";
 
 const isArabicText = (text: string) => /[\u0600-\u06FF]/.test(text);
-
-import { useFavorites } from "../hooks/use-favorites";
 
 type PlayerProps = { player: PlayerState };
 
