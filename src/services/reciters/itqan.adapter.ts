@@ -4,7 +4,9 @@ import type { ReciterSource } from "./reciter-source";
 import type {
   ItqanReciterResponse,
   ItqanRecitationResponse,
+  ItqanRecitationDetailResponse,
 } from "./itqan.types";
+import { getRiwayaKeyFromMoshafName } from "./mp3quran.helpers";
 
 const BASE_URL = "https://api.cms.itqan.dev";
 
@@ -12,57 +14,60 @@ export const ItqanAdapter: ReciterSource = {
   source: LinkSource.ITQAN,
 
   async getReciters(): Promise<Reciter[]> {
-    const recitersResponse = await fetch(`${BASE_URL}/reciters/`);
-    if (!recitersResponse.ok) {
-      throw new Error("Failed to fetch Itqan reciters");
+    const recitationsResponse = await fetch(`${BASE_URL}/recitations/`);
+    if (!recitationsResponse.ok) {
+      throw new Error("Failed to fetch Itqan recitations");
     }
 
-    const recitersData: ItqanReciterResponse = await recitersResponse.json();
+    const recitationsData: ItqanRecitationResponse =
+      await recitationsResponse.json();
 
     // Use explicit type: Array<Reciter | null>
-    const recitersWithNulls: Array<Reciter | null> = await Promise.all(
-      recitersData.results.map(async (reciter) => {
+    const reciters: Array<Reciter | null> = await Promise.all(
+      recitationsData.results.map(async (recitation) => {
         try {
-          const recitationsResponse = await fetch(
-            `${BASE_URL}/recitations/${reciter.id}`
+          const recitationsDetailResponse = await fetch(
+            `${BASE_URL}/recitations/${recitation.id}`
           );
-          if (!recitationsResponse.ok) {
-            throw new Error(`Failed to fetch recitations for ${reciter.name}`);
+          if (!recitationsDetailResponse.ok) {
+            throw new Error(
+              `Failed to fetch recitations for ${recitation.name}`
+            );
           }
 
-          const recitations: ItqanRecitationResponse =
-            await recitationsResponse.json();
+          const recitationDetailData: ItqanRecitationDetailResponse =
+            await recitationsDetailResponse.json();
 
-          const playlist: Playlist = recitations.results.map((surah) => ({
-            surahId: String(surah.surah_number),
-            link: surah.audio_url,
-          }));
+          const playlist: Playlist = recitationDetailData.results.map(
+            (surah) => ({
+              surahId: String(surah.surah_number),
+              link: surah.audio_url,
+            })
+          );
+
+          const riwaya = getRiwayaKeyFromMoshafName(recitation.riwayah.name);
 
           return {
-            id: reciter.id,
-            name: reciter.name,
+            id: recitation.reciter.id,
+            name: recitation.reciter.name,
             source: LinkSource.ITQAN,
             moshaf: {
-              id: reciter.id,
-              name: `${reciter.name} Mushaf`,
-              riwaya: Riwaya.HAFS_A_ASIM,
+              id: recitation.reciter.id,
+              name: recitation.name,
+              riwaya,
               server: "",
               surah_total: playlist.length,
               playlist,
             },
           } satisfies Reciter;
         } catch (error) {
-          console.warn(`Skipping reciter ${reciter.name}:`, error);
+          console.warn(`Skipping reciter ${recitation.reciter.name}:`, error);
           return null;
         }
       })
     );
 
-    // Filter out nulls to satisfy Reciter[]
-    const reciters: Reciter[] = recitersWithNulls.filter(
-      (r): r is Reciter => r !== null
-    );
-
-    return reciters;
+    // Filter out nulls
+    return reciters.filter((r): r is Reciter => r !== null);
   },
 };

@@ -8,23 +8,39 @@ export type ItqanReciterResponse = {
 
 export type ItqanRecitationResponse = {
   results: {
-    surah_number: number;
-    audio_url: string;
+    id: number;
+    name: string;
+    description: string;
+    publisher: {
+      id: number;
+      name: string;
+    };
+    reciter: {
+      id: number;
+      name: string;
+    };
+    riwayah: {
+      id: number;
+      name: string;
+    };
+    surahs_count: number;
   }[];
 };
 
-export type ItqanSurahResponse = {
-  results: {
-    surah_number: number;
-    surah_name: string;
-    surah_name_en: string;
-    audio_url: string;
-    duration_ms: number;
-    size_bytes: number;
-    revelation_order: number;
-    revelation_place: string;
-    ayahs_count: number;
-    ayahs_timings: any[]; // can refine if needed
-  }[];
+export type ItqanSurah = {
+  surah_number: number;
+  surah_name: string;
+  surah_name_en: string;
+  audio_url: string;
+  duration_ms: number;
+  size_bytes: number;
+  revelation_order: number;
+  revelation_place: string;
+  ayahs_count: number;
+  ayahs_timings: unknown[]; // empty array in your example, can refine later
+};
+
+export type ItqanRecitationDetailResponse = {
+  results: ItqanSurah[];
   count: number;
 };
