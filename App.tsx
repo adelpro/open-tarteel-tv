@@ -7,6 +7,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import AppNavigator from "./src/navigation/app-navigator";
 import { I18nextProvider } from "react-i18next";
+import { FavoritesProvider } from "./src/context/favorites.context";
 
 // Instruct SplashScreen not to hide yet, we want to do this manually
 SplashScreen.preventAutoHideAsync().catch(() => {
@@ -44,10 +45,12 @@ export default function App() {
 
   return (
     <I18nextProvider i18n={i18n}>
-      <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-        <AppNavigator />
-        <StatusBar style="light" />
-      </View>
+      <FavoritesProvider>
+        <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+          <StatusBar style="light" />
+          <AppNavigator />
+        </View>
+      </FavoritesProvider>
     </I18nextProvider>
   );
 }
