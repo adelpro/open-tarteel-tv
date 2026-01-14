@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0]
+
 ### Added
 
 - Splash screen animation
@@ -16,6 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - assets background and dimention fix for android tv, ios tv and app icon
+
+- fixed Layout orientation
+
+- fixed rtl d-pad navigation
+
+- fixed reciters names in playlist for arabic language
 
 ## [1.2.0] - 2025-12-20
 
