@@ -6,6 +6,7 @@ import {
 } from "react-tv-space-navigation";
 import ReciterCard from "./reciter-card";
 import { Reciter } from "../types";
+import { useItemHeight } from "../hooks/ise-item-height";
 
 type FeaturedSectionProps = {
   title: string;
@@ -34,8 +35,9 @@ const SectionFeatured = ({
 }: FeaturedSectionProps) => {
   if (reciters.length === 0) return null;
 
-  const containerHeight = isVeryWide ? 250 : isWide ? 230 : 210;
-  const cardWidth = Math.max(itemWidth, 220);
+  const { itemHeight } = useItemHeight();
+
+  const containerHeight = itemHeight + 20; // 10 is the marginBottom
 
   const styles = StyleSheet.create({
     container: {
@@ -74,14 +76,25 @@ const SectionFeatured = ({
             style={styles.scrollContent}
           >
             {reciters.map((reciter, index) => (
-              <ReciterCard
-                key={`${title}-${reciter.id}-${index}`}
-                reciter={reciter}
-                preferredFocus={index === 0} // first card gets focus
-                onPress={onReciterPress}
-                viewCount={viewCounts[String(reciter.id)]}
-                favoriteCount={favoriteCounts[String(reciter.id)]}
-              />
+              <View
+                key={`view-${title}-${reciter.id}-${index}`}
+                style={[
+                  {
+                    width: itemWidth,
+                    height: itemHeight,
+                    marginHorizontal: 4,
+                  },
+                ]}
+              >
+                <ReciterCard
+                  key={`${title}-${reciter.id}-${index}`}
+                  reciter={reciter}
+                  preferredFocus={index === 0} // first card gets focus
+                  onPress={onReciterPress}
+                  viewCount={viewCounts[String(reciter.id)]}
+                  favoriteCount={favoriteCounts[String(reciter.id)]}
+                />
+              </View>
             ))}
           </SpatialNavigationView>
         </SpatialNavigationScrollView>

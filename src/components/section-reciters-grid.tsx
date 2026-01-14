@@ -4,6 +4,7 @@ import { SpatialNavigationVirtualizedGrid } from "react-tv-space-navigation";
 
 import ReciterCard from "./reciter-card";
 import type { Reciter } from "../types";
+import { useItemHeight } from "../hooks/ise-item-height";
 
 type SectionRecitersGridProps = {
   reciters: Reciter[];
@@ -16,15 +17,12 @@ type SectionRecitersGridProps = {
 };
 
 const styles = StyleSheet.create({
-  content: {
-    paddingHorizontal: 20,
-  },
   item: {
     overflow: "visible",
   },
 });
 
-const ITEM_HEIGHT = 210; // must be stable for virtualization
+const ITEM_HEIGHT = 120; // must be stable for virtualization
 
 export default function SectionRecitersGrid({
   reciters,
@@ -35,6 +33,8 @@ export default function SectionRecitersGrid({
   viewCounts,
   favoriteCounts,
 }: SectionRecitersGridProps) {
+  const { itemHeight } = useItemHeight();
+
   const renderItem = useCallback(
     ({ item, index }: { item: Reciter; index: number }) => (
       <View
@@ -42,11 +42,13 @@ export default function SectionRecitersGrid({
           styles.item,
           {
             width: itemWidth,
-            height: ITEM_HEIGHT,
+            height: itemHeight,
+            marginHorizontal: 4,
           },
         ]}
       >
         <ReciterCard
+          key={`view-${item.id}-${index}`}
           reciter={item}
           preferredFocus={preferredFirstFocus && index === 0}
           onPress={onReciterPress}

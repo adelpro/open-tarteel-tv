@@ -1,4 +1,3 @@
-import React, { memo } from "react";
 import {
   Pressable,
   StyleSheet,
@@ -20,6 +19,7 @@ import {
 } from "../constants/interaction-colors";
 
 import { Ionicons } from "@expo/vector-icons";
+import { useItemHeight } from "../hooks/ise-item-height";
 
 type ReciterCardProps = {
   reciter: Reciter;
@@ -43,6 +43,7 @@ const ReciterCard = ({
   viewCount,
   favoriteCount,
 }: ReciterCardProps) => {
+  const { itemHeight } = useItemHeight();
   const { i18n } = useTranslation();
   const colorScheme = useColorScheme();
   const isDark = colorScheme !== "light";
@@ -57,7 +58,7 @@ const ReciterCard = ({
     reciterCard: {
       position: "relative",
       direction: isRTL ? "rtl" : "ltr",
-      height: isVeryWide ? 140 : isWide ? 128 : isMedium ? 118 : 110,
+      height: itemHeight,
       backgroundColor: cardBg,
       paddingVertical: isVeryWide ? 28 : isWide ? 24 : 20,
       paddingHorizontal: isVeryWide ? 24 : isWide ? 20 : 16,
