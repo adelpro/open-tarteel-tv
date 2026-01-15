@@ -141,7 +141,7 @@ export default function HomeScreen() {
     (reciter: Reciter) => {
       navigation.navigate("Player", { reciter });
     },
-    [navigation]
+    [navigation],
   );
 
   const mostViewedReciters = useMemo<Reciter[]>(() => {
@@ -155,14 +155,6 @@ export default function HomeScreen() {
         return { reciter, viewCount };
       })
       .filter(({ viewCount }) => viewCount > 0)
-      .sort((a, b) => {
-        if (a.viewCount !== b.viewCount) {
-          return b.viewCount - a.viewCount;
-        }
-
-        // stable fallback
-        return a.reciter.name.localeCompare(b.reciter.name, i18n.language);
-      })
       .slice(0, 10)
       .map(({ reciter }) => reciter);
 
@@ -193,11 +185,6 @@ export default function HomeScreen() {
         const idStr = String(r.id);
         const count = favoriteCounts[idStr] || 0;
         return count > 0;
-      })
-      .sort((a, b) => {
-        const countB = favoriteCounts[String(b.id)] || 0;
-        const countA = favoriteCounts[String(a.id)] || 0;
-        return countB - countA;
       })
       .slice(0, 10);
 
@@ -249,7 +236,7 @@ export default function HomeScreen() {
 
   const { cardsPerRow, itemWidth } = useReciterGridLayout(
     filteredReciters,
-    width
+    width,
   );
 
   if (loading) {

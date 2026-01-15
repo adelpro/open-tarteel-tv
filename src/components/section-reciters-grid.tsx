@@ -37,6 +37,8 @@ export default function SectionRecitersGrid({
   const { itemHeight } = useItemHeight();
   const { i18n } = useTranslation();
   const isRTL = i18n.dir() === "rtl";
+
+  console.log("reciters", reciters.length);
   const renderItem = useCallback(
     ({ item, index }: { item: Reciter; index: number }) => (
       <View
@@ -59,7 +61,13 @@ export default function SectionRecitersGrid({
         />
       </View>
     ),
-    [favoriteCounts, itemWidth, onReciterPress, preferredFirstFocus, viewCounts]
+    [
+      favoriteCounts,
+      itemWidth,
+      onReciterPress,
+      preferredFirstFocus,
+      viewCounts,
+    ],
   );
 
   return (
