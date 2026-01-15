@@ -78,6 +78,7 @@ const ReciterCard = ({
       fontSize: isVeryWide ? 26 : isWide ? 24 : isMedium ? 20 : 18,
       fontWeight: "bold",
       color: textPrimary,
+      marginTop: 5,
       marginBottom: 5,
       width: "100%",
     },

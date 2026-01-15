@@ -38,7 +38,6 @@ export default function SectionRecitersGrid({
   const { i18n } = useTranslation();
   const isRTL = i18n.dir() === "rtl";
 
-  console.log("reciters", reciters.length);
   const renderItem = useCallback(
     ({ item, index }: { item: Reciter; index: number }) => (
       <View
@@ -75,18 +74,13 @@ export default function SectionRecitersGrid({
       data={reciters}
       style={{
         width: "100%",
-        justifyContent: isRTL ? "flex-start" : "flex-end",
         direction: isRTL ? "rtl" : "ltr",
         flexDirection: isRTL ? "row-reverse" : "row",
       }}
       numberOfColumns={cardsPerRow}
       itemHeight={ITEM_HEIGHT}
       renderItem={renderItem}
-      rowContainerStyle={{
-        flexDirection: isRTL ? "row-reverse" : "row",
-        flex: 1,
-        paddingHorizontal: 10,
-      }}
+      rowContainerStyle={{}}
     />
   );
 }
