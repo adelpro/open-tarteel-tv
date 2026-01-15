@@ -9,7 +9,7 @@ import type { ReciterSource } from "./reciters/reciter-source";
  * Adding a new API = add a new adapter to this array.
  */
 const RECITER_SOURCES: readonly ReciterSource[] = [
-  /*   Mp3QuranAdapter, */
+  Mp3QuranAdapter,
   ItqanAdapter,
 ];
 

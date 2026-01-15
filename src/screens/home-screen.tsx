@@ -149,7 +149,7 @@ export default function HomeScreen() {
     (reciter: Reciter) => {
       navigation.navigate("Player", { reciter });
     },
-    [navigation]
+    [navigation],
   );
 
   const mostViewedReciters = useMemo(() => {
@@ -221,9 +221,12 @@ export default function HomeScreen() {
 
     // 2. If NO search query, sort alphabetically and return
     if (!normalizedQuery.length) {
-      return baseList.sort((a, b) => {
-        return a.name.localeCompare(b.name, i18n.language);
+      const lang = i18n.language === "ar" ? "ar" : "en";
+      const sorted = baseList.sort((a, b) => {
+        return a.name.localeCompare(b.name, "ar");
       });
+      console.log("sorted", sorted, lang);
+      return sorted;
     }
 
     // 3. If THERE IS a search query, run Fuse.js (keep relevance order, don't alphabetical sort)
@@ -237,7 +240,7 @@ export default function HomeScreen() {
       searchName: normalizeSearchText(reciter.name, searchLanguage),
       searchMoshafName: normalizeSearchText(
         reciter.moshaf.name,
-        searchLanguage
+        searchLanguage,
       ),
     }));
 
@@ -257,7 +260,7 @@ export default function HomeScreen() {
 
   const { cardsPerRow, itemWidth } = useReciterGridLayout(
     filteredReciters,
-    width
+    width,
   );
 
   if (loading) {

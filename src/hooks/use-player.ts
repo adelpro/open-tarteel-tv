@@ -47,8 +47,6 @@ export function usePlayer() {
         (item) => parseInt(item.surahId) === surahId
       )?.link;
 
-      console.log("audioUrl", audioUrl);
-
       if (!audioUrl) {
         return;
       }
@@ -61,9 +59,7 @@ export function usePlayer() {
         player.replace({ uri: audioUrl });
         currentUrlRef.current = audioUrl;
         player.play();
-      } catch (error) {
-        console.log("Error playing audio", error);
-      }
+      } catch {}
     },
     [reciter, player, isPlaying]
   );

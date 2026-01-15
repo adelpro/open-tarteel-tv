@@ -24,10 +24,9 @@ export const normalizeSearchText = (
   value: string,
   language: SearchLanguage
 ) => {
-  if (!value) {
-    return "";
-  }
-  if (language === "ar") {
+  
+   if (language === "ar") {
+  
     return normalizeArabicText(value);
   }
   return normalizeEnglishText(value);

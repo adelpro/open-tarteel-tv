@@ -7,7 +7,6 @@ import {
 import ReciterCard from "./reciter-card";
 import { Reciter } from "../types";
 import { useItemHeight } from "../hooks/ise-item-height";
-import { useTranslation } from "react-i18next";
 
 type FeaturedSectionProps = {
   title: string;
@@ -45,9 +44,6 @@ const SectionFeatured = ({
     },
     contentContainer: {
       height: containerHeight,
-      justifyContent: isRTL ? "flex-start" : "flex-end",
-      direction: isRTL ? "rtl" : "ltr",
-      flexDirection: isRTL ? "row-reverse" : "row",
     },
     sectionTitle: {
       fontSize: isVeryWide ? 26 : 22,
@@ -59,8 +55,8 @@ const SectionFeatured = ({
       opacity: 0.9,
     },
     scrollContent: {
-      flexDirection: "row",
-      flex: 1,
+      direction: isRTL ? "rtl" : "ltr",
+      flexDirection: isRTL ? "row-reverse" : "row",
       paddingHorizontal: 20,
     },
   });
