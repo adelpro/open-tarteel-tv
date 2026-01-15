@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add settings screen
+- add adapters for multiple recitations sources and make it reusable (Itqan and MP3Quran)
+- add ascript tp buildthe app for android locally
+- add virtualized grid to fast load reciters list and optimize performance
+
+### Fixed
+
+- fixed reciters names in playlist for arabic language
+- fixed layout and navigation for android tv
+- fixed eng reciter cards display
+
 ## [1.3.0]
 
 ### Added

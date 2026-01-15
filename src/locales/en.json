@@ -64,6 +64,8 @@
     "about_title": "About",
     "about_desc": "Open Tarteel TV is a React Native application built with Expo to provide an optimal Quran audio streaming experience on TV platforms.",
     "created_by": "Created by adelpro",
-    "source_code": "Source: github.com/adelpro/open-tarteel-tv"
+    "source_code": "Source: github.com/adelpro/open-tarteel-tv",
+    "sources_title": "Data Sources",
+    "sources_desc": "Recitations provided by:"
   }
 }

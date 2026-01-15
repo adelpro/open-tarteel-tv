@@ -1,6 +1,6 @@
 {
   "name": "open-tarteel-tv",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
@@ -11,7 +11,7 @@
     "prebuild:tv:android": "cross-env EXPO_TV=1 expo prebuild --clean --platform android",
     "prebuild:tv:ios": "cross-env EXPO_TV=1 expo prebuild --clean --platform ios",
     "build:tv:android:aab": "cross-env EXPO_TV=1 eas build -p android --profile production",
-    "build:tv:android:local": "cross-env EXPO_TV=1 eas build -p android --profile production --local",
+    "build:tv:android:local": "cross-env EXPO_TV=1 eas build -p android --profile production --local --output builds/",
     "build:tv:ios": "cross-env EXPO_TV=1 eas build -p ios --profile production"
   },
   "dependencies": {

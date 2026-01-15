@@ -63,6 +63,8 @@
     "about_title": "حول التطبيق",
     "about_desc": "تطبيق ترتيل هو تطبيق مبني باستخدام React Native و Expo لتوفير تجربة استماع مثالية للقرآن الكريم على منصات التلفاز.",
     "created_by": "تم التطوير بواسطة adelpro",
-    "source_code": "المصدر: github.com/adelpro/open-tarteel-tv"
+    "source_code": "المصدر: github.com/adelpro/open-tarteel-tv",
+    "sources_title": "مصادر البيانات",
+    "sources_desc": "يتم توفير التلاوات بواسطة:"
   }
 }

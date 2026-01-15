@@ -89,6 +89,13 @@ export default function AboutScreen() {
           <Text style={styles.text}>{t("about.about_desc")}</Text>
         </View>
 
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t("about.sources_title")}</Text>
+          <Text style={styles.text}>{t("about.sources_desc")}</Text>
+          <Text style={styles.text}>https://www.mp3quran.net/ar/api</Text>
+          <Text style={styles.text}>https://api.cms.itqan.dev/docs/</Text>
+        </View>
+
         <View style={styles.footer}>
           <Text style={styles.footerText}>
             © {currentYear} v{version}
