@@ -44,6 +44,15 @@ const SectionTopNav = ({ isRTL, isDark }: TopNavigationProps) => {
       accessibilityLabel={t("Privacy")}
       accessibilityRole="button"
     />,
+    <MenuButton
+      key="settings"
+      label={t("settings")}
+      iconName="settings-outline"
+      onPress={() => navigation.navigate("Settings")}
+      isDark={isDark}
+      accessibilityLabel={t("settings")}
+      accessibilityRole="button"
+    />,
     <LanguageSwitch
       key="lang"
       isDark={isDark}

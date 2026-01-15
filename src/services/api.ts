@@ -16,9 +16,16 @@ const RECITER_SOURCES: readonly ReciterSource[] = [
 /**
  * Public API – DO NOT CHANGE SIGNATURE
  */
-export async function getAllReciters(lang: "ar" | "en"): Promise<Reciter[]> {
+export async function getAllReciters(
+  lang: "ar" | "en",
+  enabledSources?: Record<string, boolean>
+): Promise<Reciter[]> {
+  const sourcesToFetch = RECITER_SOURCES.filter(
+    (source) => !enabledSources || enabledSources[source.source] !== false
+  );
+
   const results = await Promise.all(
-    RECITER_SOURCES.map((source) => source.getReciters(lang))
+    sourcesToFetch.map((source) => source.getReciters(lang))
   );
 
   return results.flat();

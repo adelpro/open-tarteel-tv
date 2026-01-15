@@ -30,6 +30,7 @@ import { useViewCounts } from "../hooks/use-view-counts";
 import { useReciterGridLayout } from "../hooks/use-reciter-grid-layout";
 import SectionRecitersGrid from "../components/section-reciters-grid";
 import { useFavorites } from "../context/favorites.context";
+import { useSettings } from "../context/settings.context";
 
 export default function HomeScreen() {
   const { t, i18n } = useTranslation();
@@ -45,6 +46,7 @@ export default function HomeScreen() {
   const { width } = useWindowDimensions();
   const { viewCounts } = useViewCounts();
   const { favoriteCounts } = useFavorites();
+  const { enabledSources } = useSettings();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRiwaya, setSelectedRiwaya] = useState<Riwaya | "all">("all");
@@ -97,7 +99,7 @@ export default function HomeScreen() {
   useEffect(() => {
     const lang = i18n.language === "ar" ? "ar" : "en";
     loadReciters(lang);
-  }, [i18n.language]);
+  }, [i18n.language, enabledSources]);
 
   useEffect(() => {
     const rn = route.name as string | undefined;
@@ -117,7 +119,7 @@ export default function HomeScreen() {
     setLoading(true);
     setError(null);
     try {
-      const data = await getAllReciters(lang);
+      const data = await getAllReciters(lang, enabledSources);
 
       setReciters(data);
       setError(null);

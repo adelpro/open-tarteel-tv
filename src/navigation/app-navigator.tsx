@@ -15,6 +15,7 @@ import HomeScreen from "../screens/home-screen";
 import PlayerScreen from "../screens/player-screen";
 import AboutScreen from "../screens/about-screen";
 import PrivacyScreen from "../screens/privacy-screen";
+import SettingsScreen from "../screens/settings-screen";
 
 const Stack = createNativeStackNavigator();
 
@@ -66,6 +67,7 @@ const linking: LinkingOptions<any> = {
       },
       About: "about",
       Privacy: "privacy",
+      Settings: "settings",
     },
   },
 };
@@ -140,6 +142,11 @@ export default function AppNavigator() {
             name="Privacy"
             component={PrivacyScreen}
             options={{ title: t("privacy.title") }}
+          />
+          <Stack.Screen
+            name="Settings"
+            component={SettingsScreen}
+            options={{ title: t("settings") }}
           />
         </Stack.Navigator>
       </NavigationContainer>
