@@ -37,7 +37,7 @@ export type Moshaf = {
 };
 
 export type Reciter = {
-  id: number;
+  id: string;
   name: string;
   source: LinkSource;
   moshaf: Moshaf;

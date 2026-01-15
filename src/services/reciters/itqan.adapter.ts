@@ -48,7 +48,7 @@ export const ItqanAdapter: ReciterSource = {
           const riwaya = getRiwayaKeyFromMoshafName(recitation.riwayah.name);
 
           return {
-            id: recitation.reciter.id,
+            id: `${LinkSource.ITQAN}-${recitation.reciter.id}`,
             name: recitation.reciter.name,
             source: LinkSource.ITQAN,
             moshaf: {

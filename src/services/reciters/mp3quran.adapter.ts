@@ -23,7 +23,7 @@ export const Mp3QuranAdapter: ReciterSource = {
     for (const apiReciter of data.reciters) {
       for (const apiMoshaf of apiReciter.moshaf) {
         reciters.push({
-          id: apiReciter.id,
+          id: `${LinkSource.MP3QURAN}-${apiReciter.id}`,
           name: apiReciter.name,
           source: LinkSource.MP3QURAN,
           moshaf: {

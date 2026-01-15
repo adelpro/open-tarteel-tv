@@ -34,6 +34,7 @@ import { useFavorites } from "../context/favorites.context";
 export default function HomeScreen() {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.dir() === "rtl";
+  const lang = i18n.language === "ar" ? "ar" : "en";
   const [reciters, setReciters] = useState<Reciter[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,15 +51,6 @@ export default function HomeScreen() {
   const [searchFocused, setSearchFocused] = useState(false);
 
   const { favorites } = useFavorites(); // local favorites
-
-  const myFavoritedReciters = useMemo(() => {
-    if (!reciters.length || !favorites.length) return [];
-    const favSet = new Set(favorites);
-
-    return reciters
-      .filter((r) => favSet.has(String(r.id)))
-      .sort((a, b) => a.name.localeCompare(b.name, i18n.language));
-  }, [reciters, favorites, i18n.language]);
 
   const { bg, textPrimary, textSecondary, errorPrimary } =
     getThemeColors(isDark);
@@ -149,37 +141,41 @@ export default function HomeScreen() {
     (reciter: Reciter) => {
       navigation.navigate("Player", { reciter });
     },
-    [navigation],
+    [navigation]
   );
 
-  const mostViewedReciters = useMemo(() => {
-    if (!reciters.length) {
+  const mostViewedReciters = useMemo<Reciter[]>(() => {
+    if (reciters.length === 0) {
       return [];
     }
 
-    const uniqueById = new Map<string, Reciter>();
-    reciters.forEach((r) => {
-      const idStr = String(r.id);
-      if (!uniqueById.has(idStr)) {
-        uniqueById.set(idStr, r);
-      }
-    });
-
-    const viewed = Array.from(uniqueById.values())
-      .filter((r) => {
-        const idStr = String(r.id);
-        const count = viewCounts[idStr] || 0;
-        return count > 0;
+    const withViews = reciters
+      .map((reciter) => {
+        const viewCount = viewCounts[String(reciter.id)] ?? 0;
+        return { reciter, viewCount };
       })
+      .filter(({ viewCount }) => viewCount > 0)
       .sort((a, b) => {
-        const countB = viewCounts[String(b.id)] || 0;
-        const countA = viewCounts[String(a.id)] || 0;
-        return countB - countA;
-      })
-      .slice(0, 10);
+        if (a.viewCount !== b.viewCount) {
+          return b.viewCount - a.viewCount;
+        }
 
-    return viewed;
+        // stable fallback
+        return a.reciter.name.localeCompare(b.reciter.name, i18n.language);
+      })
+      .slice(0, 10)
+      .map(({ reciter }) => reciter);
+
+    return withViews;
   }, [reciters, viewCounts]);
+
+  const myFavoritedReciters = useMemo(() => {
+    if (!reciters.length || !favorites.length) return [];
+    const favSet = new Set(favorites);
+    return reciters
+      .filter((reciter) => favSet.has(String(reciter.id)))
+      .sort((a, b) => a.name.localeCompare(b.name, lang));
+  }, [reciters, favorites, lang]);
 
   const mostFavoritedReciters = useMemo(() => {
     if (!reciters.length) return [];
@@ -209,27 +205,23 @@ export default function HomeScreen() {
   }, [reciters, favoriteCounts]);
 
   const filteredReciters = useMemo(() => {
-    const searchLanguage = i18n.language === "ar" ? "ar" : "en";
-
     const matchesRiwaya = (reciter: Reciter) =>
       selectedRiwaya === "all" || reciter.moshaf.riwaya === selectedRiwaya;
 
     // 1. Get base list filtered by Riwaya
     let baseList = reciters.filter(matchesRiwaya);
 
-    const normalizedQuery = normalizeSearchText(searchQuery, searchLanguage);
+    const normalizedQuery = normalizeSearchText(searchQuery, lang);
 
-    // 2. If NO search query, sort alphabetically and return
+    // 2. If no search query, sort alphabetically and return
     if (!normalizedQuery.length) {
-      const lang = i18n.language === "ar" ? "ar" : "en";
       const sorted = baseList.sort((a, b) => {
-        return a.name.localeCompare(b.name, "ar");
+        return a.name.localeCompare(b.name, lang);
       });
-      console.log("sorted", sorted, lang);
       return sorted;
     }
 
-    // 3. If THERE IS a search query, run Fuse.js (keep relevance order, don't alphabetical sort)
+    // 3. If there is a search query, run Fuse.js (keep relevance order, don't alphabetical sort)
     type ReciterSearchItem = Reciter & {
       searchName: string;
       searchMoshafName: string;
@@ -237,11 +229,8 @@ export default function HomeScreen() {
 
     const items: ReciterSearchItem[] = baseList.map((reciter) => ({
       ...reciter,
-      searchName: normalizeSearchText(reciter.name, searchLanguage),
-      searchMoshafName: normalizeSearchText(
-        reciter.moshaf.name,
-        searchLanguage,
-      ),
+      searchName: normalizeSearchText(reciter.name, lang),
+      searchMoshafName: normalizeSearchText(reciter.moshaf.name, lang),
     }));
 
     const fuse = new Fuse(items, {
@@ -260,7 +249,7 @@ export default function HomeScreen() {
 
   const { cardsPerRow, itemWidth } = useReciterGridLayout(
     filteredReciters,
-    width,
+    width
   );
 
   if (loading) {
