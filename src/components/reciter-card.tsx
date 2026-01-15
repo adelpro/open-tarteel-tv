@@ -59,7 +59,7 @@ const ReciterCard = ({
     reciterCard: {
       position: "relative",
       direction: isRTL ? "rtl" : "ltr",
-      height: itemHeight,
+      height: itemHeight + 5,
       backgroundColor: cardBg,
       paddingVertical: isVeryWide ? 28 : isWide ? 24 : 20,
       paddingHorizontal: isVeryWide ? 24 : isWide ? 20 : 16,
@@ -118,7 +118,7 @@ const ReciterCard = ({
               style={{
                 flexDirection: "row-reverse",
                 alignItems: "center",
-                marginTop: 10,
+                marginTop: 5,
               }}
             >
               {viewCount !== undefined && (
