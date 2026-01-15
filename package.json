@@ -11,7 +11,7 @@
     "prebuild:tv:android": "cross-env EXPO_TV=1 expo prebuild --clean --platform android",
     "prebuild:tv:ios": "cross-env EXPO_TV=1 expo prebuild --clean --platform ios",
     "build:tv:android:aab": "cross-env EXPO_TV=1 eas build -p android --profile production",
-    "build:tv:android:local": "cross-env EXPO_TV=1 eas build -p android --profile production --local --output ./builds/production-buildaab",
+    "build:tv:android:local": "cross-env EXPO_TV=1 eas build -p android --profile production --local --output ./builds/production-build.aab",
     "build:tv:ios": "cross-env EXPO_TV=1 eas build -p ios --profile production"
   },
   "dependencies": {
