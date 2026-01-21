@@ -68,6 +68,38 @@ If you add tests:
 
 ---
 
+---
+
+## Labels
+
+We use labels to categorize and prioritize issues. Here's a quick guide:
+
+### Type Labels
+
+| Label                 | Description                          |
+| --------------------- | ------------------------------------ |
+| `type: bug`           | Something isn't working as expected. |
+| `type: feature`       | A new functionality request.         |
+| `type: enhancement`   | Improvement to existing features.    |
+| `type: documentation` | Changes to docs or guides.           |
+
+### Difficulty Labels
+
+| Label                | Description                                  |
+| -------------------- | -------------------------------------------- |
+| `difficulty: easy`   | Good for first-time contributors.            |
+| `difficulty: medium` | Requires some familiarity with the codebase. |
+| `difficulty: hard`   | Complex tasks involving core architecture.   |
+
+### Priority Labels
+
+| Label            | Description                |
+| ---------------- | -------------------------- |
+| `priority: high` | Needs urgent attention.    |
+| `priority: low`  | Backlog or "nice to have". |
+
+---
+
 ## Attribution and License
 
 By contributing, you agree that your contributions will be licensed under the same license as the project (**MIT**).  
