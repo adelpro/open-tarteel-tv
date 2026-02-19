@@ -23,8 +23,6 @@ const styles = StyleSheet.create({
   },
 });
 
-const ITEM_HEIGHT = 120; // must be stable for virtualization
-
 export default function SectionRecitersGrid({
   reciters,
   cardsPerRow,
@@ -60,13 +58,7 @@ export default function SectionRecitersGrid({
         />
       </View>
     ),
-    [
-      favoriteCounts,
-      itemWidth,
-      onReciterPress,
-      preferredFirstFocus,
-      viewCounts,
-    ],
+    [favoriteCounts, itemWidth, onReciterPress, preferredFirstFocus, viewCounts],
   );
 
   return (
@@ -78,7 +70,7 @@ export default function SectionRecitersGrid({
         flexDirection: isRTL ? "row-reverse" : "row",
       }}
       numberOfColumns={cardsPerRow}
-      itemHeight={ITEM_HEIGHT}
+      itemHeight={itemHeight}
       renderItem={renderItem}
       rowContainerStyle={{}}
     />
