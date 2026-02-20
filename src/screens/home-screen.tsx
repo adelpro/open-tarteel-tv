@@ -340,15 +340,48 @@ export default function HomeScreen() {
             isRTL={isRTL}
           />
 
-          <SectionRecitersGrid
-            reciters={filteredReciters}
-            cardsPerRow={cardsPerRow}
-            itemWidth={itemWidth}
-            onReciterPress={handleReciterPress}
-            preferredFirstFocus={!searchFocused}
-            viewCounts={viewCounts}
-            favoriteCounts={favoriteCounts}
-          />
+          {filteredReciters.length === 0 ? (
+            <View style={{
+              alignItems: "center",
+              justifyContent: "center",
+              paddingVertical: 60,
+              paddingHorizontal: 40,
+            }}>
+              <Ionicons
+                name="search-outline"
+                size={isVeryWide ? 96 : isWide ? 80 : 64}
+                color={textSecondary}
+              />
+              <Text style={{
+                color: textPrimary,
+                fontSize: isVeryWide ? 28 : isWide ? 24 : 20,
+                fontWeight: "700",
+                marginTop: 20,
+                marginBottom: 8,
+                textAlign: "center",
+              }}>
+                {t("no_search_results_title")}
+              </Text>
+              <Text style={{
+                color: textSecondary,
+                fontSize: isVeryWide ? 20 : isWide ? 18 : 16,
+                textAlign: "center",
+                lineHeight: 24,
+              }}>
+                {t("no_search_results_message")}
+              </Text>
+            </View>
+          ) : (
+            <SectionRecitersGrid
+              reciters={filteredReciters}
+              cardsPerRow={cardsPerRow}
+              itemWidth={itemWidth}
+              onReciterPress={handleReciterPress}
+              preferredFirstFocus={!searchFocused}
+              viewCounts={viewCounts}
+              favoriteCounts={favoriteCounts}
+            />
+          )}
         </SpatialNavigationView>
       </SpatialNavigationScrollView>
     </View>
