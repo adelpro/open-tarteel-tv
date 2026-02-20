@@ -58,7 +58,15 @@ export function usePlayer() {
       }
 
       try {
-        player.replace({ uri: audioUrl });
+        const surahData = SURAHS.find((s) => s.id === surahId);
+        player.replace({
+          uri: audioUrl,
+          headers: {},
+          metadata: {
+            title: surahData?.name ?? `سورة ${surahId}`,
+            artist: effectiveReciter.name,
+          },
+        });
         currentUrlRef.current = audioUrl;
         player.play();
       } catch {}

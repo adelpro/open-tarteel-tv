@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View } from 'react-native';
 
+import { AudioModule } from 'expo-audio';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { I18nextProvider } from 'react-i18next';
@@ -26,7 +27,11 @@ export default function App() {
   useEffect(() => {
     async function prepare() {
       try {
-        // The fake delay (setTimeout) has been removed to speed up the app launch
+        // Configure audio session for background playback
+        AudioModule.setAudioModeAsync({
+          playsInSilentMode: true,
+          shouldRouteThroughEarpiece: false,
+        });
       } catch {
       } finally {
         setAppIsReady(true);
