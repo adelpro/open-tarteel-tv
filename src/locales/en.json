@@ -22,7 +22,7 @@
   "source_itqan": "Itqan",
 
   "search_placeholder": "Search Reciters",
-  "no_search_results_title": "No Reciters Found",
+  "no_search_results_title": "No Matching Reciters",
   "no_search_results_message": "Try a different search term or clear the filters.",
 
   "filter_all": "All",

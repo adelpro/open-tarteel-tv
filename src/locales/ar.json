@@ -21,7 +21,7 @@
   "source_mp3quran": "MP3Quran",
   "source_itqan": "إتقان",
   "search_placeholder": "البحث عن قراء",
-  "no_search_results_title": "لا توجد نتائج",
+  "no_search_results_title": "لا يوجد قراء مطابقون",
   "no_search_results_message": "جرّب كلمة بحث مختلفة أو أزِل عوامل التصفية.",
 
   "filter_all": "الكل",
