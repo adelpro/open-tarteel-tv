@@ -67,8 +67,10 @@ const SearchInput = ({
       marginLeft: 10,
     },
     searchInputFocused: {
-      backgroundColor: focusBg,
+      backgroundColor: isDark ? colorPrimaryDark : colorPrimaryTint,
       borderColor: colorPrimary,
+      borderWidth: 3,
+      transform: [{ scale: focusScale }],
     },
   });
 
