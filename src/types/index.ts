@@ -3,6 +3,7 @@
 export enum LinkSource {
   MP3QURAN = 'mp3quran',
   ITQAN = 'itqan',
+  EVERYAYAH = 'everyayah',
 }
 
 export enum Riwaya {

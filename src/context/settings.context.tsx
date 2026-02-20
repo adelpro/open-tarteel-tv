@@ -26,6 +26,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     {
       [LinkSource.MP3QURAN]: true,
       [LinkSource.ITQAN]: false,
+      [LinkSource.EVERYAYAH]: true,
     },
   );
 
