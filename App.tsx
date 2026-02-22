@@ -24,7 +24,7 @@ export default function App() {
   useEffect(() => {
     async function prepare() {
       try {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        // The fake delay (setTimeout) has been removed to speed up the app launch
       } catch {
       } finally {
         setAppIsReady(true);
