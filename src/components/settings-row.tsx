@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { StyleSheet, Text, View, Switch, Pressable } from "react-native";
+import { StyleSheet, Switch, Text, View } from "react-native";
 import { SpatialNavigationFocusableView } from "react-tv-space-navigation";
 import { getThemeColors } from "../constants/theme";
 import {
@@ -50,20 +50,17 @@ export const SettingRow = memo(
     return (
       <SpatialNavigationFocusableView onSelect={onToggle}>
         {({ isFocused }) => (
-          <Pressable
-            style={[styles.row, isFocused && styles.rowFocused]}
-            onPress={onToggle}
-          >
+          <View style={[styles.row, isFocused && styles.rowFocused]}>
             <Text style={styles.label}>{label}</Text>
-            <Switch
-              value={isEnabled}
-              onValueChange={onToggle}
-              trackColor={{ false: "#767577", true: colorPrimary }}
-              thumbColor={isEnabled ? "#fff" : "#f4f3f4"}
-              // Disable standard focus for switch since the parent handles it
-              focusable={false}
-            />
-          </Pressable>
+            <View pointerEvents="none">
+              <Switch
+                value={isEnabled}
+                trackColor={{ false: "#767577", true: colorPrimary }}
+                thumbColor={isEnabled ? "#fff" : "#f4f3f4"}
+                focusable={false}
+              />
+            </View>
+          </View>
         )}
       </SpatialNavigationFocusableView>
     );
