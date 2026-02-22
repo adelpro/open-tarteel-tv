@@ -18,15 +18,30 @@ const RECITER_SOURCES: readonly ReciterSource[] = [
  */
 export async function getAllReciters(
   lang: "ar" | "en",
-  enabledSources?: Record<string, boolean>
+  enabledSources?: Record<string, boolean>,
 ): Promise<Reciter[]> {
   const sourcesToFetch = RECITER_SOURCES.filter(
-    (source) => !enabledSources || enabledSources[source.source] !== false
+    (source) => !enabledSources || enabledSources[source.source] !== false,
   );
 
-  const results = await Promise.all(
-    sourcesToFetch.map((source) => source.getReciters(lang))
+  const results = await Promise.allSettled(
+    sourcesToFetch.map(async (source) => {
+      try {
+        const reciters = await source.getReciters(lang);
+        return reciters;
+      } catch (error) {
+        return [];
+      }
+    }),
   );
 
-  return results.flat();
+  // Filter out rejected promises and flatten successful results
+  const successfulResults = results
+    .filter(
+      (result): result is PromiseFulfilledResult<Reciter[]> =>
+        result.status === "fulfilled",
+    )
+    .map((result) => result.value);
+
+  return successfulResults.flat();
 }

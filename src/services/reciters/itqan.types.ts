@@ -1,11 +1,3 @@
-export type ItqanReciterResponse = {
-  results: {
-    id: number;
-    name: string;
-    recitations_count: number;
-  }[];
-};
-
 export type ItqanRecitationResponse = {
   results: {
     id: number;
