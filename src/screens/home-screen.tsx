@@ -30,6 +30,7 @@ import { useViewCounts } from "../hooks/use-view-counts";
 import { useReciterGridLayout } from "../hooks/use-reciter-grid-layout";
 import SectionRecitersGrid from "../components/section-reciters-grid";
 import { useFavorites } from "../context/favorites.context";
+import { useRecentlyPlayed } from "../context/recently-played.context";
 import { useSettings } from "../context/settings.context";
 
 export default function HomeScreen() {
@@ -46,6 +47,7 @@ export default function HomeScreen() {
   const { width } = useWindowDimensions();
   const { viewCounts } = useViewCounts();
   const { favoriteCounts } = useFavorites();
+  const { recentlyPlayed } = useRecentlyPlayed();
   const { enabledSources } = useSettings();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -170,7 +172,18 @@ export default function HomeScreen() {
       .filter((reciter) => favSet.has(String(reciter.id)))
       .sort((a, b) => a.name.localeCompare(b.name, lang));
   }, [reciters, favorites, lang]);
+  const recentlyPlayedReciters = useMemo(() => {
+    if (!reciters.length || !recentlyPlayed.length) return [];
+    const reciterMap = new Map<string, Reciter>();
+    reciters.forEach((r) => {
+      reciterMap.set(String(r.id), r);
+    });
 
+    // Map recently played IDs to actual reciter objects, maintaining order
+    return recentlyPlayed
+      .map((item) => reciterMap.get(item.reciterId))
+      .filter((reciter): reciter is Reciter => reciter !== undefined);
+  }, [reciters, recentlyPlayed]);
   const mostFavoritedReciters = useMemo(() => {
     if (!reciters.length) return [];
 
@@ -291,6 +304,21 @@ export default function HomeScreen() {
             onFocusChange={setSearchFocused}
             isDark={isDark}
           />
+
+          {recentlyPlayedReciters.length > 0 && (
+            <SectionFeatured
+              title={`${t("recently_played")} (${recentlyPlayedReciters.length})`}
+              reciters={recentlyPlayedReciters}
+              itemWidth={itemWidth}
+              isRTL={isRTL}
+              viewCounts={viewCounts}
+              favoriteCounts={favoriteCounts}
+              onReciterPress={handleReciterPress}
+              isVeryWide={isVeryWide}
+              isWide={isWide}
+              textPrimary={textPrimary}
+            />
+          )}
 
           <SectionFeatured
             title={`${t("my_favorites")} (${myFavoritedReciters.length})`}

@@ -2,7 +2,6 @@
   "app_name": "Open Tarteel TV",
   "app_description": "تلاوات القرآن الكريم - تجربة مثالية على التلفاز",
   "change_language": "العربية",
-
   "Loading_Reciters": "تحميل القراء...",
   "Failed_to_Load_Reciters": "فشل في تحميل القراء",
   "attempt": "المحاولة {{current}} من {{max}}",
@@ -16,23 +15,22 @@
   "most_viewed": "الأكثر مشاهدة",
   "most_favorited": "الأكثر تفضيلاً",
   "my_favorites": "المفضلة",
+  "recently_played": "تم تشغيله مؤخراً",
+  "recently_played_badge": "أخير",
   "settings": "الإعدادات",
   "sources_management": "إدارة المصادر",
   "source_mp3quran": "MP3Quran",
   "source_itqan": "إتقان",
   "search_placeholder": "البحث عن قراء",
-
   "filter_all": "الكل",
   "filter_hafs": "حفص",
   "filter_warsh": "ورش",
   "filter_qalun": "قولون",
   "filter_ad_duri": "الدوري",
-
   "home": "الرئيسية",
   "reciters": "القراء",
   "reciter": "القارئ",
   "playlist": "القائمة",
-
   "riwaya": {
     "hafs": "حفص",
     "warsh": "ورش",

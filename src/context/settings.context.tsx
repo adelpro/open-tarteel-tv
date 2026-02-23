@@ -23,7 +23,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [enabledSources, setEnabledSources] = useState<Record<string, boolean>>(
     {
       [LinkSource.MP3QURAN]: true,
-      [LinkSource.ITQAN]: true,
+      [LinkSource.ITQAN]: false, // temporary
     },
   );
 
