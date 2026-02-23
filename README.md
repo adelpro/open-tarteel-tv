@@ -15,6 +15,7 @@ It focuses on a simple, beautiful, and remote-friendly experience.
 
 - Searchable grid of reciters with rich metadata
 - Filter reciters by riwaya (Hafs, Warsh, Qalun, Ad-Duri, and more)
+- Recently Played section tracking with persistent storage
 - TV-remote friendly navigation and focus management
 - Dedicated player screen with playlist of surahs
 - Light and dark themes with system theme support
@@ -79,6 +80,7 @@ High-level folders:
 - `src/screens/` – top-level screens like home, player, about, privacy
 - `src/navigation/` – app navigation configuration
 - `src/hooks/` – reusable hooks for player behavior and state
+- `src/context/` – React contexts for global state (favorites, recently played, settings)
 - `src/constants/` – theme, colors, and other constants
 - `src/locales/` – localization JSON files (Arabic, English)
 - `src/services/` – API access and data fetching
