@@ -46,7 +46,7 @@ const ReciterCard = ({
   favoriteCount,
 }: ReciterCardProps) => {
   const { itemHeight } = useItemHeight();
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const { recentlyPlayed } = useRecentlyPlayed();
   const colorScheme = useColorScheme();
   const isDark = colorScheme !== "light";
@@ -126,7 +126,7 @@ const ReciterCard = ({
             {isRecentlyPlayed && (
               <View style={styles.recentlyPlayedBadge}>
                 <Ionicons name="play" size={10} color="#fff" />
-                <Text style={styles.recentlyPlayedText}>Recent</Text>
+                <Text style={styles.recentlyPlayedText}>{t("recently_played_badge")}</Text>
               </View>
             )}
 
