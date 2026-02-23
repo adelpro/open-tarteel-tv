@@ -108,10 +108,12 @@ const ReciterCard = ({
     },
     recentlyPlayedText: {
       color: "#fff",
-      fontSize: 10,
+      fontSize: isVeryWide ? 12 : isWide ? 11 : isMedium ? 10 : 9,
       fontWeight: "bold",
     },
   });
+
+  const badgeIconSize = isVeryWide ? 12 : isWide ? 11 : isMedium ? 10 : 9;
   return (
     <SpatialNavigationFocusableView onSelect={() => onPress(reciter)}>
       {({ isFocused }) => {
@@ -125,7 +127,7 @@ const ReciterCard = ({
           >
             {isRecentlyPlayed && (
               <View style={styles.recentlyPlayedBadge}>
-                <Ionicons name="play" size={10} color="#fff" />
+                <Ionicons name="play" size={badgeIconSize} color="#fff" />
                 <Text style={styles.recentlyPlayedText}>{t("recently_played_badge")}</Text>
               </View>
             )}
