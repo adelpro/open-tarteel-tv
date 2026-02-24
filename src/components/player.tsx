@@ -1,31 +1,33 @@
-import React, { memo, useMemo } from "react";
+import React, { memo, useMemo } from 'react';
 import {
   Pressable,
   StyleSheet,
   Text,
   useColorScheme,
   View,
-} from "react-native";
+} from 'react-native';
+
+import { FontAwesome } from '@expo/vector-icons';
 import {
   SpatialNavigationFocusableView,
   SpatialNavigationView,
-} from "react-tv-space-navigation";
-import { FontAwesome } from "@expo/vector-icons";
-import AudioSpectrum from "./audio-spectrum";
+} from 'react-tv-space-navigation';
+
+import AudioSpectrum from './audio-spectrum';
 import {
   colorPrimary,
   colorPrimaryLight,
-} from "../constants/interaction-colors";
-import { getThemeColors } from "../constants/theme";
-import type { PlayerState } from "../hooks/use-player";
-import { useFavorites } from "../context/favorites.context";
+} from '../constants/interaction-colors';
+import { getThemeColors } from '../constants/theme';
+import { useFavorites } from '../context/favorites.context';
+import type { PlayerState } from '../hooks/use-player';
 
 const isArabicText = (text: string) => /[\u0600-\u06FF]/.test(text);
 
 type PlayerProps = { player: PlayerState };
 
 export const Player = ({ player }: PlayerProps) => {
-  const isDark = useColorScheme() !== "light";
+  const isDark = useColorScheme() !== 'light';
   const styles = createStyles(isDark);
   const { isFavorited, toggleFavorite } = useFavorites();
 
@@ -47,52 +49,52 @@ export const Player = ({ player }: PlayerProps) => {
 
   const PLAYER_CONTROLS = [
     {
-      icon: "step-backward",
+      icon: 'step-backward',
       onSelect: handlePrevious,
       size: 22,
-      key: "backward",
+      key: 'backward',
     },
     {
-      icon: isPlaying ? "pause" : "play",
+      icon: isPlaying ? 'pause' : 'play',
       onSelect: handlePlayPause,
       size: 28,
       wide: true,
-      key: "play-pause",
+      key: 'play-pause',
     },
-    { icon: "step-forward", onSelect: handleNext, size: 28, key: "forward" },
+    { icon: 'step-forward', onSelect: handleNext, size: 28, key: 'forward' },
     {
-      icon: favorited ? "heart" : "heart-o",
+      icon: favorited ? 'heart' : 'heart-o',
       onSelect: () => reciter && toggleFavorite(reciter.id.toString()),
       size: 22,
       active: favorited,
-      key: "favorite",
+      key: 'favorite',
     },
     {
-      icon: "repeat",
+      icon: 'repeat',
       onSelect: handleToggleRepeat,
       size: 22,
       active: repeat,
-      key: "repeat",
+      key: 'repeat',
     },
   ];
 
   const hasSelection = selectedSurah !== null;
   const currentSurah = hasSelection
-    ? playlistData.find((s) => s.id === selectedSurah) ?? null
+    ? (playlistData.find((s) => s.id === selectedSurah) ?? null)
     : null;
 
   const isCurrentSurahNameArabic = useMemo(
-    () => isArabicText(currentSurah?.name ?? ""),
-    [currentSurah?.name]
+    () => isArabicText(currentSurah?.name ?? ''),
+    [currentSurah?.name],
   );
 
   const formatTime = (sec: number) => {
     const m = Math.floor(sec / 60)
       .toString()
-      .padStart(2, "0");
+      .padStart(2, '0');
     const s = Math.floor(sec % 60)
       .toString()
-      .padStart(2, "0");
+      .padStart(2, '0');
     return `${m}:${s}`;
   };
 
@@ -112,7 +114,7 @@ export const Player = ({ player }: PlayerProps) => {
         {hasSelection ? (
           <>
             <Text style={styles.metadataTitle}>
-              {currentSurah?.englishName ?? "Select a surah"}
+              {currentSurah?.englishName ?? 'Select a surah'}
             </Text>
             <Text
               style={[
@@ -126,7 +128,7 @@ export const Player = ({ player }: PlayerProps) => {
               {reciter.name} • {reciter.moshaf.name}
             </Text>
             <Text style={styles.metadataMeta}>
-              Track {currentSurah?.id ?? "-"} of {reciter.moshaf.surah_total}
+              Track {currentSurah?.id ?? '-'} of {reciter.moshaf.surah_total}
             </Text>
           </>
         ) : (
@@ -143,8 +145,8 @@ export const Player = ({ player }: PlayerProps) => {
         <View style={styles.playerControls}>
           <Text style={styles.nowPlaying}>
             {hasSelection
-              ? `Now Playing: ${currentSurah?.englishName ?? ""}`
-              : "Select a surah to start playing"}
+              ? `Now Playing: ${currentSurah?.englishName ?? ''}`
+              : 'Select a surah to start playing'}
           </Text>
 
           <AudioSpectrum playing={hasSelection && isPlaying} />
@@ -159,7 +161,7 @@ export const Player = ({ player }: PlayerProps) => {
                     {
                       width: duration
                         ? `${(position / duration) * 100}%`
-                        : "0%",
+                        : '0%',
                     },
                   ]}
                 />
@@ -200,7 +202,7 @@ export const Player = ({ player }: PlayerProps) => {
                       color={
                         btn.active || (isFocused && hasSelection)
                           ? colorPrimary
-                          : "#fff"
+                          : '#fff'
                       }
                     />
                   </Pressable>
@@ -217,11 +219,11 @@ export const Player = ({ player }: PlayerProps) => {
 function createStyles(isDark: boolean) {
   const { textPrimary, textSecondary, cardBg, border } = getThemeColors(isDark);
   const panelBg = cardBg;
-  const controlBg = isDark ? "#232323" : "#E0E0E0";
-  const controlBgWide = isDark ? "#2F2F2F" : "#DADADA";
+  const controlBg = isDark ? '#232323' : '#E0E0E0';
+  const controlBgWide = isDark ? '#2F2F2F' : '#DADADA';
 
   return StyleSheet.create({
-    playerColumn: { flex: 1, justifyContent: "flex-start" },
+    playerColumn: { flex: 1, justifyContent: 'flex-start' },
     playerArea: { marginTop: 12 },
     metadataCard: {
       marginTop: 8,
@@ -243,7 +245,7 @@ function createStyles(isDark: boolean) {
       backgroundColor: panelBg,
       borderTopWidth: 2,
       borderTopColor: colorPrimary,
-      alignItems: "center",
+      alignItems: 'center',
       borderBottomLeftRadius: 8,
       borderBottomRightRadius: 8,
     },
@@ -252,10 +254,10 @@ function createStyles(isDark: boolean) {
       height: 72,
       borderRadius: 36,
       backgroundColor: controlBgWide,
-      justifyContent: "center",
-      alignItems: "center",
+      justifyContent: 'center',
+      alignItems: 'center',
       borderWidth: 2,
-      borderColor: "transparent",
+      borderColor: 'transparent',
       padding: 0,
     },
     controlBtn: { marginHorizontal: 8 },
@@ -264,10 +266,10 @@ function createStyles(isDark: boolean) {
       height: 52,
       borderRadius: 26,
       backgroundColor: controlBg,
-      justifyContent: "center",
-      alignItems: "center",
+      justifyContent: 'center',
+      alignItems: 'center',
       borderWidth: 2,
-      borderColor: "transparent",
+      borderColor: 'transparent',
     },
     controlBtnFocused: { backgroundColor: colorPrimaryLight },
     controlBtnDisabled: { opacity: 0.4 },
@@ -275,15 +277,15 @@ function createStyles(isDark: boolean) {
       borderColor: colorPrimary,
       backgroundColor: panelBg,
     },
-    arabicText: { textAlign: "right", writingDirection: "rtl" },
-    controlsRow: { flexDirection: "row", alignItems: "center" },
+    arabicText: { textAlign: 'right', writingDirection: 'rtl' },
+    controlsRow: { flexDirection: 'row', alignItems: 'center' },
 
-    progressContainer: { width: "100%", marginVertical: 6 },
+    progressContainer: { width: '100%', marginVertical: 6 },
     progressBarBackground: {
       height: 4,
-      backgroundColor: "#555",
+      backgroundColor: '#555',
       borderRadius: 2,
-      overflow: "hidden",
+      overflow: 'hidden',
     },
     progressBarForeground: {
       height: 4,
@@ -294,7 +296,7 @@ function createStyles(isDark: boolean) {
       marginTop: 4,
       fontSize: 12,
       color: textSecondary,
-      textAlign: "right",
+      textAlign: 'right',
     },
   });
 }

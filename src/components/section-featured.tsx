@@ -1,12 +1,14 @@
-import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+
 import {
   SpatialNavigationScrollView,
   SpatialNavigationView,
-} from "react-tv-space-navigation";
-import ReciterCard from "./reciter-card";
-import { Reciter } from "../types";
-import { useItemHeight } from "../hooks/ise-item-height";
+} from 'react-tv-space-navigation';
+
+import ReciterCard from './reciter-card';
+import { useItemHeight } from '../hooks/ise-item-height';
+import { Reciter } from '../types';
 
 type FeaturedSectionProps = {
   title: string;
@@ -32,9 +34,9 @@ const SectionFeatured = ({
   isVeryWide,
   textPrimary,
 }: FeaturedSectionProps) => {
-  if (reciters.length === 0) return null;
-
   const { itemHeight } = useItemHeight();
+
+  if (reciters.length === 0) return null;
 
   const containerHeight = itemHeight + 20; // 10 is the marginBottom
 
@@ -47,16 +49,16 @@ const SectionFeatured = ({
     },
     sectionTitle: {
       fontSize: isVeryWide ? 26 : 22,
-      fontWeight: "700",
+      fontWeight: '700',
       color: textPrimary,
       marginBottom: 8,
-      textAlign: isRTL ? "right" : "left",
+      textAlign: isRTL ? 'right' : 'left',
       paddingHorizontal: 10,
       opacity: 0.9,
     },
     scrollContent: {
-      direction: isRTL ? "rtl" : "ltr",
-      flexDirection: isRTL ? "row-reverse" : "row",
+      direction: isRTL ? 'rtl' : 'ltr',
+      flexDirection: isRTL ? 'row-reverse' : 'row',
       paddingHorizontal: 20,
     },
   });

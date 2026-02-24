@@ -1,6 +1,7 @@
-import React, { memo, useEffect, useRef } from "react";
-import { Animated, Easing, StyleSheet, View } from "react-native";
-import { colorPrimary } from "../constants/interaction-colors";
+import React, { memo, useEffect, useRef } from 'react';
+import { Animated, Easing, StyleSheet, View } from 'react-native';
+
+import { colorPrimary } from '../constants/interaction-colors';
 
 type AudioSpectrumProps = {
   playing: boolean;
@@ -9,7 +10,7 @@ type AudioSpectrumProps = {
 const AudioSpectrum = ({ playing }: AudioSpectrumProps) => {
   const bars = 14;
   const valuesRef = useRef<Animated.Value[]>(
-    Array.from({ length: bars }, () => new Animated.Value(0.6))
+    Array.from({ length: bars }, () => new Animated.Value(0.6)),
   );
   const loopsRef = useRef<Animated.CompositeAnimation[]>([]);
 
@@ -66,9 +67,9 @@ const AudioSpectrum = ({ playing }: AudioSpectrumProps) => {
 
 const styles = StyleSheet.create({
   spectrumRow: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'center',
     gap: 4,
     marginBottom: 16,
     height: 40,

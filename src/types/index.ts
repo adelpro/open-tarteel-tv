@@ -1,15 +1,15 @@
 // TypeScript type definitions
 
 export enum LinkSource {
-  MP3QURAN = "mp3quran",
-  ITQAN = "itqan",
+  MP3QURAN = 'mp3quran',
+  ITQAN = 'itqan',
 }
 
 export enum Riwaya {
-  HAFS_A_ASIM = "hafs-a-asim",
-  WARSH_AN_NAFI = "warsh-an-nafi",
-  QALUN_AN_NAFI = "qalun-an-nafi",
-  ALDURI_AN_ALKAISSAI = "alduri-an-alkaissai",
+  HAFS_A_ASIM = 'hafs-a-asim',
+  WARSH_AN_NAFI = 'warsh-an-nafi',
+  QALUN_AN_NAFI = 'qalun-an-nafi',
+  ALDURI_AN_ALKAISSAI = 'alduri-an-alkaissai',
 }
 
 export type Surah = {

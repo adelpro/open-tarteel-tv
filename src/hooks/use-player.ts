@@ -1,12 +1,14 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRoute, RouteProp } from "@react-navigation/native";
-import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
-import { Reciter, Surah } from "../types";
-import { SURAHS } from "../constants/surahs";
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+import { RouteProp, useRoute } from '@react-navigation/native';
+import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
+
+import { SURAHS } from '../constants/surahs';
+import { Reciter, Surah } from '../types';
 
 type PlayerScreenRouteProp = RouteProp<
   { PlayerScreen: { reciter?: Reciter; reciterId?: number; surahId?: number } },
-  "PlayerScreen"
+  'PlayerScreen'
 >;
 
 export function usePlayer() {
@@ -17,7 +19,7 @@ export function usePlayer() {
   const { currentTime, duration, playing: isPlaying, didJustFinish } = status;
 
   const [reciter, setReciter] = useState<Reciter | null>(
-    route.params?.reciter ?? null
+    route.params?.reciter ?? null,
   );
   const [selectedSurah, setSelectedSurah] = useState<number | null>(null);
   const [repeat, setRepeat] = useState(false);
@@ -27,7 +29,7 @@ export function usePlayer() {
 
   const playlistData: Surah[] = useMemo(
     () => SURAHS.slice().sort((a, b) => a.id - b.id),
-    []
+    [],
   );
 
   useEffect(() => {
@@ -44,7 +46,7 @@ export function usePlayer() {
       setSelectedSurah(surahId);
 
       const audioUrl = effectiveReciter.moshaf.playlist.find(
-        (item) => parseInt(item.surahId) === surahId
+        (item) => parseInt(item.surahId) === surahId,
       )?.link;
 
       if (!audioUrl) {
@@ -61,7 +63,7 @@ export function usePlayer() {
         player.play();
       } catch {}
     },
-    [reciter, player, isPlaying]
+    [reciter, player, isPlaying],
   );
 
   const handlePlayPause = useCallback(() => {

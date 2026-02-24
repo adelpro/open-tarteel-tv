@@ -1,10 +1,12 @@
-import React from "react";
-import { StyleSheet, View } from "react-native";
-import { SpatialNavigationView } from "react-tv-space-navigation";
-import { useTranslation } from "react-i18next";
-import { useNavigation } from "@react-navigation/native";
-import MenuButton from "./menu-button";
-import LanguageSwitch from "./language-switch";
+import React from 'react';
+import { StyleSheet, View } from 'react-native';
+
+import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
+import { SpatialNavigationView } from 'react-tv-space-navigation';
+
+import LanguageSwitch from './language-switch';
+import MenuButton from './menu-button';
 
 type TopNavigationProps = {
   isRTL: boolean;
@@ -17,9 +19,9 @@ const SectionTopNav = ({ isRTL, isDark }: TopNavigationProps) => {
 
   const styles = StyleSheet.create({
     menuRow: {
-      direction: isRTL ? "rtl" : "ltr",
-      flexDirection: isRTL ? "row-reverse" : "row",
-      justifyContent: "flex-end",
+      direction: isRTL ? 'rtl' : 'ltr',
+      flexDirection: isRTL ? 'row-reverse' : 'row',
+      justifyContent: 'flex-end',
       gap: 10,
       marginBottom: 20,
     },
@@ -28,35 +30,35 @@ const SectionTopNav = ({ isRTL, isDark }: TopNavigationProps) => {
   const buttons = [
     <MenuButton
       key="about"
-      label={t("About")}
+      label={t('About')}
       iconName="information-circle-outline"
-      onPress={() => navigation.navigate("About")}
+      onPress={() => navigation.navigate('About')}
       isDark={isDark}
-      accessibilityLabel={t("About")}
+      accessibilityLabel={t('About')}
       accessibilityRole="button"
     />,
     <MenuButton
       key="privacy"
-      label={t("Privacy")}
+      label={t('Privacy')}
       iconName="shield-checkmark-outline"
-      onPress={() => navigation.navigate("Privacy")}
+      onPress={() => navigation.navigate('Privacy')}
       isDark={isDark}
-      accessibilityLabel={t("Privacy")}
+      accessibilityLabel={t('Privacy')}
       accessibilityRole="button"
     />,
     <MenuButton
       key="settings"
-      label={t("settings")}
+      label={t('settings')}
       iconName="settings-outline"
-      onPress={() => navigation.navigate("Settings")}
+      onPress={() => navigation.navigate('Settings')}
       isDark={isDark}
-      accessibilityLabel={t("settings")}
+      accessibilityLabel={t('settings')}
       accessibilityRole="button"
     />,
     <LanguageSwitch
       key="lang"
       isDark={isDark}
-      accessibilityLabel={t("change_language")}
+      accessibilityLabel={t('change_language')}
       accessibilityRole="button"
     />,
   ];

@@ -1,8 +1,7 @@
-import type { Reciter } from "../types";
-import { ItqanAdapter } from "./reciters/itqan.adapter";
-
-import { Mp3QuranAdapter } from "./reciters/mp3quran.adapter";
-import type { ReciterSource } from "./reciters/reciter-source";
+import type { Reciter } from '../types';
+import { ItqanAdapter } from './reciters/itqan.adapter';
+import { Mp3QuranAdapter } from './reciters/mp3quran.adapter';
+import type { ReciterSource } from './reciters/reciter-source';
 
 /**
  * Register all reciter sources here.
@@ -17,7 +16,7 @@ const RECITER_SOURCES: readonly ReciterSource[] = [
  * Public API – DO NOT CHANGE SIGNATURE
  */
 export async function getAllReciters(
-  lang: "ar" | "en",
+  lang: 'ar' | 'en',
   enabledSources?: Record<string, boolean>,
 ): Promise<Reciter[]> {
   const sourcesToFetch = RECITER_SOURCES.filter(
@@ -29,7 +28,7 @@ export async function getAllReciters(
       try {
         const reciters = await source.getReciters(lang);
         return reciters;
-      } catch (error) {
+      } catch {
         return [];
       }
     }),
@@ -39,7 +38,7 @@ export async function getAllReciters(
   const successfulResults = results
     .filter(
       (result): result is PromiseFulfilledResult<Reciter[]> =>
-        result.status === "fulfilled",
+        result.status === 'fulfilled',
     )
     .map((result) => result.value);
 

@@ -1,12 +1,12 @@
 export const fetchWithTimeout = (
   url: string,
-  timeoutMs = 10_000
+  timeoutMs = 10_000,
 ): Promise<Response> =>
   Promise.race([
     fetch(url, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
         'Content-Type': 'application/json',
         'User-Agent': 'OpenTarteelTV/1.0.0',
         'X-Requested-With': 'XMLHttpRequest',
@@ -18,13 +18,13 @@ export const fetchWithTimeout = (
       redirect: 'follow',
     }),
     new Promise<Response>((_, reject) =>
-      setTimeout(() => reject(new Error("Fetch timeout")), timeoutMs)
+      setTimeout(() => reject(new Error('Fetch timeout')), timeoutMs),
     ),
   ]);
 
 export const retryFetch = async (
   url: string,
-  maxAttempts = 3
+  maxAttempts = 3,
 ): Promise<Response> => {
   let lastError: Error | null = null;
 

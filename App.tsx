@@ -1,14 +1,16 @@
 //Must be the first import
-import i18n from "./src/i18n";
 
-import React, { useCallback, useEffect, useState } from "react";
-import { View } from "react-native";
-import * as SplashScreen from "expo-splash-screen";
-import { StatusBar } from "expo-status-bar";
-import AppNavigator from "./src/navigation/app-navigator";
-import { I18nextProvider } from "react-i18next";
-import { FavoritesProvider } from "./src/context/favorites.context";
-import { SettingsProvider } from "./src/context/settings.context";
+import React, { useCallback, useEffect, useState } from 'react';
+import { View } from 'react-native';
+
+import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
+import { I18nextProvider } from 'react-i18next';
+
+import { FavoritesProvider } from './src/context/favorites.context';
+import { SettingsProvider } from './src/context/settings.context';
+import i18n from './src/i18n';
+import AppNavigator from './src/navigation/app-navigator';
 
 // Instruct SplashScreen not to hide yet, we want to do this manually
 SplashScreen.preventAutoHideAsync().catch(() => {
