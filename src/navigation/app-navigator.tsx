@@ -91,10 +91,18 @@ export default function AppNavigator() {
         cb('down');
         break;
       case 'left':
-        isRTL ? cb('right') : cb('left');
+        if (isRTL) {
+          cb('right');
+        } else {
+          cb('left');
+        }
         break;
       case 'right':
-        isRTL ? cb('left') : cb('right');
+        if (isRTL) {
+          cb('left');
+        } else {
+          cb('right');
+        }
         break;
       case 'select':
       case 'playPause':

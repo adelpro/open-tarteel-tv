@@ -96,7 +96,7 @@ const LanguageSwitch = ({ isDark, ...pressableProps }: LanguageSwitchProps) => {
         setCurrentLang(savedLang);
       }
     })();
-  }, []);
+  }, [i18n]);
 
   const toggleLanguage = async () => {
     const newLang = currentLang === 'en' ? 'ar' : 'en';

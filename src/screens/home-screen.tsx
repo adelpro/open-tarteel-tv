@@ -98,10 +98,39 @@ export default function HomeScreen() {
     },
   });
 
+  const loadReciters = useCallback(
+    async (lang: 'ar' | 'en') => {
+      setLoading(true);
+      setError(null);
+      try {
+        console.log(
+          `Loading reciters for language: ${lang}, sources:`,
+          enabledSources,
+        );
+        const data = await getAllReciters(lang, enabledSources);
+        console.log(`Successfully loaded ${data.length} reciters`);
+
+        setReciters(data);
+        setError(null);
+      } catch (err) {
+        console.error('Failed to load reciters:', err);
+        const errorMsg =
+          err instanceof Error
+            ? err.message
+            : 'Failed to load reciters. Please try again.';
+        setError(errorMsg);
+        setReciters([]);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [enabledSources],
+  );
+
   useEffect(() => {
     const lang = i18n.language === 'ar' ? 'ar' : 'en';
     loadReciters(lang);
-  }, [i18n.language, enabledSources]);
+  }, [i18n.language, loadReciters]);
 
   useEffect(() => {
     const rn = route.name as string | undefined;
@@ -117,31 +146,6 @@ export default function HomeScreen() {
     }
   }, [route]);
 
-  const loadReciters = async (lang: 'ar' | 'en') => {
-    setLoading(true);
-    setError(null);
-    try {
-      console.log(
-        `Loading reciters for language: ${lang}, sources:`,
-        enabledSources,
-      );
-      const data = await getAllReciters(lang, enabledSources);
-      console.log(`Successfully loaded ${data.length} reciters`);
-
-      setReciters(data);
-      setError(null);
-    } catch (err) {
-      console.error('Failed to load reciters:', err);
-      const errorMsg =
-        err instanceof Error
-          ? err.message
-          : 'Failed to load reciters. Please try again.';
-      setError(errorMsg);
-      setReciters([]);
-    } finally {
-      setLoading(false);
-    }
-  };
   const handleRetry = () => {
     const lang = i18n.language === 'ar' ? 'ar' : 'en';
     loadReciters(lang);
@@ -242,7 +246,7 @@ export default function HomeScreen() {
 
     const results = fuse.search(normalizedQuery);
     return results.map((entry) => entry.item);
-  }, [reciters, searchQuery, selectedRiwaya, i18n.language]);
+  }, [reciters, searchQuery, lang, selectedRiwaya]);
 
   const { cardsPerRow, itemWidth } = useReciterGridLayout(
     filteredReciters,

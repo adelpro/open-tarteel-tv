@@ -15,7 +15,7 @@ type RiwayaTagConfig = {
 };
 
 const RiwayaTag = ({ riwaya }: RiwayaTagProps) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   const RIWAYA_TAG: Record<Riwaya, RiwayaTagConfig> = {
     [Riwaya.HAFS_A_ASIM]: {
@@ -37,7 +37,6 @@ const RiwayaTag = ({ riwaya }: RiwayaTagProps) => {
   };
   const { label, backgroundColor } = RIWAYA_TAG[riwaya];
 
-  const isRTL = i18n.dir() === 'rtl';
   return (
     <View
       style={{

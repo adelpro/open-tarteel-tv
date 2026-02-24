@@ -1,9 +1,9 @@
 ---
 name: Feature Request
 about: Suggest an idea for Open Tarteel TV
-title: "[FEATURE] "
-labels: ["type: feature"]
-assignees: ""
+title: '[FEATURE] '
+labels: ['type: feature']
+assignees: ''
 ---
 
 ## Problem Statement

@@ -1,9 +1,9 @@
 ---
 name: Bug Report
 about: Create a report to help us improve Open Tarteel TV
-title: "[BUG] "
-labels: ["type: bug"]
-assignees: ""
+title: '[BUG] '
+labels: ['type: bug']
+assignees: ''
 ---
 
 ## Description

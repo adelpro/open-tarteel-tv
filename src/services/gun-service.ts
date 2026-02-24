@@ -10,6 +10,7 @@ import {
 
 // TextEncoder / TextDecoder Polyfill for Gun/RN
 if (typeof (global as any).TextEncoder === 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const pkg = require('fast-text-encoding');
   (global as any).TextEncoder = pkg.TextEncoder;
   (global as any).TextDecoder = pkg.TextDecoder;

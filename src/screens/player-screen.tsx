@@ -7,7 +7,7 @@ import {
 } from 'react-tv-space-navigation';
 
 import Playlist from '../components/play-list';
-import Player from '../components/player';
+import PlayerComponent from '../components/player';
 import { getThemeColors } from '../constants/theme';
 import { usePlayer } from '../hooks/use-player';
 import { useViewCounts } from '../hooks/use-view-counts';
@@ -49,7 +49,7 @@ export default function PlayerScreen() {
   return (
     <View style={styles.container}>
       <SpatialNavigationView direction="horizontal" style={styles.mainContent}>
-        <Player player={player} />
+        <PlayerComponent player={player} />
         <Playlist player={player} listRef={playlistRef} />
       </SpatialNavigationView>
     </View>

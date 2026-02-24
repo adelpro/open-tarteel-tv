@@ -110,27 +110,27 @@ This section explains how to set up TV emulators and simulators for local develo
 
 When using a TV emulator or simulator:
 
-| Platform | Navigation | Select/Enter | Back |
-|----------|-----------|--------------|------|
-| Android TV | Arrow keys | Enter | Backspace |
-| tvOS Simulator | Arrow keys | Enter | Escape (Menu) |
+| Platform       | Navigation | Select/Enter | Back          |
+| -------------- | ---------- | ------------ | ------------- |
+| Android TV     | Arrow keys | Enter        | Backspace     |
+| tvOS Simulator | Arrow keys | Enter        | Escape (Menu) |
 
 The app uses `react-tv-space-navigation` for spatial focus management — all UI elements are navigable via directional input.
 
 ### Available Scripts
 
-| Script | Description |
-|--------|-------------|
-| `yarn start` | Start Expo dev server |
-| `yarn android` | Run on Android (mobile) |
-| `yarn ios` | Run on iOS (mobile) |
-| `yarn run:tv:android` | Run on Android TV emulator |
-| `yarn run:tv:ios` | Run on tvOS simulator |
-| `yarn prebuild:tv:android` | Generate Android TV native project |
-| `yarn prebuild:tv:ios` | Generate tvOS native project |
-| `yarn build:tv:android:aab` | Build Android TV production AAB (via EAS) |
-| `yarn build:tv:android:local` | Build Android TV production AAB locally |
-| `yarn build:tv:ios` | Build tvOS production (via EAS) |
+| Script                        | Description                               |
+| ----------------------------- | ----------------------------------------- |
+| `yarn start`                  | Start Expo dev server                     |
+| `yarn android`                | Run on Android (mobile)                   |
+| `yarn ios`                    | Run on iOS (mobile)                       |
+| `yarn run:tv:android`         | Run on Android TV emulator                |
+| `yarn run:tv:ios`             | Run on tvOS simulator                     |
+| `yarn prebuild:tv:android`    | Generate Android TV native project        |
+| `yarn prebuild:tv:ios`        | Generate tvOS native project              |
+| `yarn build:tv:android:aab`   | Build Android TV production AAB (via EAS) |
+| `yarn build:tv:android:local` | Build Android TV production AAB locally   |
+| `yarn build:tv:ios`           | Build tvOS production (via EAS)           |
 
 ---
 

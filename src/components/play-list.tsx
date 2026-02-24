@@ -45,7 +45,7 @@ const Playlist = ({ player, listRef }: PlaylistProps) => {
     if (index >= 0 && listRef.current) {
       listRef.current.focus(index);
     }
-  }, [memoizedData, selectedSurah]);
+  }, [listRef, memoizedData, selectedSurah]);
 
   const renderItem = ({ item }: { item: (typeof memoizedData)[0] }) => (
     <SpatialNavigationFocusableView
