@@ -10,6 +10,7 @@ import {
 } from "react-tv-space-navigation";
 
 import { useViewCounts } from "../hooks/use-view-counts";
+import { useRecentlyPlayed } from "../context/recently-played.context";
 
 export default function PlayerScreen() {
   const colorScheme = useColorScheme();
@@ -18,14 +19,16 @@ export default function PlayerScreen() {
   const playlistRef = useRef<SpatialNavigationVirtualizedListRef | null>(null);
 
   const { incrementView } = useViewCounts();
+  const { addToRecentlyPlayed } = useRecentlyPlayed();
   const player = usePlayer();
   const { playlistData, reciter, selectedSurah } = player;
 
   useEffect(() => {
     if (reciter?.id) {
       incrementView(reciter.id.toString());
+      addToRecentlyPlayed(reciter.id.toString());
     }
-  }, [reciter?.id, incrementView]);
+  }, [reciter?.id, incrementView, addToRecentlyPlayed]);
 
   useEffect(() => {
     if (!selectedSurah) return;
