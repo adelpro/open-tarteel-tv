@@ -30,17 +30,11 @@ const LanguageSwitch = ({ isDark, ...pressableProps }: LanguageSwitchProps) => {
   const { t, i18n } = useTranslation();
   const [currentLang, setCurrentLang] = useState(i18n.language);
 
-  const { textPrimary, cardBg, border, focusBg } = getThemeColors(isDark);
+  const { textPrimary, cardBg, border } = getThemeColors(isDark);
 
   const isRTL = i18n.dir() === 'rtl';
 
   const styles = StyleSheet.create({
-    menuRow: {
-      flexDirection: isRTL ? 'row-reverse' : 'row',
-      justifyContent: 'center',
-      gap: 12,
-      marginBottom: 10,
-    },
     menuButton: {
       backgroundColor: cardBg,
       height: 50,
@@ -69,21 +63,6 @@ const LanguageSwitch = ({ isDark, ...pressableProps }: LanguageSwitchProps) => {
       flexDirection: isRTL ? 'row-reverse' : 'row',
       alignItems: 'center',
       gap: 8,
-    },
-    micButton: {
-      width: 42,
-      height: 42,
-      borderRadius: 8,
-      backgroundColor: cardBg,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: 2,
-      borderColor: border,
-    },
-    micButtonFocused: {
-      backgroundColor: focusBg,
-      borderColor: colorPrimary,
-      transform: [{ scale: focusScale }],
     },
   });
 

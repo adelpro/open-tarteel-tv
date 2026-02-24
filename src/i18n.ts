@@ -1,11 +1,12 @@
 import { I18nManager } from 'react-native';
 
-import * as i18n from 'i18next';
+import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 import ar from './locales/ar.json';
 import en from './locales/en.json';
 
+// eslint-disable-next-line import/no-named-as-default-member
 i18n.use(initReactI18next).init({
   resources: {
     en: { translation: en },
@@ -17,6 +18,7 @@ i18n.use(initReactI18next).init({
   react: { useSuspense: false }, // avoid Suspense issues in RN
 });
 
+// eslint-disable-next-line import/no-named-as-default-member
 export const isRTL = i18n.dir() === 'rtl';
 
 if (I18nManager.isRTL !== isRTL) {

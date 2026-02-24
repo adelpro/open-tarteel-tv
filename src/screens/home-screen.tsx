@@ -103,13 +103,7 @@ export default function HomeScreen() {
       setLoading(true);
       setError(null);
       try {
-        console.log(
-          `Loading reciters for language: ${lang}, sources:`,
-          enabledSources,
-        );
         const data = await getAllReciters(lang, enabledSources);
-        console.log(`Successfully loaded ${data.length} reciters`);
-
         setReciters(data);
         setError(null);
       } catch (err) {
