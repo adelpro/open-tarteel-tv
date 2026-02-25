@@ -59,63 +59,66 @@ export default function HomeScreen() {
     getThemeColors(isDark);
   const isVeryWide = width >= 2800;
   const isWide = width >= 2200 && width < 2800;
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: bg,
-      padding: 20,
-    },
-    centerContainer: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      backgroundColor: bg,
-    },
-    loadingText: {
-      color: textPrimary,
-      marginTop: 10,
-      fontSize: isVeryWide ? 24 : isWide ? 20 : 16,
-    },
-
-    errorMessage: {
-      fontSize: isVeryWide ? 20 : isWide ? 18 : 16,
-      color: textSecondary,
-      textAlign: "center",
-      marginBottom: 24,
-      lineHeight: 24,
-    },
-    errorContainer: {
-      alignItems: "center",
-      paddingHorizontal: 40,
-    },
-    errorTitle: {
-      fontSize: isVeryWide ? 32 : isWide ? 28 : 24,
-      fontWeight: "700",
-      color: textPrimary,
-      marginTop: 20,
-      marginBottom: 12,
-    },
-    emptyStateContainer: {
-      alignItems: "center",
-      justifyContent: "center",
-      paddingVertical: 60,
-      paddingHorizontal: 40,
-    },
-    emptyStateTitle: {
-      color: textPrimary,
-      fontSize: isVeryWide ? 28 : isWide ? 24 : 20,
-      fontWeight: "700",
-      marginTop: 20,
-      marginBottom: 8,
-      textAlign: "center",
-    },
-    emptyStateMessage: {
-      color: textSecondary,
-      fontSize: isVeryWide ? 20 : isWide ? 18 : 16,
-      textAlign: "center",
-      lineHeight: 24,
-    },
-  });
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          flex: 1,
+          backgroundColor: bg,
+          padding: 20,
+        },
+        centerContainer: {
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: bg,
+        },
+        loadingText: {
+          color: textPrimary,
+          marginTop: 10,
+          fontSize: isVeryWide ? 24 : isWide ? 20 : 16,
+        },
+        errorMessage: {
+          fontSize: isVeryWide ? 20 : isWide ? 18 : 16,
+          color: textSecondary,
+          textAlign: "center",
+          marginBottom: 24,
+          lineHeight: 24,
+        },
+        errorContainer: {
+          alignItems: "center",
+          paddingHorizontal: 40,
+        },
+        errorTitle: {
+          fontSize: isVeryWide ? 32 : isWide ? 28 : 24,
+          fontWeight: "700",
+          color: textPrimary,
+          marginTop: 20,
+          marginBottom: 12,
+        },
+        emptyStateContainer: {
+          alignItems: "center",
+          justifyContent: "center",
+          paddingVertical: 60,
+          paddingHorizontal: 40,
+        },
+        emptyStateTitle: {
+          color: textPrimary,
+          fontSize: isVeryWide ? 28 : isWide ? 24 : 20,
+          fontWeight: "700",
+          marginTop: 20,
+          marginBottom: 8,
+          textAlign: "center",
+        },
+        emptyStateMessage: {
+          color: textSecondary,
+          fontSize: isVeryWide ? 20 : isWide ? 18 : 16,
+          textAlign: "center",
+          lineHeight: 24,
+        },
+      }),
+    [bg, textPrimary, textSecondary, isVeryWide, isWide],
+  );
 
   useEffect(() => {
     const lang = i18n.language === "ar" ? "ar" : "en";
