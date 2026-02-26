@@ -32,7 +32,6 @@ import SectionRecitersGrid from "../components/section-reciters-grid";
 import { useFavorites } from "../context/favorites.context";
 import { useSettings } from "../context/settings.context";
 
-/** Main home screen displaying reciters with search, filters, and featured sections. */
 export default function HomeScreen() {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.dir() === "rtl";
@@ -139,7 +138,6 @@ export default function HomeScreen() {
     }
   }, [route]);
 
-  /** Fetches the reciter list from the API for the given language. */
   const loadReciters = async (lang: "ar" | "en") => {
     setLoading(true);
     setError(null);
@@ -162,13 +160,11 @@ export default function HomeScreen() {
       setLoading(false);
     }
   };
-  /** Retries loading reciters using the current language. */
   const handleRetry = () => {
     const lang = i18n.language === "ar" ? "ar" : "en";
     loadReciters(lang);
   };
 
-  /** Navigates to the player screen for the selected reciter. */
   const handleReciterPress = useCallback(
     (reciter: Reciter) => {
       navigation.navigate("Player", { reciter });
@@ -176,7 +172,6 @@ export default function HomeScreen() {
     [navigation],
   );
 
-  /** Top 10 reciters sorted by view count (only those with views > 0). */
   const mostViewedReciters = useMemo<Reciter[]>(() => {
     if (reciters.length === 0) {
       return [];
@@ -194,7 +189,6 @@ export default function HomeScreen() {
     return withViews;
   }, [reciters, viewCounts]);
 
-  /** Reciters that the user has locally favorited, sorted alphabetically. */
   const myFavoritedReciters = useMemo(() => {
     if (!reciters.length || !favorites.length) return [];
     const favSet = new Set(favorites);
@@ -203,7 +197,6 @@ export default function HomeScreen() {
       .sort((a, b) => a.name.localeCompare(b.name, lang));
   }, [reciters, favorites, lang]);
 
-  /** Top 10 reciters by global favorite count (deduplicated by ID). */
   const mostFavoritedReciters = useMemo(() => {
     if (!reciters.length) return [];
 
@@ -226,7 +219,6 @@ export default function HomeScreen() {
     return favorited;
   }, [reciters, favoriteCounts]);
 
-  /** Reciters filtered by riwaya and search query, using fuzzy matching via Fuse.js. */
   const filteredReciters = useMemo(() => {
     const matchesRiwaya = (reciter: Reciter) =>
       selectedRiwaya === "all" || reciter.moshaf.riwaya === selectedRiwaya;
