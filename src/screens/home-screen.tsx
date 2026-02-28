@@ -29,6 +29,7 @@ import { normalizeSearchText } from "../utils/search";
 import { useViewCounts } from "../hooks/use-view-counts";
 import { useReciterGridLayout } from "../hooks/use-reciter-grid-layout";
 import SectionRecitersGrid from "../components/section-reciters-grid";
+import EmptyState from "../components/empty-state";
 import { useFavorites } from "../context/favorites.context";
 import { useRecentlyPlayed } from "../context/recently-played.context";
 import { useSettings } from "../context/settings.context";
@@ -279,14 +280,12 @@ export default function HomeScreen() {
   if (!loading && reciters.length === 0) {
     return (
       <View style={styles.centerContainer}>
-        <View style={styles.errorContainer}>
-          <Ionicons name="folder-outline" size={64} color={textSecondary} />
-          <Text style={styles.errorTitle}>{t("No_Reciters_Found_Title")}</Text>
-          <Text style={styles.errorMessage}>
-            {t("No_Reciters_Found_Content")}
-          </Text>
-          <RetryButton onPress={handleRetry} />
-        </View>
+        <EmptyState
+          icon="library-outline"
+          title={t("No_Reciters_Found_Title")}
+          message={t("No_Reciters_Found_Content")}
+        />
+        <RetryButton onPress={handleRetry} />
       </View>
     );
   }
@@ -365,15 +364,23 @@ export default function HomeScreen() {
             isRTL={isRTL}
           />
 
-          <SectionRecitersGrid
-            reciters={filteredReciters}
-            cardsPerRow={cardsPerRow}
-            itemWidth={itemWidth}
-            onReciterPress={handleReciterPress}
-            preferredFirstFocus={!searchFocused}
-            viewCounts={viewCounts}
-            favoriteCounts={favoriteCounts}
-          />
+          {filteredReciters.length > 0 ? (
+            <SectionRecitersGrid
+              reciters={filteredReciters}
+              cardsPerRow={cardsPerRow}
+              itemWidth={itemWidth}
+              onReciterPress={handleReciterPress}
+              preferredFirstFocus={!searchFocused}
+              viewCounts={viewCounts}
+              favoriteCounts={favoriteCounts}
+            />
+          ) : (
+            <EmptyState
+              icon="search-outline"
+              title={t("No_Search_Results_Title")}
+              message={t("No_Search_Results_Content")}
+            />
+          )}
         </SpatialNavigationView>
       </SpatialNavigationScrollView>
     </View>
