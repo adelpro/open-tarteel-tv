@@ -33,6 +33,8 @@ import { useViewCounts } from '../hooks/use-view-counts';
 import { getAllReciters } from '../services/api';
 import { Reciter, Riwaya } from '../types';
 import { normalizeSearchText } from '../utils/search';
+import EmptyState from '../components/empty-state';
+import { useRecentlyPlayed } from '../context/recently-played.context';
 
 export default function HomeScreen() {
   const { t, i18n } = useTranslation();
@@ -48,6 +50,7 @@ export default function HomeScreen() {
   const { width } = useWindowDimensions();
   const { viewCounts } = useViewCounts();
   const { favoriteCounts } = useFavorites();
+  const { recentlyPlayed } = useRecentlyPlayed();
   const { enabledSources } = useSettings();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -176,7 +179,18 @@ export default function HomeScreen() {
       .filter((reciter) => favSet.has(String(reciter.id)))
       .sort((a, b) => a.name.localeCompare(b.name, lang));
   }, [reciters, favorites, lang]);
+  const recentlyPlayedReciters = useMemo(() => {
+    if (!reciters.length || !recentlyPlayed.length) return [];
+    const reciterMap = new Map<string, Reciter>();
+    reciters.forEach((r) => {
+      reciterMap.set(String(r.id), r);
+    });
 
+    // Map recently played IDs to actual reciter objects, maintaining order
+    return recentlyPlayed
+      .map((item) => reciterMap.get(item.reciterId))
+      .filter((reciter): reciter is Reciter => reciter !== undefined);
+  }, [reciters, recentlyPlayed]);
   const mostFavoritedReciters = useMemo(() => {
     if (!reciters.length) return [];
 
@@ -272,14 +286,12 @@ export default function HomeScreen() {
   if (!loading && reciters.length === 0) {
     return (
       <View style={styles.centerContainer}>
-        <View style={styles.errorContainer}>
-          <Ionicons name="folder-outline" size={64} color={textSecondary} />
-          <Text style={styles.errorTitle}>{t('No_Reciters_Found_Title')}</Text>
-          <Text style={styles.errorMessage}>
-            {t('No_Reciters_Found_Content')}
-          </Text>
-          <RetryButton onPress={handleRetry} />
-        </View>
+        <EmptyState
+          icon="library-outline"
+          title={t('No_Reciters_Found_Title')}
+          message={t('No_Reciters_Found_Content')}
+        />
+        <RetryButton onPress={handleRetry} />
       </View>
     );
   }
@@ -297,6 +309,21 @@ export default function HomeScreen() {
             onFocusChange={setSearchFocused}
             isDark={isDark}
           />
+
+          {recentlyPlayedReciters.length > 0 && (
+            <SectionFeatured
+              title={`${t('recently_played')} (${recentlyPlayedReciters.length})`}
+              reciters={recentlyPlayedReciters}
+              itemWidth={itemWidth}
+              isRTL={isRTL}
+              viewCounts={viewCounts}
+              favoriteCounts={favoriteCounts}
+              onReciterPress={handleReciterPress}
+              isVeryWide={isVeryWide}
+              isWide={isWide}
+              textPrimary={textPrimary}
+            />
+          )}
 
           <SectionFeatured
             title={`${t('my_favorites')} (${myFavoritedReciters.length})`}
@@ -343,15 +370,23 @@ export default function HomeScreen() {
             isRTL={isRTL}
           />
 
-          <SectionRecitersGrid
-            reciters={filteredReciters}
-            cardsPerRow={cardsPerRow}
-            itemWidth={itemWidth}
-            onReciterPress={handleReciterPress}
-            preferredFirstFocus={!searchFocused}
-            viewCounts={viewCounts}
-            favoriteCounts={favoriteCounts}
-          />
+          {filteredReciters.length > 0 ? (
+            <SectionRecitersGrid
+              reciters={filteredReciters}
+              cardsPerRow={cardsPerRow}
+              itemWidth={itemWidth}
+              onReciterPress={handleReciterPress}
+              preferredFirstFocus={!searchFocused}
+              viewCounts={viewCounts}
+              favoriteCounts={favoriteCounts}
+            />
+          ) : (
+            <EmptyState
+              icon="search-outline"
+              title={t('No_Search_Results_Title')}
+              message={t('No_Search_Results_Content')}
+            />
+          )}
         </SpatialNavigationView>
       </SpatialNavigationScrollView>
     </View>

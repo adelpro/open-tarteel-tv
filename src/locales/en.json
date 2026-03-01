@@ -2,13 +2,14 @@
   "app_name": "Open Tarteel TV",
   "app_description": "Quran Recitations - TV Optimized",
   "change_language": "English",
-
   "Loading_Reciters": "Loading Reciters...",
   "Failed_to_Load_Reciters": "Failed to Load Reciters",
   "attempt": "Attempt {{current}} of {{max}}",
   "Try_Again": "Try Again",
   "No_Reciters_Found_Title": "No Reciters Found",
   "No_Reciters_Found_Content": "No reciter data available. Please check your connection.",
+  "No_Search_Results_Title": "No Results Found",
+  "No_Search_Results_Content": "Try adjusting your search or filters to find what you're looking for.",
   "About": "About",
   "Privacy": "Privacy",
   "quran_player": "Quran Player",
@@ -16,24 +17,22 @@
   "most_viewed": "Most Viewed",
   "most_favorited": "Most Favorited",
   "my_favorites": "My Favorites",
+  "recently_played": "Recently Played",
+  "recently_played_badge": "Recent",
   "settings": "Settings",
   "sources_management": "Sources Management",
   "source_mp3quran": "MP3Quran",
   "source_itqan": "Itqan",
-
   "search_placeholder": "Search Reciters",
-
   "filter_all": "All",
   "filter_hafs": "Hafs",
   "filter_warsh": "Warsh",
   "filter_qalun": "Qalun",
   "filter_ad_duri": "Ad Duri",
-
   "home": "Home",
   "reciters": "Reciters",
   "reciter": "Reciter",
   "playlist": "Playlist",
-
   "riwaya": {
     "hafs": "Hafs",
     "warsh": "Warsh",

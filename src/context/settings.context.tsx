@@ -21,7 +21,7 @@ type SettingsContextValue = {
 const SettingsContext = createContext<SettingsContextValue | null>(null);
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
-  // Default all sources to true initially
+  // Default source enablement (MP3QURAN enabled, ITQAN disabled)
   const [enabledSources, setEnabledSources] = useState<Record<string, boolean>>(
     {
       [LinkSource.MP3QURAN]: true,

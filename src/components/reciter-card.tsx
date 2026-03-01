@@ -20,8 +20,10 @@ import {
   colorPrimaryLight,
   focusScale,
 } from '../constants/interaction-colors';
-import { getThemeColors } from '../constants/theme';
+
 import { useItemHeight } from '../hooks/ise-item-height';
+import { useRecentlyPlayed } from '../context/recently-played.context';
+import { getThemeColors } from '../constants/theme';
 
 type ReciterCardProps = {
   reciter: Reciter;
@@ -46,7 +48,8 @@ const ReciterCard = ({
   favoriteCount,
 }: ReciterCardProps) => {
   const { itemHeight } = useItemHeight();
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
+  const { recentlyPlayed } = useRecentlyPlayed();
   const colorScheme = useColorScheme();
   const isDark = colorScheme !== 'light';
   const { textPrimary, textSecondary, cardBg, border } = getThemeColors(isDark);
@@ -55,6 +58,11 @@ const ReciterCard = ({
   const isVeryWide = width >= 2800;
   const isWide = width >= 2200 && width < 2800;
   const isMedium = width >= 1600 && width < 2200;
+
+  // Check if this reciter is in recently played
+  const isRecentlyPlayed = recentlyPlayed.some(
+    (item) => item.reciterId === reciter.id.toString(),
+  );
   const styles = StyleSheet.create({
     reciterCard: {
       position: 'relative',
@@ -87,7 +95,26 @@ const ReciterCard = ({
       color: textSecondary,
       width: '100%',
     },
+    recentlyPlayedBadge: {
+      position: 'absolute',
+      bottom: 8,
+      [isRTL ? 'right' : 'left']: 8,
+      backgroundColor: colorPrimary,
+      paddingVertical: 4,
+      paddingHorizontal: 8,
+      borderRadius: 4,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    recentlyPlayedText: {
+      color: '#fff',
+      fontSize: isVeryWide ? 12 : isWide ? 11 : isMedium ? 10 : 9,
+      fontWeight: 'bold',
+    },
   });
+
+  const badgeIconSize = isVeryWide ? 12 : isWide ? 11 : isMedium ? 10 : 9;
   return (
     <SpatialNavigationFocusableView onSelect={() => onPress(reciter)}>
       {({ isFocused }) => {
@@ -99,6 +126,15 @@ const ReciterCard = ({
             accessibilityRole="button"
             accessibilityLabel={`Reciter ${reciter.name}, Moshaf ${reciter.moshaf.name}`}
           >
+            {isRecentlyPlayed && (
+              <View style={styles.recentlyPlayedBadge}>
+                <Ionicons name="play" size={badgeIconSize} color="#fff" />
+                <Text style={styles.recentlyPlayedText}>
+                  {t('recently_played_badge')}
+                </Text>
+              </View>
+            )}
+
             <Text
               style={styles.reciterName}
               numberOfLines={1}
