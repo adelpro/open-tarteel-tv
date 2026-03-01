@@ -1,34 +1,35 @@
+import { useColorScheme, useTVEventHandler } from 'react-native';
+
 import {
-  NavigationContainer,
   createNavigationContainerRef,
   LinkingOptions,
-} from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+  NavigationContainer,
+} from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 import {
-  SpatialNavigationRoot,
   SpatialNavigation,
-} from "react-tv-space-navigation";
-import { useTVEventHandler, useColorScheme } from "react-native";
-import { useTranslation } from "react-i18next";
+  SpatialNavigationRoot,
+} from 'react-tv-space-navigation';
 
-import HomeScreen from "../screens/home-screen";
-import PlayerScreen from "../screens/player-screen";
-import AboutScreen from "../screens/about-screen";
-import PrivacyScreen from "../screens/privacy-screen";
-import SettingsScreen from "../screens/settings-screen";
+import AboutScreen from '../screens/about-screen';
+import HomeScreen from '../screens/home-screen';
+import PlayerScreen from '../screens/player-screen';
+import PrivacyScreen from '../screens/privacy-screen';
+import SettingsScreen from '../screens/settings-screen';
 
 const Stack = createNativeStackNavigator();
 
 const navigationRef = createNavigationContainerRef();
 
 type TVKey =
-  | "left"
-  | "right"
-  | "up"
-  | "down"
-  | "enter"
-  | "long_enter"
-  | "*"
+  | 'left'
+  | 'right'
+  | 'up'
+  | 'down'
+  | 'enter'
+  | 'long_enter'
+  | '*'
   | null;
 let onTvEvent: ((key: TVKey) => void) | null = null;
 
@@ -47,27 +48,27 @@ SpatialNavigation.configureRemoteControl({
 });
 
 const linking: LinkingOptions<any> = {
-  prefixes: ["opentarteel://"],
+  prefixes: ['opentarteel://'],
   config: {
     screens: {
-      Home: "home",
+      Home: 'home',
       Search: {
-        path: "search/:q?/:riwaya?",
+        path: 'search/:q?/:riwaya?',
         parse: {
-          q: (s: string) => s || "",
+          q: (s: string) => s || '',
           riwaya: (s: string) => s || undefined,
         },
       },
       Player: {
-        path: "player/:reciterId?/:surahId?",
+        path: 'player/:reciterId?/:surahId?',
         parse: {
           reciterId: (id: string) => (id ? Number(id) : undefined),
           surahId: (id: string) => (id ? Number(id) : undefined),
         },
       },
-      About: "about",
-      Privacy: "privacy",
-      Settings: "settings",
+      About: 'about',
+      Privacy: 'privacy',
+      Settings: 'settings',
     },
   },
 };
@@ -75,30 +76,38 @@ const linking: LinkingOptions<any> = {
 export default function AppNavigator() {
   const { t, i18n } = useTranslation();
 
-  const isRTL = i18n.language === "ar";
+  const isRTL = i18n.language === 'ar';
   const colorScheme = useColorScheme();
-  const isDark = colorScheme !== "light";
+  const isDark = colorScheme !== 'light';
   useTVEventHandler((evt: any) => {
     const type = evt?.eventType as string | undefined;
     const cb = onTvEvent;
     if (!cb || !type) return;
     switch (type) {
-      case "up":
-        cb("up");
+      case 'up':
+        cb('up');
         break;
-      case "down":
-        cb("down");
+      case 'down':
+        cb('down');
         break;
-      case "left":
-        isRTL ? cb("right") : cb("left");
+      case 'left':
+        if (isRTL) {
+          cb('right');
+        } else {
+          cb('left');
+        }
         break;
-      case "right":
-        isRTL ? cb("left") : cb("right");
+      case 'right':
+        if (isRTL) {
+          cb('left');
+        } else {
+          cb('right');
+        }
         break;
-      case "select":
-      case "playPause":
-      case "enter":
-        cb("enter");
+      case 'select':
+      case 'playPause':
+      case 'enter':
+        cb('enter');
         break;
       default:
         break;
@@ -111,42 +120,42 @@ export default function AppNavigator() {
         <Stack.Navigator
           initialRouteName="Home"
           screenOptions={{
-            headerStyle: { backgroundColor: isDark ? "#000" : "#fff" },
-            headerTintColor: isDark ? "#fff" : "#111",
-            headerTitleStyle: { fontWeight: "bold" },
+            headerStyle: { backgroundColor: isDark ? '#000' : '#fff' },
+            headerTintColor: isDark ? '#fff' : '#111',
+            headerTitleStyle: { fontWeight: 'bold' },
             gestureEnabled: false,
-            animation: "fade",
+            animation: 'fade',
           }}
         >
           <Stack.Screen
             name="Home"
             component={HomeScreen}
-            options={{ title: t("app_name") }}
+            options={{ title: t('app_name') }}
           />
           <Stack.Screen
             name="Search"
             component={HomeScreen}
-            options={{ title: t("search_title") }}
+            options={{ title: t('search_title') }}
           />
           <Stack.Screen
             name="Player"
             component={PlayerScreen}
-            options={{ title: t("quran_player") }}
+            options={{ title: t('quran_player') }}
           />
           <Stack.Screen
             name="About"
             component={AboutScreen}
-            options={{ title: t("about.about_title") }}
+            options={{ title: t('about.about_title') }}
           />
           <Stack.Screen
             name="Privacy"
             component={PrivacyScreen}
-            options={{ title: t("privacy.title") }}
+            options={{ title: t('privacy.title') }}
           />
           <Stack.Screen
             name="Settings"
             component={SettingsScreen}
-            options={{ title: t("settings") }}
+            options={{ title: t('settings') }}
           />
         </Stack.Navigator>
       </NavigationContainer>

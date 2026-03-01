@@ -1,9 +1,10 @@
-import { useMemo } from "react";
-import { Reciter } from "../types";
+import { useMemo } from 'react';
+
+import { Reciter } from '../types';
 
 export function useReciterGridLayout(
   filteredReciters: Reciter[],
-  width: number
+  width: number,
 ) {
   const cardsPerRow = useMemo(() => {
     if (width >= 2800) return 6;

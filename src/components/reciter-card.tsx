@@ -5,23 +5,25 @@ import {
   useColorScheme,
   useWindowDimensions,
   View,
-} from "react-native";
-import { SpatialNavigationFocusableView } from "react-tv-space-navigation";
-import { Reciter, Riwaya } from "../types";
-import RiwayaTag from "./riwaya-tag";
-import { getThemeColors } from "../constants/theme";
-import { useTranslation } from "react-i18next";
+} from 'react-native';
+
+import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
+import { SpatialNavigationFocusableView } from 'react-tv-space-navigation';
+
+import { Reciter, Riwaya } from '../types';
+import RiwayaTag from './riwaya-tag';
+import SourceTag from './source-tag';
 import {
   colorPrimary,
   colorPrimaryDark,
   colorPrimaryLight,
   focusScale,
-} from "../constants/interaction-colors";
+} from '../constants/interaction-colors';
 
-import { Ionicons } from "@expo/vector-icons";
-import { useItemHeight } from "../hooks/ise-item-height";
-import SourceTag from "./source-tag";
-import { useRecentlyPlayed } from "../context/recently-played.context";
+import { useItemHeight } from '../hooks/ise-item-height';
+import { useRecentlyPlayed } from '../context/recently-played.context';
+import { getThemeColors } from '../constants/theme';
 
 type ReciterCardProps = {
   reciter: Reciter;
@@ -32,10 +34,10 @@ type ReciterCardProps = {
 };
 
 const RIWAYA_LABEL: Record<Riwaya, string> = {
-  [Riwaya.HAFS_A_ASIM]: "Hafs",
-  [Riwaya.WARSH_AN_NAFI]: "Warsh",
-  [Riwaya.QALUN_AN_NAFI]: "Qalun",
-  [Riwaya.ALDURI_AN_ALKAISSAI]: "Ad-Duri",
+  [Riwaya.HAFS_A_ASIM]: 'Hafs',
+  [Riwaya.WARSH_AN_NAFI]: 'Warsh',
+  [Riwaya.QALUN_AN_NAFI]: 'Qalun',
+  [Riwaya.ALDURI_AN_ALKAISSAI]: 'Ad-Duri',
 };
 
 const ReciterCard = ({
@@ -49,23 +51,22 @@ const ReciterCard = ({
   const { i18n, t } = useTranslation();
   const { recentlyPlayed } = useRecentlyPlayed();
   const colorScheme = useColorScheme();
-  const isDark = colorScheme !== "light";
-  const { textPrimary, textSecondary, cardBg, border, focusBg } =
-    getThemeColors(isDark);
+  const isDark = colorScheme !== 'light';
+  const { textPrimary, textSecondary, cardBg, border } = getThemeColors(isDark);
   const { width } = useWindowDimensions();
-  const isRTL = i18n.dir() === "rtl";
+  const isRTL = i18n.dir() === 'rtl';
   const isVeryWide = width >= 2800;
   const isWide = width >= 2200 && width < 2800;
   const isMedium = width >= 1600 && width < 2200;
 
   // Check if this reciter is in recently played
   const isRecentlyPlayed = recentlyPlayed.some(
-    (item) => item.reciterId === reciter.id.toString()
+    (item) => item.reciterId === reciter.id.toString(),
   );
   const styles = StyleSheet.create({
     reciterCard: {
-      position: "relative",
-      direction: isRTL ? "rtl" : "ltr",
+      position: 'relative',
+      direction: isRTL ? 'rtl' : 'ltr',
       height: itemHeight + 5,
       backgroundColor: cardBg,
       paddingVertical: isVeryWide ? 28 : isWide ? 24 : 20,
@@ -83,33 +84,33 @@ const ReciterCard = ({
     },
     reciterName: {
       fontSize: isVeryWide ? 26 : isWide ? 24 : isMedium ? 20 : 18,
-      fontWeight: "bold",
+      fontWeight: 'bold',
       color: textPrimary,
       marginTop: 5,
       marginBottom: 5,
-      width: "100%",
+      width: '100%',
     },
     reciterDesc: {
       fontSize: isVeryWide ? 18 : isWide ? 16 : isMedium ? 15 : 14,
       color: textSecondary,
-      width: "100%",
+      width: '100%',
     },
     recentlyPlayedBadge: {
-      position: "absolute",
+      position: 'absolute',
       bottom: 8,
-      [isRTL ? "right" : "left"]: 8,
+      [isRTL ? 'right' : 'left']: 8,
       backgroundColor: colorPrimary,
       paddingVertical: 4,
       paddingHorizontal: 8,
       borderRadius: 4,
-      flexDirection: "row",
-      alignItems: "center",
+      flexDirection: 'row',
+      alignItems: 'center',
       gap: 4,
     },
     recentlyPlayedText: {
-      color: "#fff",
+      color: '#fff',
       fontSize: isVeryWide ? 12 : isWide ? 11 : isMedium ? 10 : 9,
-      fontWeight: "bold",
+      fontWeight: 'bold',
     },
   });
 
@@ -128,7 +129,9 @@ const ReciterCard = ({
             {isRecentlyPlayed && (
               <View style={styles.recentlyPlayedBadge}>
                 <Ionicons name="play" size={badgeIconSize} color="#fff" />
-                <Text style={styles.recentlyPlayedText}>{t("recently_played_badge")}</Text>
+                <Text style={styles.recentlyPlayedText}>
+                  {t('recently_played_badge')}
+                </Text>
               </View>
             )}
 
@@ -149,16 +152,16 @@ const ReciterCard = ({
 
             <View
               style={{
-                flexDirection: "row-reverse",
-                alignItems: "center",
+                flexDirection: 'row-reverse',
+                alignItems: 'center',
                 marginTop: 5,
               }}
             >
               {viewCount !== undefined && (
                 <View
                   style={{
-                    flexDirection: "row",
-                    alignItems: "center",
+                    flexDirection: 'row',
+                    alignItems: 'center',
                   }}
                 >
                   <Ionicons
@@ -169,7 +172,7 @@ const ReciterCard = ({
                   <Text
                     style={[
                       styles.reciterDesc,
-                      { marginEnd: 4, fontSize: 12, width: "auto" },
+                      { marginEnd: 4, fontSize: 12, width: 'auto' },
                     ]}
                   >
                     {viewCount}
@@ -178,7 +181,7 @@ const ReciterCard = ({
               )}
 
               {favoriteCount !== undefined && (
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Ionicons
                     name="heart-outline"
                     size={14}
@@ -187,7 +190,7 @@ const ReciterCard = ({
                   <Text
                     style={[
                       styles.reciterDesc,
-                      { marginEnd: 4, fontSize: 12, width: "auto" },
+                      { marginEnd: 4, fontSize: 12, width: 'auto' },
                     ]}
                   >
                     {favoriteCount}
@@ -197,9 +200,9 @@ const ReciterCard = ({
             </View>
             <View
               style={{
-                flexDirection: "row",
-                alignItems: "center",
-                position: "absolute",
+                flexDirection: 'row',
+                alignItems: 'center',
+                position: 'absolute',
                 margin: 2,
                 top: 4,
                 end: 4,

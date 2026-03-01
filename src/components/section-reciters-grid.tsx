@@ -1,11 +1,12 @@
-import React, { useCallback } from "react";
-import { StyleSheet, View } from "react-native";
-import { SpatialNavigationVirtualizedGrid } from "react-tv-space-navigation";
+import React, { useCallback } from 'react';
+import { StyleSheet, View } from 'react-native';
 
-import ReciterCard from "./reciter-card";
-import type { Reciter } from "../types";
-import { useItemHeight } from "../hooks/ise-item-height";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
+import { SpatialNavigationVirtualizedGrid } from 'react-tv-space-navigation';
+
+import ReciterCard from './reciter-card';
+import { useItemHeight } from '../hooks/ise-item-height';
+import type { Reciter } from '../types';
 
 type SectionRecitersGridProps = {
   reciters: Reciter[];
@@ -19,11 +20,9 @@ type SectionRecitersGridProps = {
 
 const styles = StyleSheet.create({
   item: {
-    overflow: "visible",
+    overflow: 'visible',
   },
 });
-
-const ITEM_HEIGHT = 120; // must be stable for virtualization
 
 export default function SectionRecitersGrid({
   reciters,
@@ -36,7 +35,7 @@ export default function SectionRecitersGrid({
 }: SectionRecitersGridProps) {
   const { itemHeight } = useItemHeight();
   const { i18n } = useTranslation();
-  const isRTL = i18n.dir() === "rtl";
+  const isRTL = i18n.dir() === 'rtl';
 
   const renderItem = useCallback(
     ({ item, index }: { item: Reciter; index: number }) => (
@@ -62,6 +61,7 @@ export default function SectionRecitersGrid({
     ),
     [
       favoriteCounts,
+      itemHeight,
       itemWidth,
       onReciterPress,
       preferredFirstFocus,
@@ -73,12 +73,12 @@ export default function SectionRecitersGrid({
     <SpatialNavigationVirtualizedGrid<Reciter>
       data={reciters}
       style={{
-        width: "100%",
-        direction: isRTL ? "rtl" : "ltr",
-        flexDirection: isRTL ? "row-reverse" : "row",
+        width: '100%',
+        direction: isRTL ? 'rtl' : 'ltr',
+        flexDirection: isRTL ? 'row-reverse' : 'row',
       }}
       numberOfColumns={cardsPerRow}
-      itemHeight={ITEM_HEIGHT}
+      itemHeight={itemHeight}
       renderItem={renderItem}
       rowContainerStyle={{}}
     />

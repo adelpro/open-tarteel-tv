@@ -1,44 +1,40 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   Pressable,
-  Text,
-  View,
   PressableProps,
   StyleSheet,
-} from "react-native";
-import { SpatialNavigationFocusableView } from "react-tv-space-navigation";
-import { useTranslation } from "react-i18next";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Ionicons } from "@expo/vector-icons";
+  Text,
+  View,
+} from 'react-native';
+
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTranslation } from 'react-i18next';
+import { SpatialNavigationFocusableView } from 'react-tv-space-navigation';
+
 import {
   colorPrimary,
   colorPrimaryDark,
   colorPrimaryLight,
   focusScale,
-} from "../constants/interaction-colors";
-import { getThemeColors } from "../constants/theme";
+} from '../constants/interaction-colors';
+import { getThemeColors } from '../constants/theme';
 
 type LanguageSwitchProps = {
   isDark: boolean;
-} & Omit<PressableProps, "onPress">;
+} & Omit<PressableProps, 'onPress'>;
 
-const LANGUAGE_KEY = "app_language";
+const LANGUAGE_KEY = 'app_language';
 
 const LanguageSwitch = ({ isDark, ...pressableProps }: LanguageSwitchProps) => {
   const { t, i18n } = useTranslation();
   const [currentLang, setCurrentLang] = useState(i18n.language);
 
-  const { textPrimary, cardBg, border, focusBg } = getThemeColors(isDark);
+  const { textPrimary, cardBg, border } = getThemeColors(isDark);
 
-  const isRTL = i18n.dir() === "rtl";
+  const isRTL = i18n.dir() === 'rtl';
 
   const styles = StyleSheet.create({
-    menuRow: {
-      flexDirection: isRTL ? "row-reverse" : "row",
-      justifyContent: "center",
-      gap: 12,
-      marginBottom: 10,
-    },
     menuButton: {
       backgroundColor: cardBg,
       height: 50,
@@ -48,9 +44,9 @@ const LanguageSwitch = ({ isDark, ...pressableProps }: LanguageSwitchProps) => {
       borderRadius: 8,
       borderWidth: 2,
       borderColor: border,
-      flexDirection: isRTL ? "row-reverse" : "row",
-      alignItems: "center",
-      justifyContent: "center",
+      flexDirection: isRTL ? 'row-reverse' : 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
       gap: 8,
     },
     menuButtonFocused: {
@@ -61,27 +57,12 @@ const LanguageSwitch = ({ isDark, ...pressableProps }: LanguageSwitchProps) => {
     menuButtonText: {
       color: textPrimary,
       fontSize: 16,
-      fontWeight: "600",
+      fontWeight: '600',
     },
     menuButtonContent: {
-      flexDirection: isRTL ? "row-reverse" : "row",
-      alignItems: "center",
+      flexDirection: isRTL ? 'row-reverse' : 'row',
+      alignItems: 'center',
       gap: 8,
-    },
-    micButton: {
-      width: 42,
-      height: 42,
-      borderRadius: 8,
-      backgroundColor: cardBg,
-      justifyContent: "center",
-      alignItems: "center",
-      borderWidth: 2,
-      borderColor: border,
-    },
-    micButtonFocused: {
-      backgroundColor: focusBg,
-      borderColor: colorPrimary,
-      transform: [{ scale: focusScale }],
     },
   });
 
@@ -94,10 +75,10 @@ const LanguageSwitch = ({ isDark, ...pressableProps }: LanguageSwitchProps) => {
         setCurrentLang(savedLang);
       }
     })();
-  }, []);
+  }, [i18n]);
 
   const toggleLanguage = async () => {
-    const newLang = currentLang === "en" ? "ar" : "en";
+    const newLang = currentLang === 'en' ? 'ar' : 'en';
     await i18n.changeLanguage(newLang);
     await AsyncStorage.setItem(LANGUAGE_KEY, newLang);
     setCurrentLang(newLang);
@@ -110,7 +91,7 @@ const LanguageSwitch = ({ isDark, ...pressableProps }: LanguageSwitchProps) => {
           style={[styles.menuButton, isFocused && styles.menuButtonFocused]}
           focusable
           accessibilityRole="button"
-          accessibilityLabel={t("change_language")}
+          accessibilityLabel={t('change_language')}
           {...pressableProps}
         >
           <View style={styles.menuButtonContent}>
@@ -121,11 +102,11 @@ const LanguageSwitch = ({ isDark, ...pressableProps }: LanguageSwitchProps) => {
                 isFocused
                   ? colorPrimary
                   : isDark
-                  ? colorPrimaryLight
-                  : colorPrimaryDark
+                    ? colorPrimaryLight
+                    : colorPrimaryDark
               }
             />
-            <Text style={styles.menuButtonText}>{t("change_language")}</Text>
+            <Text style={styles.menuButtonText}>{t('change_language')}</Text>
           </View>
         </Pressable>
       )}

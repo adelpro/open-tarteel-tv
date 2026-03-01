@@ -1,0 +1,12 @@
+dist/
+android/
+ios/
+design/
+screenshots/
+assets/
+.expo/
+node_modules/
+firebase.json
+google-services.json
+.firebase
+*-lock.json

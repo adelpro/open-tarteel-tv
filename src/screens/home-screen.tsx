@@ -1,58 +1,60 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   StyleSheet,
   Text,
-  View,
   useColorScheme,
   useWindowDimensions,
-} from "react-native";
-import { useNavigation, useRoute } from "@react-navigation/native";
+  View,
+} from 'react-native';
+
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import Fuse from 'fuse.js';
+import { useTranslation } from 'react-i18next';
 import {
   SpatialNavigationScrollView,
   SpatialNavigationView,
-} from "react-tv-space-navigation";
-import { Ionicons } from "@expo/vector-icons";
-import BrandHeader from "../components/brand-header";
-import RetryButton from "../components/retry-button";
-import SearchInput from "../components/search-input";
-import SectionFeatured from "../components/section-featured";
-import SectionFilters from "../components/section-filters";
-import SectionTopNav from "../components/section-top-nav";
-import { getAllReciters } from "../services/api";
-import { Reciter, Riwaya } from "../types";
-import { colorPrimary } from "../constants/interaction-colors";
-import { getThemeColors } from "../constants/theme";
-import { useTranslation } from "react-i18next";
-import Fuse from "fuse.js";
-import { normalizeSearchText } from "../utils/search";
-import { useViewCounts } from "../hooks/use-view-counts";
-import { useReciterGridLayout } from "../hooks/use-reciter-grid-layout";
-import SectionRecitersGrid from "../components/section-reciters-grid";
-import EmptyState from "../components/empty-state";
-import { useFavorites } from "../context/favorites.context";
-import { useRecentlyPlayed } from "../context/recently-played.context";
-import { useSettings } from "../context/settings.context";
+} from 'react-tv-space-navigation';
+
+import BrandHeader from '../components/brand-header';
+import RetryButton from '../components/retry-button';
+import SearchInput from '../components/search-input';
+import SectionFeatured from '../components/section-featured';
+import SectionFilters from '../components/section-filters';
+import SectionRecitersGrid from '../components/section-reciters-grid';
+import SectionTopNav from '../components/section-top-nav';
+import { colorPrimary } from '../constants/interaction-colors';
+import { getThemeColors } from '../constants/theme';
+import { useFavorites } from '../context/favorites.context';
+import { useSettings } from '../context/settings.context';
+import { useReciterGridLayout } from '../hooks/use-reciter-grid-layout';
+import { useViewCounts } from '../hooks/use-view-counts';
+import { getAllReciters } from '../services/api';
+import { Reciter, Riwaya } from '../types';
+import { normalizeSearchText } from '../utils/search';
+import EmptyState from '../components/empty-state';
+import { useRecentlyPlayed } from '../context/recently-played.context';
 
 export default function HomeScreen() {
   const { t, i18n } = useTranslation();
-  const isRTL = i18n.dir() === "rtl";
-  const lang = i18n.language === "ar" ? "ar" : "en";
+  const isRTL = i18n.dir() === 'rtl';
+  const lang = i18n.language === 'ar' ? 'ar' : 'en';
   const [reciters, setReciters] = useState<Reciter[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const colorScheme = useColorScheme();
-  const isDark = colorScheme !== "light";
+  const isDark = colorScheme !== 'light';
   const { width } = useWindowDimensions();
   const { viewCounts } = useViewCounts();
   const { favoriteCounts } = useFavorites();
   const { recentlyPlayed } = useRecentlyPlayed();
   const { enabledSources } = useSettings();
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedRiwaya, setSelectedRiwaya] = useState<Riwaya | "all">("all");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedRiwaya, setSelectedRiwaya] = useState<Riwaya | 'all'>('all');
   const [searchFocused, setSearchFocused] = useState(false);
 
   const { favorites } = useFavorites(); // local favorites
@@ -69,8 +71,8 @@ export default function HomeScreen() {
     },
     centerContainer: {
       flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
+      justifyContent: 'center',
+      alignItems: 'center',
       backgroundColor: bg,
     },
     loadingText: {
@@ -82,69 +84,73 @@ export default function HomeScreen() {
     errorMessage: {
       fontSize: isVeryWide ? 20 : isWide ? 18 : 16,
       color: textSecondary,
-      textAlign: "center",
+      textAlign: 'center',
       marginBottom: 24,
       lineHeight: 24,
     },
     errorContainer: {
-      alignItems: "center",
+      alignItems: 'center',
       paddingHorizontal: 40,
     },
     errorTitle: {
       fontSize: isVeryWide ? 32 : isWide ? 28 : 24,
-      fontWeight: "700",
+      fontWeight: '700',
       color: textPrimary,
       marginTop: 20,
       marginBottom: 12,
     },
   });
 
+  const loadReciters = useCallback(
+    async (lang: 'ar' | 'en') => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await getAllReciters(lang, enabledSources);
+        setReciters(data);
+        setError(null);
+      } catch (err) {
+        console.error('Failed to load reciters:', err);
+        const errorMsg =
+          err instanceof Error
+            ? err.message
+            : 'Failed to load reciters. Please try again.';
+        setError(errorMsg);
+        setReciters([]);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [enabledSources],
+  );
+
   useEffect(() => {
-    const lang = i18n.language === "ar" ? "ar" : "en";
+    const lang = i18n.language === 'ar' ? 'ar' : 'en';
     loadReciters(lang);
-  }, [i18n.language, enabledSources]);
+  }, [i18n.language, loadReciters]);
 
   useEffect(() => {
     const rn = route.name as string | undefined;
-    if (rn === "Search") {
+    if (rn === 'Search') {
       const q = route.params?.q as string | undefined;
       const riw = route.params?.riwaya as string | undefined;
-      setSearchQuery(q ?? "");
+      setSearchQuery(q ?? '');
       if (riw && (Object.values(Riwaya) as string[]).includes(riw)) {
         setSelectedRiwaya(riw as Riwaya);
       } else {
-        setSelectedRiwaya("all");
+        setSelectedRiwaya('all');
       }
     }
   }, [route]);
 
-  const loadReciters = async (lang: "ar" | "en") => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await getAllReciters(lang, enabledSources);
-
-      setReciters(data);
-      setError(null);
-    } catch (err) {
-      const errorMsg =
-        err instanceof Error
-          ? err.message
-          : "Failed to load reciters. Please try again.";
-      setError(errorMsg);
-      setReciters([]);
-    } finally {
-      setLoading(false);
-    }
-  };
   const handleRetry = () => {
-    const lang = i18n.language === "ar" ? "ar" : "en";
+    const lang = i18n.language === 'ar' ? 'ar' : 'en';
     loadReciters(lang);
   };
 
   const handleReciterPress = useCallback(
     (reciter: Reciter) => {
-      navigation.navigate("Player", { reciter });
+      navigation.navigate('Player', { reciter });
     },
     [navigation],
   );
@@ -209,7 +215,7 @@ export default function HomeScreen() {
 
   const filteredReciters = useMemo(() => {
     const matchesRiwaya = (reciter: Reciter) =>
-      selectedRiwaya === "all" || reciter.moshaf.riwaya === selectedRiwaya;
+      selectedRiwaya === 'all' || reciter.moshaf.riwaya === selectedRiwaya;
 
     // 1. Get base list filtered by Riwaya
     let baseList = reciters.filter(matchesRiwaya);
@@ -238,8 +244,8 @@ export default function HomeScreen() {
 
     const fuse = new Fuse(items, {
       keys: [
-        { name: "searchName", weight: 0.6 },
-        { name: "searchMoshafName", weight: 0.4 },
+        { name: 'searchName', weight: 0.6 },
+        { name: 'searchMoshafName', weight: 0.4 },
       ],
       threshold: 0.4,
       ignoreLocation: true,
@@ -248,7 +254,7 @@ export default function HomeScreen() {
 
     const results = fuse.search(normalizedQuery);
     return results.map((entry) => entry.item);
-  }, [reciters, searchQuery, selectedRiwaya, i18n.language]);
+  }, [reciters, searchQuery, lang, selectedRiwaya]);
 
   const { cardsPerRow, itemWidth } = useReciterGridLayout(
     filteredReciters,
@@ -259,7 +265,7 @@ export default function HomeScreen() {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color={colorPrimary} />
-        <Text style={styles.loadingText}>{t("Loading_Reciters")}</Text>
+        <Text style={styles.loadingText}>{t('Loading_Reciters')}</Text>
       </View>
     );
   }
@@ -269,7 +275,7 @@ export default function HomeScreen() {
       <View style={styles.centerContainer}>
         <View style={styles.errorContainer}>
           <Ionicons name="alert-circle" size={64} color={errorPrimary} />
-          <Text style={styles.errorTitle}>{t("Failed_to_Load_Reciters")}</Text>
+          <Text style={styles.errorTitle}>{t('Failed_to_Load_Reciters')}</Text>
           <Text style={styles.errorMessage}>{error}</Text>
           <RetryButton onPress={handleRetry} />
         </View>
@@ -282,8 +288,8 @@ export default function HomeScreen() {
       <View style={styles.centerContainer}>
         <EmptyState
           icon="library-outline"
-          title={t("No_Reciters_Found_Title")}
-          message={t("No_Reciters_Found_Content")}
+          title={t('No_Reciters_Found_Title')}
+          message={t('No_Reciters_Found_Content')}
         />
         <RetryButton onPress={handleRetry} />
       </View>
@@ -306,7 +312,7 @@ export default function HomeScreen() {
 
           {recentlyPlayedReciters.length > 0 && (
             <SectionFeatured
-              title={`${t("recently_played")} (${recentlyPlayedReciters.length})`}
+              title={`${t('recently_played')} (${recentlyPlayedReciters.length})`}
               reciters={recentlyPlayedReciters}
               itemWidth={itemWidth}
               isRTL={isRTL}
@@ -320,7 +326,7 @@ export default function HomeScreen() {
           )}
 
           <SectionFeatured
-            title={`${t("my_favorites")} (${myFavoritedReciters.length})`}
+            title={`${t('my_favorites')} (${myFavoritedReciters.length})`}
             reciters={myFavoritedReciters}
             itemWidth={itemWidth}
             isRTL={isRTL}
@@ -333,7 +339,7 @@ export default function HomeScreen() {
           />
 
           <SectionFeatured
-            title={`${t("most_viewed")} (${mostViewedReciters.length})`}
+            title={`${t('most_viewed')} (${mostViewedReciters.length})`}
             reciters={mostViewedReciters}
             itemWidth={itemWidth}
             isRTL={isRTL}
@@ -346,7 +352,7 @@ export default function HomeScreen() {
           />
 
           <SectionFeatured
-            title={`${t("most_favorited")} (${mostFavoritedReciters.length})`}
+            title={`${t('most_favorited')} (${mostFavoritedReciters.length})`}
             reciters={mostFavoritedReciters}
             itemWidth={itemWidth}
             isRTL={isRTL}
@@ -377,8 +383,8 @@ export default function HomeScreen() {
           ) : (
             <EmptyState
               icon="search-outline"
-              title={t("No_Search_Results_Title")}
-              message={t("No_Search_Results_Content")}
+              title={t('No_Search_Results_Title')}
+              message={t('No_Search_Results_Content')}
             />
           )}
         </SpatialNavigationView>

@@ -71,6 +71,70 @@ yarn ios
 
 ---
 
+## Development Setup
+
+This section explains how to set up TV emulators and simulators for local development.
+
+### Android TV Emulator
+
+1. **Install Android Studio** from [developer.android.com/studio](https://developer.android.com/studio)
+2. Open Android Studio → **Virtual Device Manager** (Tools → Device Manager)
+3. Click **Create Device** → select a **TV** device profile (e.g., "Android TV (1080p)")
+4. Choose a system image with **API 34+** (recommended: API 34 with Google APIs)
+5. Finish the wizard and launch the emulator
+6. Generate the native Android TV project:
+   ```bash
+   yarn prebuild:tv:android
+   ```
+7. Run the app on the emulator:
+   ```bash
+   yarn run:tv:android
+   ```
+
+> **Note:** The `EXPO_TV=1` environment variable is set automatically by the `run:tv:android` script. This enables the TV-specific configuration from `@react-native-tvos/config-tv`.
+
+### tvOS Simulator (macOS only)
+
+1. **Install Xcode** from the Mac App Store (version 15+ recommended)
+2. Open Xcode → **Settings → Platforms** → install the **tvOS** simulator runtime
+3. Open **Simulator.app** → **File → Open Simulator → tvOS** → choose a device (e.g., "Apple TV 4K")
+4. Generate the native tvOS project:
+   ```bash
+   yarn prebuild:tv:ios
+   ```
+5. Run the app on the simulator:
+   ```bash
+   yarn run:tv:ios
+   ```
+
+### Remote Control Navigation
+
+When using a TV emulator or simulator:
+
+| Platform       | Navigation | Select/Enter | Back          |
+| -------------- | ---------- | ------------ | ------------- |
+| Android TV     | Arrow keys | Enter        | Backspace     |
+| tvOS Simulator | Arrow keys | Enter        | Escape (Menu) |
+
+The app uses `react-tv-space-navigation` for spatial focus management — all UI elements are navigable via directional input.
+
+### Available Scripts
+
+| Script                        | Description                               |
+| ----------------------------- | ----------------------------------------- |
+| `yarn start`                  | Start Expo dev server                     |
+| `yarn android`                | Run on Android (mobile)                   |
+| `yarn ios`                    | Run on iOS (mobile)                       |
+| `yarn run:tv:android`         | Run on Android TV emulator                |
+| `yarn run:tv:ios`             | Run on tvOS simulator                     |
+| `yarn prebuild:tv:android`    | Generate Android TV native project        |
+| `yarn prebuild:tv:ios`        | Generate tvOS native project              |
+| `yarn build:tv:android:aab`   | Build Android TV production AAB (via EAS) |
+| `yarn build:tv:android:local` | Build Android TV production AAB locally   |
+| `yarn build:tv:ios`           | Build tvOS production (via EAS)           |
+
+---
+
 ## Project Structure
 
 High-level folders:

@@ -1,9 +1,11 @@
-import React, { memo } from "react";
-import { Pressable, StyleSheet, Text } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { SpatialNavigationFocusableView } from "react-tv-space-navigation";
-import { useTranslation } from "react-i18next";
-import { colorPrimary } from "../constants/interaction-colors";
+import React, { memo } from 'react';
+import { Pressable, StyleSheet, Text } from 'react-native';
+
+import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
+import { SpatialNavigationFocusableView } from 'react-tv-space-navigation';
+
+import { colorPrimary } from '../constants/interaction-colors';
 
 type RetryButtonProps = {
   onPress: () => void;
@@ -18,26 +20,26 @@ const RetryButton = ({ onPress }: RetryButtonProps) => {
       paddingVertical: 16,
       paddingHorizontal: 32,
       borderRadius: 8,
-      flexDirection: "row",
-      alignItems: "center",
+      flexDirection: 'row',
+      alignItems: 'center',
       borderWidth: 2,
       borderColor: colorPrimary,
     },
     retryButtonFocused: {
-      backgroundColor: "#45a049",
-      borderColor: "#fff",
+      backgroundColor: '#45a049',
+      borderColor: '#fff',
       transform: [{ scale: 1.08 }],
     },
     retryButtonIcon: {
       marginRight: 10,
     },
     retryButtonText: {
-      color: "#fff",
+      color: '#fff',
       fontSize: 18,
-      fontWeight: "600",
+      fontWeight: '600',
     },
     retryButtonTextFocused: {
-      color: "#fff",
+      color: '#fff',
     },
   });
   return (
@@ -54,7 +56,7 @@ const RetryButton = ({ onPress }: RetryButtonProps) => {
           <Ionicons
             name="refresh"
             size={20}
-            color={isFocused ? "#fff" : "#4CAF50"}
+            color={isFocused ? '#fff' : '#4CAF50'}
             style={styles.retryButtonIcon}
           />
           <Text
@@ -63,7 +65,7 @@ const RetryButton = ({ onPress }: RetryButtonProps) => {
               isFocused && styles.retryButtonTextFocused,
             ]}
           >
-            {t("Try_Again")}
+            {t('Try_Again')}
           </Text>
         </Pressable>
       )}

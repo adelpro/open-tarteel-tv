@@ -1,19 +1,21 @@
-import React, { memo } from "react";
+import React, { memo } from 'react';
 import {
   Pressable,
   StyleSheet,
   Text,
   useColorScheme,
   useWindowDimensions,
-} from "react-native";
-import { SpatialNavigationFocusableView } from "react-tv-space-navigation";
-import { getThemeColors } from "../constants/theme";
+} from 'react-native';
+
+import { SpatialNavigationFocusableView } from 'react-tv-space-navigation';
+
 import {
   colorPrimary,
   colorPrimaryDark,
   colorPrimaryTint,
   focusScale,
-} from "../constants/interaction-colors";
+} from '../constants/interaction-colors';
+import { getThemeColors } from '../constants/theme';
 
 type FilterChipProps = {
   label: string;
@@ -23,7 +25,7 @@ type FilterChipProps = {
 
 const FilterChip = ({ label, selected, onPress }: FilterChipProps) => {
   const colorScheme = useColorScheme();
-  const isDark = colorScheme !== "light";
+  const isDark = colorScheme !== 'light';
   const { textPrimary, cardBg, border } = getThemeColors(isDark);
   const { width } = useWindowDimensions();
   const isVeryWide = width >= 2800;
@@ -44,16 +46,16 @@ const FilterChip = ({ label, selected, onPress }: FilterChipProps) => {
     filterChipText: {
       color: textPrimary,
       fontSize: 14,
-      fontWeight: "600",
+      fontWeight: '600',
     },
     filterChipTextSelected: {
-      color: "#fff",
+      color: '#fff',
     },
     filterChipFocused: {
       backgroundColor: isDark ? colorPrimaryDark : colorPrimaryTint,
       borderColor: colorPrimary,
       transform: [{ scale: focusScale }],
-      shadowColor: "#000",
+      shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.15,
       shadowRadius: 4,
@@ -76,7 +78,7 @@ const FilterChip = ({ label, selected, onPress }: FilterChipProps) => {
           ]}
           focusable
           accessibilityRole="button"
-          accessibilityLabel={`Filter ${label}${selected ? " selected" : ""}`}
+          accessibilityLabel={`Filter ${label}${selected ? ' selected' : ''}`}
           onPress={onPress}
         >
           <Text

@@ -1,28 +1,30 @@
-import React, { memo } from "react";
+import React, { memo } from 'react';
 import {
   Pressable,
   PressableProps,
   StyleSheet,
   Text,
   View,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { SpatialNavigationFocusableView } from "react-tv-space-navigation";
-import { getThemeColors } from "../constants/theme";
+} from 'react-native';
+
+import { Ionicons } from '@expo/vector-icons';
+import { SpatialNavigationFocusableView } from 'react-tv-space-navigation';
+
 import {
   colorPrimary,
   colorPrimaryDark,
   colorPrimaryLight,
   focusScale,
-} from "../constants/interaction-colors";
-import i18n from "../i18n";
+} from '../constants/interaction-colors';
+import { getThemeColors } from '../constants/theme';
+import i18n from '../i18n';
 
 type MenuButtonProps = {
   label: string;
   iconName?: keyof typeof Ionicons.glyphMap;
   onPress: () => void;
   isDark: boolean;
-} & Omit<PressableProps, "onPress">;
+} & Omit<PressableProps, 'onPress'>;
 
 const MenuButton = ({
   label,
@@ -33,12 +35,12 @@ const MenuButton = ({
 }: MenuButtonProps) => {
   const { textPrimary, cardBg, border, focusBg } = getThemeColors(isDark);
 
-  const isRTL = i18n.dir() === "rtl";
+  const isRTL = i18n.dir() === 'rtl';
 
   const styles = StyleSheet.create({
     menuRow: {
-      flexDirection: isRTL ? "row-reverse" : "row",
-      justifyContent: "center",
+      flexDirection: isRTL ? 'row-reverse' : 'row',
+      justifyContent: 'center',
       gap: 12,
       marginBottom: 10,
     },
@@ -51,9 +53,9 @@ const MenuButton = ({
       borderRadius: 8,
       borderWidth: 2,
       borderColor: border,
-      flexDirection: isRTL ? "row-reverse" : "row",
-      alignItems: "center",
-      justifyContent: "center",
+      flexDirection: isRTL ? 'row-reverse' : 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
       gap: 8,
     },
     menuButtonFocused: {
@@ -64,11 +66,11 @@ const MenuButton = ({
     menuButtonText: {
       color: textPrimary,
       fontSize: 16,
-      fontWeight: "600",
+      fontWeight: '600',
     },
     menuButtonContent: {
-      flexDirection: isRTL ? "row-reverse" : "row",
-      alignItems: "center",
+      flexDirection: isRTL ? 'row-reverse' : 'row',
+      alignItems: 'center',
       gap: 8,
     },
     micButton: {
@@ -76,8 +78,8 @@ const MenuButton = ({
       height: 42,
       borderRadius: 8,
       backgroundColor: cardBg,
-      justifyContent: "center",
-      alignItems: "center",
+      justifyContent: 'center',
+      alignItems: 'center',
       borderWidth: 2,
       borderColor: border,
     },
@@ -105,8 +107,8 @@ const MenuButton = ({
                   isFocused
                     ? colorPrimary
                     : isDark
-                    ? colorPrimaryLight
-                    : colorPrimaryDark
+                      ? colorPrimaryLight
+                      : colorPrimaryDark
                 }
               />
             ) : null}

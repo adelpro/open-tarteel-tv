@@ -4,6 +4,7 @@
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
+    "prebuild": "expo prebuild --clean",
     "android": "expo run:android -d",
     "ios": "expo run:ios",
     "run:tv:android": "cross-env EXPO_TV=1 expo run:android -d",
@@ -12,7 +13,14 @@
     "prebuild:tv:ios": "cross-env EXPO_TV=1 expo prebuild --clean --platform ios",
     "build:tv:android:aab": "cross-env EXPO_TV=1 eas build -p android --profile production",
     "build:tv:android:local": "cross-env EXPO_TV=1 eas build -p android --profile production --local --output ./builds/production-build.aab",
-    "build:tv:ios": "cross-env EXPO_TV=1 eas build -p ios --profile production"
+    "build:tv:ios": "cross-env EXPO_TV=1 eas build -p ios --profile production",
+    "lint": "eslint . --cache --concurrency=auto",
+    "lint:fix": "eslint . --fix --cache --concurrency=auto",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky",
+    "commit": "git-cz"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -47,11 +55,34 @@
     }
   },
   "devDependencies": {
-    "@react-native-tvos/config-tv": "^0.1.4",
+    "@commitlint/config-conventional": "^19.4.1",
     "@react-native-community/cli": "latest",
+    "@react-native-tvos/config-tv": "^0.1.4",
     "@types/react": "~19.1.0",
+    "commitlint": "^19.4.1",
     "cross-env": "^10.1.0",
+    "eslint": "^9.21.0",
+    "eslint-config-expo": "^10.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.30.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-react-compiler": "^19.1.0-rc.2",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "husky": "^9.1.5",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.3.3",
     "typescript": "~5.9.2"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix --cache --concurrency=auto",
+      "prettier --write"
+    ]
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   },
   "private": true
 }

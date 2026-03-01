@@ -1,21 +1,23 @@
-import "react-native-get-random-values";
-import "fast-text-encoding";
-import Gun from "gun";
+import 'react-native-get-random-values';
+import 'fast-text-encoding';
+import Gun from 'gun';
+
 import {
-  GUNCONFIG,
   FAVORITE_COUNTS_KEY,
+  GUNCONFIG,
   VIEW_COUNTS_KEY,
-} from "../constants/gun";
+} from '../constants/gun';
 
 // TextEncoder / TextDecoder Polyfill for Gun/RN
-if (typeof (global as any).TextEncoder === "undefined") {
-  const pkg = require("fast-text-encoding");
+if (typeof (global as any).TextEncoder === 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const pkg = require('fast-text-encoding');
   (global as any).TextEncoder = pkg.TextEncoder;
   (global as any).TextDecoder = pkg.TextDecoder;
 }
 
 // Fix for Gun in environments where Root might not be defined or other shims needed
-if (typeof global !== "undefined" && !(global as any).window) {
+if (typeof global !== 'undefined' && !(global as any).window) {
   (global as any).window = global;
 }
 
@@ -24,9 +26,9 @@ const gun = Gun({
   retry: 1000, // Retry peer connection every second
 });
 
-(gun as any).on("hi", (peer: any) => {});
+(gun as any).on('hi', (peer: any) => {});
 
-(gun as any).on("bye", (peer: any) => {});
+(gun as any).on('bye', (peer: any) => {});
 
 const favoriteCountsNode = gun.get(FAVORITE_COUNTS_KEY);
 const viewCountsNode = gun.get(VIEW_COUNTS_KEY);
@@ -35,10 +37,10 @@ const viewCountsNode = gun.get(VIEW_COUNTS_KEY);
  * Subscribe to global favorite count updates in real time.
  */
 export function subscribeToFavoriteCounts(
-  callback: (key: string, count: number) => void
+  callback: (key: string, count: number) => void,
 ): () => void {
   const onUpdate = (count: number, key: string) => {
-    if (!key || typeof count !== "number") return;
+    if (!key || typeof count !== 'number') return;
     callback(key, count);
   };
 
@@ -65,7 +67,7 @@ export function syncFavorite(id: string, isFavorited: boolean): void {
 
   ref.once((currentCount: any) => {
     done = true;
-    const count = typeof currentCount === "number" ? currentCount : 0;
+    const count = typeof currentCount === 'number' ? currentCount : 0;
     const updated = isFavorited ? count + 1 : Math.max(0, count - 1);
     ref.put(updated, (ack: any) => {
       if (ack.err) {
@@ -79,10 +81,10 @@ export function syncFavorite(id: string, isFavorited: boolean): void {
  * Subscribe to global view count updates in real time.
  */
 export function subscribeToViewCounts(
-  callback: (key: string, count: number) => void
+  callback: (key: string, count: number) => void,
 ): () => void {
   const onUpdate = (count: number, key: string) => {
-    if (!key || typeof count !== "number") return;
+    if (!key || typeof count !== 'number') return;
     callback(key, count);
   };
 
@@ -108,7 +110,7 @@ export function syncView(id: string) {
 
   ref.once((currentCount: any) => {
     done = true;
-    const count = typeof currentCount === "number" ? currentCount : 0;
+    const count = typeof currentCount === 'number' ? currentCount : 0;
     const updated = count + 1;
     ref.put(updated, (ack: any) => {
       if (ack.err) {

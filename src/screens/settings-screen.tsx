@@ -1,20 +1,22 @@
-import React from "react";
-import { StyleSheet, Text, View, useColorScheme } from "react-native";
-import { useTranslation } from "react-i18next";
-import { LinkSource } from "../types";
-import { useSettings } from "../context/settings.context";
-import { getThemeColors } from "../constants/theme";
-import BrandHeader from "../components/brand-header";
+import React from 'react';
+import { StyleSheet, Text, useColorScheme, View } from 'react-native';
+
+import { useTranslation } from 'react-i18next';
 import {
   SpatialNavigationScrollView,
   SpatialNavigationView,
-} from "react-tv-space-navigation";
-import { SettingRow } from "../components/settings-row";
+} from 'react-tv-space-navigation';
+
+import BrandHeader from '../components/brand-header';
+import { SettingRow } from '../components/settings-row';
+import { getThemeColors } from '../constants/theme';
+import { useSettings } from '../context/settings.context';
+import { LinkSource } from '../types';
 
 const SettingsScreen = () => {
   const { t } = useTranslation();
   const colorScheme = useColorScheme();
-  const isDark = colorScheme !== "light";
+  const isDark = colorScheme !== 'light';
   const { bg, textPrimary, textSecondary } = getThemeColors(isDark);
   const { isSourceEnabled, toggleSource } = useSettings();
 
@@ -27,7 +29,7 @@ const SettingsScreen = () => {
     title: {
       color: textPrimary,
       fontSize: 24,
-      fontWeight: "bold",
+      fontWeight: 'bold',
       marginBottom: 20,
     },
     section: {
@@ -38,7 +40,7 @@ const SettingsScreen = () => {
       color: textSecondary,
       fontSize: 18,
       marginBottom: 10,
-      textTransform: "uppercase",
+      textTransform: 'uppercase',
     },
   });
 
@@ -49,10 +51,10 @@ const SettingsScreen = () => {
       <BrandHeader />
       <SpatialNavigationScrollView>
         <SpatialNavigationView direction="vertical">
-          <Text style={styles.title}>{t("settings")}</Text>
+          <Text style={styles.title}>{t('settings')}</Text>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t("sources_management")}</Text>
+            <Text style={styles.sectionTitle}>{t('sources_management')}</Text>
             {sources.map((source) => (
               <SettingRow
                 key={source}
