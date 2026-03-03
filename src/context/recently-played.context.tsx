@@ -4,10 +4,10 @@ import React, {
   useContext,
   useEffect,
   useState,
-} from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const RECENTLY_PLAYED_STORAGE_KEY = "@open_tarteel_recently_played";
+const RECENTLY_PLAYED_STORAGE_KEY = '@open_tarteel_recently_played';
 const MAX_RECENTLY_PLAYED = 10; // Keep last 10 played reciters
 
 export type RecentlyPlayedItem = {
@@ -21,7 +21,7 @@ type RecentlyPlayedContextValue = {
 };
 
 const RecentlyPlayedContext = createContext<RecentlyPlayedContextValue | null>(
-  null
+  null,
 );
 
 export function RecentlyPlayedProvider({
@@ -29,7 +29,9 @@ export function RecentlyPlayedProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [recentlyPlayed, setRecentlyPlayed] = useState<RecentlyPlayedItem[]>([]);
+  const [recentlyPlayed, setRecentlyPlayed] = useState<RecentlyPlayedItem[]>(
+    [],
+  );
 
   /* load once */
   useEffect(() => {
@@ -41,38 +43,35 @@ export function RecentlyPlayedProvider({
           setRecentlyPlayed(parsed.sort((a, b) => b.playedAt - a.playedAt));
         }
       })
-      .catch(() => { });
+      .catch(() => {});
   }, []);
 
-  const addToRecentlyPlayed = useCallback(
-    async (reciterId: string) => {
-      setRecentlyPlayed((prev) => {
-        // Remove if already in list (we'll add it at the beginning)
-        const filtered = prev.filter((item) => item.reciterId !== reciterId);
+  const addToRecentlyPlayed = useCallback(async (reciterId: string) => {
+    setRecentlyPlayed((prev) => {
+      // Remove if already in list (we'll add it at the beginning)
+      const filtered = prev.filter((item) => item.reciterId !== reciterId);
 
-        // Add to beginning with current timestamp
-        const updated = [
-          {
-            reciterId,
-            playedAt: Date.now(),
-          },
-          ...filtered,
-        ];
+      // Add to beginning with current timestamp
+      const updated = [
+        {
+          reciterId,
+          playedAt: Date.now(),
+        },
+        ...filtered,
+      ];
 
-        // Keep only the last MAX_RECENTLY_PLAYED items
-        const limited = updated.slice(0, MAX_RECENTLY_PLAYED);
+      // Keep only the last MAX_RECENTLY_PLAYED items
+      const limited = updated.slice(0, MAX_RECENTLY_PLAYED);
 
-        // Persist to storage
-        AsyncStorage.setItem(
-          RECENTLY_PLAYED_STORAGE_KEY,
-          JSON.stringify(limited)
-        ).catch(() => { });
+      // Persist to storage
+      AsyncStorage.setItem(
+        RECENTLY_PLAYED_STORAGE_KEY,
+        JSON.stringify(limited),
+      ).catch(() => {});
 
-        return limited;
-      });
-    },
-    []
-  );
+      return limited;
+    });
+  }, []);
 
   return (
     <RecentlyPlayedContext.Provider
@@ -91,7 +90,7 @@ export function useRecentlyPlayed() {
   const ctx = useContext(RecentlyPlayedContext);
   if (!ctx) {
     throw new Error(
-      "useRecentlyPlayed must be used within RecentlyPlayedProvider"
+      'useRecentlyPlayed must be used within RecentlyPlayedProvider',
     );
   }
   return ctx;
