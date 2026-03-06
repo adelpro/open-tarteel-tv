@@ -1,19 +1,21 @@
-import React from "react";
+import React from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
   ScrollView,
+  StyleSheet,
+  Text,
   useColorScheme,
-} from "react-native";
-import { useTranslation } from "react-i18next";
-import { getThemeColors } from "../constants/theme";
+  View,
+} from 'react-native';
+
+import { useTranslation } from 'react-i18next';
+
+import { getThemeColors } from '../constants/theme';
 
 export default function PrivacyScreen() {
   const { t, i18n } = useTranslation();
-  const isRTL = i18n.dir() === "rtl";
+  const isRTL = i18n.dir() === 'rtl';
   const colorScheme = useColorScheme();
-  const isDark = colorScheme !== "light";
+  const isDark = colorScheme !== 'light';
   const { textPrimary, textSecondary, border, cardBg } = getThemeColors(isDark);
 
   const styles = StyleSheet.create({
@@ -26,33 +28,33 @@ export default function PrivacyScreen() {
     },
     title: {
       fontSize: 36,
-      fontWeight: "bold",
+      fontWeight: 'bold',
       color: textPrimary,
       marginBottom: 30,
-      textAlign: isRTL ? "right" : "left",
+      textAlign: isRTL ? 'right' : 'left',
     },
     section: {
       marginBottom: 30,
     },
     sectionTitle: {
       fontSize: 24,
-      fontWeight: "bold",
+      fontWeight: 'bold',
       color: textPrimary,
       marginBottom: 15,
-      textAlign: isRTL ? "right" : "left",
+      textAlign: isRTL ? 'right' : 'left',
     },
     text: {
       fontSize: 16,
       color: textPrimary,
       marginBottom: 10,
       lineHeight: 24,
-      textAlign: isRTL ? "right" : "left",
+      textAlign: isRTL ? 'right' : 'left',
     },
     linkText: {
       fontSize: 16,
       color: textPrimary,
       marginTop: 10,
-      textAlign: isRTL ? "right" : "left",
+      textAlign: isRTL ? 'right' : 'left',
     },
     footer: {
       marginTop: 30,
@@ -63,44 +65,44 @@ export default function PrivacyScreen() {
     footerText: {
       fontSize: 14,
       color: textSecondary,
-      textAlign: isRTL ? "right" : "left",
+      textAlign: isRTL ? 'right' : 'left',
     },
   });
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.title}>{t("privacy.title")}</Text>
+        <Text style={styles.title}>{t('privacy.title')}</Text>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
-            {t("privacy.info_collection_title")}
+            {t('privacy.info_collection_title')}
           </Text>
-          <Text style={styles.text}>{t("privacy.info_collection_desc")}</Text>
+          <Text style={styles.text}>{t('privacy.info_collection_desc')}</Text>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
-            {t("privacy.data_usage_title")}
+            {t('privacy.data_usage_title')}
           </Text>
-          <Text style={styles.text}>{t("privacy.data_usage_desc")}</Text>
+          <Text style={styles.text}>{t('privacy.data_usage_desc')}</Text>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
-            {t("privacy.third_party_title")}
+            {t('privacy.third_party_title')}
           </Text>
-          <Text style={styles.text}>{t("privacy.third_party_desc")}</Text>
-          <Text style={styles.text}>{t("privacy.mp3_quran_api")}</Text>
+          <Text style={styles.text}>{t('privacy.third_party_desc')}</Text>
+          <Text style={styles.text}>{t('privacy.mp3_quran_api')}</Text>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t("privacy.contact_title")}</Text>
-          <Text style={styles.text}>{t("privacy.contact_desc")}</Text>
+          <Text style={styles.sectionTitle}>{t('privacy.contact_title')}</Text>
+          <Text style={styles.text}>{t('privacy.contact_desc')}</Text>
           <Text style={styles.linkText}>contact@quran.us.kg</Text>
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>{t("privacy.last_updated")}</Text>
+          <Text style={styles.footerText}>{t('privacy.last_updated')}</Text>
         </View>
       </View>
     </ScrollView>

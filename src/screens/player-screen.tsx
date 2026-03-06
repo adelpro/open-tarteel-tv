@@ -1,31 +1,35 @@
-import React, { useEffect, useRef } from "react";
-import { View, Text, StyleSheet, useColorScheme } from "react-native";
-import Player from "../components/player";
-import Playlist from "../components/play-list";
-import { getThemeColors } from "../constants/theme";
-import { usePlayer } from "../hooks/use-player";
+import React, { useEffect, useRef } from 'react';
+import { StyleSheet, Text, useColorScheme, View } from 'react-native';
+
 import {
   SpatialNavigationView,
   SpatialNavigationVirtualizedListRef,
-} from "react-tv-space-navigation";
+} from 'react-tv-space-navigation';
 
-import { useViewCounts } from "../hooks/use-view-counts";
+import { useRecentlyPlayed } from '../context/recently-played.context';
+import Playlist from '../components/play-list';
+import PlayerComponent from '../components/player';
+import { getThemeColors } from '../constants/theme';
+import { usePlayer } from '../hooks/use-player';
+import { useViewCounts } from '../hooks/use-view-counts';
 
 export default function PlayerScreen() {
   const colorScheme = useColorScheme();
-  const isDark = colorScheme !== "light";
+  const isDark = colorScheme !== 'light';
   const styles = createStyles(isDark);
   const playlistRef = useRef<SpatialNavigationVirtualizedListRef | null>(null);
 
   const { incrementView } = useViewCounts();
+  const { addToRecentlyPlayed } = useRecentlyPlayed();
   const player = usePlayer();
   const { playlistData, reciter, selectedSurah } = player;
 
   useEffect(() => {
     if (reciter?.id) {
       incrementView(reciter.id.toString());
+      addToRecentlyPlayed(reciter.id.toString());
     }
-  }, [reciter?.id, incrementView]);
+  }, [reciter?.id, incrementView, addToRecentlyPlayed]);
 
   useEffect(() => {
     if (!selectedSurah) return;
@@ -48,7 +52,7 @@ export default function PlayerScreen() {
   return (
     <View style={styles.container}>
       <SpatialNavigationView direction="horizontal" style={styles.mainContent}>
-        <Player player={player} />
+        <PlayerComponent player={player} />
         <Playlist player={player} listRef={playlistRef} />
       </SpatialNavigationView>
     </View>
@@ -64,8 +68,8 @@ function createStyles(isDark: boolean) {
     },
     centerContainer: {
       flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
+      justifyContent: 'center',
+      alignItems: 'center',
       backgroundColor: bg,
     },
     errorText: {
@@ -74,7 +78,7 @@ function createStyles(isDark: boolean) {
     },
     mainContent: {
       flex: 1,
-      flexDirection: "row",
+      flexDirection: 'row',
       paddingHorizontal: 20,
       paddingTop: 16,
       paddingBottom: 20,

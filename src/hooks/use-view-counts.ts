@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-import { subscribeToViewCounts, syncView } from "../services/gun-service";
+import { useEffect, useState } from 'react';
+
+import { subscribeToViewCounts, syncView } from '../services/gun-service';
 
 export function useViewCounts() {
   const [viewCounts, setViewCounts] = useState<Record<string, number>>({});

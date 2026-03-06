@@ -1,14 +1,14 @@
-import { LinkSource, Reciter } from "../../types";
-import type { Playlist } from "../../types";
-import type { ReciterSource } from "./reciter-source";
 import type {
-  ItqanRecitationResponse,
   ItqanRecitationDetailResponse,
-} from "./itqan.types";
-import { getRiwayaKeyFromMoshafName } from "./mp3quran.helpers";
-import { retryFetch } from "./shared-fetch";
+  ItqanRecitationResponse,
+} from './itqan.types';
+import { getRiwayaKeyFromMoshafName } from './mp3quran.helpers';
+import type { ReciterSource } from './reciter-source';
+import { retryFetch } from './shared-fetch';
+import type { Playlist } from '../../types';
+import { LinkSource, Reciter } from '../../types';
 
-const BASE_URL = "https://api.cms.itqan.dev";
+const BASE_URL = 'https://api.cms.itqan.dev';
 
 export const ItqanAdapter: ReciterSource = {
   source: LinkSource.ITQAN,
@@ -26,7 +26,7 @@ export const ItqanAdapter: ReciterSource = {
         await recitationsResponse.json();
 
       // Use explicit type: Array<Reciter | null>
-      const reciters: Array<Reciter | null> = await Promise.all(
+      const reciters: (Reciter | null)[] = await Promise.all(
         recitationsData.results.map(async (recitation) => {
           try {
             const recitationsDetailResponse = await retryFetch(
@@ -58,7 +58,7 @@ export const ItqanAdapter: ReciterSource = {
                 id: recitation.reciter.id,
                 name: recitation.name,
                 riwaya,
-                server: "",
+                server: '',
                 surah_total: playlist.length,
                 playlist,
               },
@@ -73,7 +73,7 @@ export const ItqanAdapter: ReciterSource = {
       // Filter out nulls
       return reciters.filter((r): r is Reciter => r !== null);
     } catch (error) {
-      console.error("Itqan API error:", error);
+      console.error('Itqan API error:', error);
       // Return empty array to gracefully handle Itqan API failures
       // MP3Quran will still provide reciters
       return [];

@@ -1,19 +1,21 @@
-import React, { memo, useEffect, useMemo } from "react";
-import { StyleSheet, Text, useColorScheme, View } from "react-native";
+import React, { memo, useEffect, useMemo } from 'react';
+import { StyleSheet, Text, useColorScheme, View } from 'react-native';
+
+import { useTranslation } from 'react-i18next';
 import {
   SpatialNavigationFocusableView,
+  SpatialNavigationView,
   SpatialNavigationVirtualizedList,
   SpatialNavigationVirtualizedListRef,
-  SpatialNavigationView,
-} from "react-tv-space-navigation";
+} from 'react-tv-space-navigation';
+
 import {
   colorPrimary,
   colorPrimaryDark,
   colorPrimaryLight,
-} from "../constants/interaction-colors";
-import { getThemeColors } from "../constants/theme";
-import type { PlayerState } from "../hooks/use-player";
-import { useTranslation } from "react-i18next";
+} from '../constants/interaction-colors';
+import { getThemeColors } from '../constants/theme';
+import type { PlayerState } from '../hooks/use-player';
 
 const SURAH_ITEM_HEIGHT = 64;
 
@@ -24,10 +26,10 @@ type PlaylistProps = {
 
 const Playlist = ({ player, listRef }: PlaylistProps) => {
   const { handleSurahPress, playlistData, selectedSurah } = player;
-  const isDark = useColorScheme() !== "light";
+  const isDark = useColorScheme() !== 'light';
   const { i18n } = useTranslation();
-  
-  const isArabic = i18n.language === "ar";
+
+  const isArabic = i18n.language === 'ar';
   const styles = createStyles(isDark);
 
   const memoizedData = useMemo(() => playlistData, [playlistData]);
@@ -43,7 +45,7 @@ const Playlist = ({ player, listRef }: PlaylistProps) => {
     if (index >= 0 && listRef.current) {
       listRef.current.focus(index);
     }
-  }, [memoizedData, selectedSurah]);
+  }, [listRef, memoizedData, selectedSurah]);
 
   const renderItem = ({ item }: { item: (typeof memoizedData)[0] }) => (
     <SpatialNavigationFocusableView
@@ -68,7 +70,6 @@ const Playlist = ({ player, listRef }: PlaylistProps) => {
                 styles.surahNumberWrapper,
                 showFocus && styles.surahNumberWrapperFocused,
                 isActive && styles.surahNumberWrapperSelected,
-
               ]}
             >
               <Text
@@ -124,22 +125,22 @@ function createStyles(isDark: boolean) {
     playlistPanel: {
       backgroundColor: cardBg,
       borderRadius: 12,
-      height: "100%",
+      height: '100%',
       marginLeft: 12,
-      overflow: "hidden",
+      overflow: 'hidden',
       width: 320,
     },
     playlistHeaderRow: {
-      alignItems: "center",
-      flexDirection: "row",
-      justifyContent: "space-between",
+      alignItems: 'center',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
       paddingHorizontal: 16,
       paddingVertical: 10,
     },
     playlistTitle: {
       color: textPrimary,
       fontSize: 14,
-      fontWeight: "600",
+      fontWeight: '600',
     },
     playlistBody: {
       flex: 1,
@@ -150,12 +151,12 @@ function createStyles(isDark: boolean) {
     },
 
     surahCard: {
-      alignItems: "center",
+      alignItems: 'center',
       backgroundColor: cardBg,
-      flexDirection: "row",
+      flexDirection: 'row',
       height: SURAH_ITEM_HEIGHT,
       paddingHorizontal: 8,
-      width: "100%",
+      width: '100%',
     },
     surahCardFocused: {
       backgroundColor: isDark ? colorPrimaryDark : colorPrimaryLight,
@@ -168,14 +169,14 @@ function createStyles(isDark: boolean) {
 
     // Number wrapper
     surahNumberWrapper: {
-      alignItems: "center",
+      alignItems: 'center',
       height: 28,
-      justifyContent: "center",
+      justifyContent: 'center',
       marginRight: 10,
       width: 28,
     },
     surahNumberWrapperFocused: {
-      backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+      backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
       borderRadius: 14,
     },
     surahNumberWrapperSelected: {
@@ -184,22 +185,22 @@ function createStyles(isDark: boolean) {
     },
 
     surahCardArabic: {
-      flexDirection: "row-reverse",
+      flexDirection: 'row-reverse',
     },
 
     // Number text
     surahNumber: {
       fontSize: 12,
-      fontWeight: "500",
+      fontWeight: '500',
       color: textSecondary,
-      textAlign: "center",
+      textAlign: 'center',
     },
     surahNumberFocused: {
       color: colorPrimary,
     },
     surahNumberSelected: {
       color: textSecondary,
-      fontWeight: "600",
+      fontWeight: '600',
     },
 
     // Surah name

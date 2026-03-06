@@ -4,14 +4,16 @@ import React, {
   useContext,
   useEffect,
   useState,
-} from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+} from 'react';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import {
   subscribeToFavoriteCounts,
   syncFavorite,
-} from "../services/gun-service";
+} from '../services/gun-service';
 
-const FAVORITES_STORAGE_KEY = "@open_tarteel_favorites";
+const FAVORITES_STORAGE_KEY = '@open_tarteel_favorites';
 
 type FavoritesContextValue = {
   favorites: string[];
@@ -25,7 +27,7 @@ const FavoritesContext = createContext<FavoritesContextValue | null>(null);
 export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [favoriteCounts, setFavoriteCounts] = useState<Record<string, number>>(
-    {}
+    {},
   );
 
   /* load once */
@@ -48,7 +50,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
 
   const isFavorited = useCallback(
     (id: string) => favorites.includes(id),
-    [favorites]
+    [favorites],
   );
 
   const toggleFavorite = useCallback(
@@ -62,13 +64,13 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       setFavorites(updated);
       await AsyncStorage.setItem(
         FAVORITES_STORAGE_KEY,
-        JSON.stringify(updated)
+        JSON.stringify(updated),
       );
 
       // side-effect only
       syncFavorite(id, !isFav);
     },
-    [favorites]
+    [favorites],
   );
 
   return (
@@ -89,7 +91,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
 export function useFavorites() {
   const ctx = useContext(FavoritesContext);
   if (!ctx) {
-    throw new Error("useFavorites must be used within FavoritesProvider");
+    throw new Error('useFavorites must be used within FavoritesProvider');
   }
   return ctx;
 }

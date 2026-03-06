@@ -4,11 +4,13 @@ import React, {
   useContext,
   useEffect,
   useState,
-} from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { LinkSource } from "../types";
+} from 'react';
 
-const SETTINGS_STORAGE_KEY = "@open_tarteel_settings";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { LinkSource } from '../types';
+
+const SETTINGS_STORAGE_KEY = '@open_tarteel_settings';
 
 type SettingsContextValue = {
   enabledSources: Record<string, boolean>;
@@ -19,7 +21,7 @@ type SettingsContextValue = {
 const SettingsContext = createContext<SettingsContextValue | null>(null);
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
-  // Default all sources to true initially
+  // Default source enablement (MP3QURAN enabled, ITQAN disabled)
   const [enabledSources, setEnabledSources] = useState<Record<string, boolean>>(
     {
       [LinkSource.MP3QURAN]: true,
@@ -85,7 +87,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 export function useSettings() {
   const ctx = useContext(SettingsContext);
   if (!ctx) {
-    throw new Error("useSettings must be used within SettingsProvider");
+    throw new Error('useSettings must be used within SettingsProvider');
   }
   return ctx;
 }

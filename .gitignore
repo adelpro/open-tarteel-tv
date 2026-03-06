@@ -1,12 +1,9 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
-
-# dependencies
 node_modules/
-
-# Expo
 .expo/
 dist/
-web-build/
+npm-debug.*
+
+# Expo
 expo-env.d.ts
 
 # Native
@@ -25,7 +22,6 @@ build_log.*
 .metro-health-check*
 
 # debug
-npm-debug.*
 yarn-debug.*
 yarn-error.*
 
@@ -45,3 +41,23 @@ yarn-error.*
 
 # local builds
 builds/
+
+# Firebase
+firebase.json
+google-services.json
+.firebase
+firebase-debug.log
+firebase-debug.*.log
+
+# VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# GitHub Copilot
+.github/copilot-instructions.md
+
+.eslintcache

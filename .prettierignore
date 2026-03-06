@@ -1,0 +1,9 @@
+dist/
+android/
+ios/
+node_modules/
+.expo/
+*.lock
+package-lock.json
+yarn.lock
+.agent/

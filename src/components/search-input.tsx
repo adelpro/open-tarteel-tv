@@ -1,16 +1,18 @@
-import React, { memo, useMemo, useRef, useState } from "react";
-import { StyleSheet, TextInput, useWindowDimensions, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { SpatialNavigationFocusableView } from "react-tv-space-navigation";
-import { useTranslation } from "react-i18next";
+import React, { memo, useMemo, useRef, useState } from 'react';
+import { StyleSheet, TextInput, useWindowDimensions, View } from 'react-native';
+
+import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
+import { SpatialNavigationFocusableView } from 'react-tv-space-navigation';
+
 import {
   colorPrimary,
   colorPrimaryDark,
   colorPrimaryLight,
   colorPrimaryTint,
   focusScale,
-} from "../constants/interaction-colors";
-import { getThemeColors } from "../constants/theme";
+} from '../constants/interaction-colors';
+import { getThemeColors } from '../constants/theme';
 
 type SearchInputProps = {
   value: string;
@@ -42,9 +44,9 @@ const SearchInput = ({
       StyleSheet.create({
         searchContainer: {
           marginBottom: 16,
-          alignItems: "center",
+          alignItems: 'center',
           paddingHorizontal: 20,
-          width: "100%",
+          width: '100%',
         },
         searchInput: {
           backgroundColor: cardBg,
@@ -56,14 +58,14 @@ const SearchInput = ({
           fontSize: 16,
         },
         searchInputContainer: {
-          flexDirection: "row",
-          alignItems: "center",
+          flexDirection: 'row',
+          alignItems: 'center',
           backgroundColor: cardBg,
           borderRadius: 8,
           borderWidth: 2,
           borderColor: border,
           paddingHorizontal: 8,
-          width: "100%",
+          width: '100%',
           marginBottom: 16,
         },
         searchInputIcon: {
@@ -107,8 +109,8 @@ const SearchInput = ({
               onFocusChange?.(false);
             }}
             showSoftInputOnFocus
-            placeholder={t("search_placeholder")}
-            placeholderTextColor={isDark ? "#888" : "#999"}
+            placeholder={t('search_placeholder')}
+            placeholderTextColor={isDark ? '#888' : '#999'}
           />
 
           <Ionicons
@@ -118,8 +120,8 @@ const SearchInput = ({
               textFocused || isFocused
                 ? colorPrimary
                 : isDark
-                ? colorPrimaryLight
-                : colorPrimaryDark
+                  ? colorPrimaryLight
+                  : colorPrimaryDark
             }
             style={styles.searchInputIcon}
           />
