@@ -1,8 +1,8 @@
-import React, { useCallback } from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { useTranslation } from 'react-i18next';
-import { SpatialNavigationVirtualizedGrid } from 'react-tv-space-navigation';
+import { SpatialNavigationView } from 'react-tv-space-navigation';
 
 import ReciterCard from './reciter-card';
 import { useItemHeight } from '../hooks/ise-item-height';
@@ -22,6 +22,9 @@ const styles = StyleSheet.create({
   item: {
     overflow: 'visible',
   },
+  row: {
+    flexDirection: 'row',
+  },
 });
 
 export default function SectionRecitersGrid({
@@ -37,51 +40,51 @@ export default function SectionRecitersGrid({
   const { i18n } = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
 
-  const renderItem = useCallback(
-    ({ item, index }: { item: Reciter; index: number }) => (
-      <View
-        style={[
-          styles.item,
-          {
-            width: itemWidth,
-            height: itemHeight,
-            marginHorizontal: 4,
-            marginVertical: 8,
-          },
-        ]}
-      >
-        <ReciterCard
-          key={`view-${item.id}-${index}`}
-          reciter={item}
-          preferredFocus={preferredFirstFocus && index === 0}
-          onPress={onReciterPress}
-          viewCount={viewCounts[item.id.toString()]}
-          favoriteCount={favoriteCounts[item.id.toString()]}
-        />
-      </View>
-    ),
-    [
-      favoriteCounts,
-      itemHeight,
-      itemWidth,
-      onReciterPress,
-      preferredFirstFocus,
-      viewCounts,
-    ],
-  );
+  // Group reciters into rows so the outer SpatialNavigationScrollView
+  // can scroll natively to each row without any transform conflict.
+  const rows = useMemo(() => {
+    const result: Reciter[][] = [];
+    for (let i = 0; i < reciters.length; i += cardsPerRow) {
+      result.push(reciters.slice(i, i + cardsPerRow));
+    }
+    return result;
+  }, [reciters, cardsPerRow]);
 
   return (
-    <SpatialNavigationVirtualizedGrid<Reciter>
-      data={reciters}
-      style={{
-        width: '100%',
-        direction: isRTL ? 'rtl' : 'ltr',
-        flexDirection: isRTL ? 'row-reverse' : 'row',
-      }}
-      numberOfColumns={cardsPerRow}
-      itemHeight={itemHeight + 16}
-      renderItem={renderItem}
-      rowContainerStyle={{}}
-    />
+    <SpatialNavigationView direction="vertical">
+      {rows.map((row, rowIndex) => (
+        <SpatialNavigationView
+          key={rowIndex}
+          direction="horizontal"
+          style={{ flexDirection: isRTL ? 'row-reverse' : 'row' }}
+        >
+          {row.map((reciter, colIndex) => {
+            const globalIndex = rowIndex * cardsPerRow + colIndex;
+            return (
+              <View
+                key={`${rowIndex}-${colIndex}`}
+                style={[
+                  styles.item,
+                  {
+                    width: itemWidth,
+                    height: itemHeight,
+                    marginHorizontal: 4,
+                    marginVertical: 8,
+                  },
+                ]}
+              >
+                <ReciterCard
+                  reciter={reciter}
+                  preferredFocus={preferredFirstFocus && globalIndex === 0}
+                  onPress={onReciterPress}
+                  viewCount={viewCounts[reciter.id.toString()]}
+                  favoriteCount={favoriteCounts[reciter.id.toString()]}
+                />
+              </View>
+            );
+          })}
+        </SpatialNavigationView>
+      ))}
+    </SpatialNavigationView>
   );
 }

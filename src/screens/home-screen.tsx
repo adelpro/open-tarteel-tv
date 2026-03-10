@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   StyleSheet,
   Text,
-  useColorScheme,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -45,13 +44,11 @@ export default function HomeScreen() {
   const [error, setError] = useState<string | null>(null);
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme !== 'light';
   const { width } = useWindowDimensions();
   const { viewCounts } = useViewCounts();
   const { favoriteCounts } = useFavorites();
   const { recentlyPlayed } = useRecentlyPlayed();
-  const { enabledSources } = useSettings();
+  const { enabledSources, isDark } = useSettings();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRiwaya, setSelectedRiwaya] = useState<Riwaya | 'all'>('all');
@@ -301,6 +298,12 @@ export default function HomeScreen() {
       <SectionTopNav isRTL={isRTL} isDark={isDark} />
       <BrandHeader />
 
+      <SectionFilters
+        selectedRiwaya={selectedRiwaya}
+        onSelectRiwaya={setSelectedRiwaya}
+        isRTL={isRTL}
+      />
+
       <SpatialNavigationScrollView>
         <SpatialNavigationView direction="vertical">
           <SearchInput
@@ -362,12 +365,6 @@ export default function HomeScreen() {
             isVeryWide={isVeryWide}
             isWide={isWide}
             textPrimary={textPrimary}
-          />
-
-          <SectionFilters
-            selectedRiwaya={selectedRiwaya}
-            onSelectRiwaya={setSelectedRiwaya}
-            isRTL={isRTL}
           />
 
           {filteredReciters.length > 0 ? (
