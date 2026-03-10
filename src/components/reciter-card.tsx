@@ -2,7 +2,6 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  useColorScheme,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -22,6 +21,7 @@ import {
 } from '../constants/interaction-colors';
 import { getThemeColors } from '../constants/theme';
 import { useRecentlyPlayed } from '../context/recently-played.context';
+import { useSettings } from '../context/settings.context';
 import { useItemHeight } from '../hooks/ise-item-height';
 
 type ReciterCardProps = {
@@ -49,8 +49,7 @@ const ReciterCard = ({
   const { itemHeight } = useItemHeight();
   const { i18n, t } = useTranslation();
   const { recentlyPlayed } = useRecentlyPlayed();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme !== 'light';
+  const { isDark } = useSettings();
   const { textPrimary, textSecondary, cardBg, border } = getThemeColors(isDark);
   const { width } = useWindowDimensions();
   const isRTL = i18n.dir() === 'rtl';

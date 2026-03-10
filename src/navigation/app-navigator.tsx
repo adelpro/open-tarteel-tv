@@ -1,4 +1,4 @@
-import { useColorScheme, useTVEventHandler } from 'react-native';
+import { useTVEventHandler } from 'react-native';
 
 import {
   createNavigationContainerRef,
@@ -12,6 +12,7 @@ import {
   SpatialNavigationRoot,
 } from 'react-tv-space-navigation';
 
+import { useSettings } from '../context/settings.context';
 import AboutScreen from '../screens/about-screen';
 import HomeScreen from '../screens/home-screen';
 import PlayerScreen from '../screens/player-screen';
@@ -77,8 +78,7 @@ export default function AppNavigator() {
   const { t, i18n } = useTranslation();
 
   const isRTL = i18n.language === 'ar';
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme !== 'light';
+  const { isDark } = useSettings();
   useTVEventHandler((evt: any) => {
     const type = evt?.eventType as string | undefined;
     const cb = onTvEvent;

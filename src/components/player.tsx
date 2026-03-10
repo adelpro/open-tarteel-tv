@@ -1,11 +1,5 @@
 import React, { memo, useMemo } from 'react';
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { FontAwesome } from '@expo/vector-icons';
 import {
@@ -20,6 +14,7 @@ import {
 } from '../constants/interaction-colors';
 import { getThemeColors } from '../constants/theme';
 import { useFavorites } from '../context/favorites.context';
+import { useSettings } from '../context/settings.context';
 import type { PlayerState } from '../hooks/use-player';
 
 const isArabicText = (text: string) => /[\u0600-\u06FF]/.test(text);
@@ -27,7 +22,7 @@ const isArabicText = (text: string) => /[\u0600-\u06FF]/.test(text);
 type PlayerProps = { player: PlayerState };
 
 export const Player = ({ player }: PlayerProps) => {
-  const isDark = useColorScheme() !== 'light';
+  const { isDark } = useSettings();
   const styles = createStyles(isDark);
   const { isFavorited, toggleFavorite } = useFavorites();
 

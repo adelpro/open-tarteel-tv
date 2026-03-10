@@ -5,22 +5,31 @@ import React, {
   useEffect,
   useState,
 } from 'react';
+import { useColorScheme } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { LinkSource } from '../types';
 
 const SETTINGS_STORAGE_KEY = '@open_tarteel_settings';
+const THEME_STORAGE_KEY = '@open_tarteel_theme';
+
+export type ThemeMode = 'system' | 'light' | 'dark';
 
 type SettingsContextValue = {
   enabledSources: Record<string, boolean>;
   isSourceEnabled: (source: string) => boolean;
   toggleSource: (source: string) => Promise<void>;
+  themeMode: ThemeMode;
+  setThemeMode: (mode: ThemeMode) => void;
+  isDark: boolean;
 };
 
 const SettingsContext = createContext<SettingsContextValue | null>(null);
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
+  const systemColorScheme = useColorScheme();
+
   // Default source enablement (MP3QURAN enabled, ITQAN disabled)
   const [enabledSources, setEnabledSources] = useState<Record<string, boolean>>(
     {
@@ -28,6 +37,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       [LinkSource.ITQAN]: false,
     },
   );
+  const [themeMode, setThemeModeState] = useState<ThemeMode>('system');
 
   /* load once */
   useEffect(() => {
@@ -40,7 +50,25 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         }
       })
       .catch(() => {});
+
+    AsyncStorage.getItem(THEME_STORAGE_KEY)
+      .then((stored) => {
+        if (stored === 'light' || stored === 'dark' || stored === 'system') {
+          setThemeModeState(stored);
+        }
+      })
+      .catch(() => {});
   }, []);
+
+  const setThemeMode = useCallback((mode: ThemeMode) => {
+    setThemeModeState(mode);
+    AsyncStorage.setItem(THEME_STORAGE_KEY, mode).catch(() => {});
+  }, []);
+
+  const isDark =
+    themeMode === 'system'
+      ? systemColorScheme !== 'light'
+      : themeMode === 'dark';
 
   const isSourceEnabled = useCallback(
     (source: string) => {
@@ -76,6 +104,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         enabledSources,
         isSourceEnabled,
         toggleSource,
+        themeMode,
+        setThemeMode,
+        isDark,
       }}
     >
       {children}

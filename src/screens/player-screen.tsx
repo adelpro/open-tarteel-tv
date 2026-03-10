@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { StyleSheet, Text, useColorScheme, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import {
   SpatialNavigationView,
@@ -10,12 +10,12 @@ import Playlist from '../components/play-list';
 import PlayerComponent from '../components/player';
 import { getThemeColors } from '../constants/theme';
 import { useRecentlyPlayed } from '../context/recently-played.context';
+import { useSettings } from '../context/settings.context';
 import { usePlayer } from '../hooks/use-player';
 import { useViewCounts } from '../hooks/use-view-counts';
 
 export default function PlayerScreen() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme !== 'light';
+  const { isDark } = useSettings();
   const styles = createStyles(isDark);
   const playlistRef = useRef<SpatialNavigationVirtualizedListRef | null>(null);
 
