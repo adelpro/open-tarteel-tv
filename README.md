@@ -5,9 +5,34 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
+[![Athar](https://img.shields.io/static/v1?label=Athar&message=%F0%9F%8C%99&color=blue)](https://community.itqan.dev/d/256/6)
 
 Open Tarteel TV is a modern, open-source TV app for browsing and listening to Quran recitations on TV platforms (Android TV, tvOS).  
 It focuses on a simple, beautiful, and remote-friendly experience.
+
+---
+
+## Table of Contents
+
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#1-prerequisites)
+  - [Install Packages](#2-install-packages)
+  - [Run on Android TV](#3-run-on-android-tv)
+  - [Run on tvOS](#4-run-on-tvos)
+- [Development Setup](#development-setup)
+  - [Android TV Emulator](#android-tv-emulator)
+  - [tvOS Simulator](#tvos-simulator-macos-only)
+  - [Remote Control Navigation](#remote-control-navigation)
+  - [Available Scripts](#available-scripts)
+- [Project Structure](#project-structure)
+- [Internationalization (i18n)](#internationalization-i18n)
+- [TV Navigation](#tv-navigation)
+- [Testing](#testing)
+- [Contributing](#contributing)
+- [License](#license)
+- [Acknowledgements](#acknowledgements)
 
 ---
 
@@ -83,10 +108,13 @@ This section explains how to set up TV emulators and simulators for local develo
 4. Choose a system image with **API 34+** (recommended: API 34 with Google APIs)
 5. Finish the wizard and launch the emulator
 6. Generate the native Android TV project:
+
    ```bash
    yarn prebuild:tv:android
    ```
+
 7. Run the app on the emulator:
+
    ```bash
    yarn run:tv:android
    ```
@@ -99,10 +127,13 @@ This section explains how to set up TV emulators and simulators for local develo
 2. Open Xcode → **Settings → Platforms** → install the **tvOS** simulator runtime
 3. Open **Simulator.app** → **File → Open Simulator → tvOS** → choose a device (e.g., "Apple TV 4K")
 4. Generate the native tvOS project:
+
    ```bash
    yarn prebuild:tv:ios
    ```
+
 5. Run the app on the simulator:
+
    ```bash
    yarn run:tv:ios
    ```
@@ -236,4 +267,11 @@ See the full text in [`LICENSE`](./LICENSE).
 ## Acknowledgements
 
 - The TV-specific React Native support provided by the `react-native-tvos` community
-- The broader React Native and Expo ecosystems
+- The broader React Native and Expo ecosystems for their tools and libraries
+- Special thanks to the [ITQAN Community](https://community.itqan.dev) for their support and contribution to the Quran technology ecosystem.
+
+<p align="center">
+  <a href="https://itqan.dev">
+    <img src="https://itqan.dev/logo.svg" alt="ITQAN Community Logo" width="150" />
+  </a>
+</p>

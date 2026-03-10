@@ -1,6 +1,6 @@
 {
   "name": "open-tarteel-tv",
-  "version": "1.4.0",
+  "version": "2.0.0-athar",
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
