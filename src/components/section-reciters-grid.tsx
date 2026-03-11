@@ -7,6 +7,8 @@ import type { Reciter } from "../types";
 import { useItemHeight } from "../hooks/ise-item-height";
 import { useTranslation } from "react-i18next";
 
+const GRID_ROW_GAP = 15;
+
 type SectionRecitersGridProps = {
   reciters: Reciter[];
   cardsPerRow: number;
@@ -36,7 +38,7 @@ export default function SectionRecitersGrid({
   const { i18n } = useTranslation();
   const isRTL = i18n.dir() === "rtl";
 
-  const gridItemHeight = itemHeight + 15;
+  const gridItemHeight = itemHeight + GRID_ROW_GAP;
 
   const renderItem = useCallback(
     ({ item, index }: { item: Reciter; index: number }) => (
