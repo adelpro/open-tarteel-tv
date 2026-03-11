@@ -20,10 +20,9 @@ import {
   colorPrimaryLight,
   focusScale,
 } from '../constants/interaction-colors';
-
-import { useItemHeight } from '../hooks/ise-item-height';
-import { useRecentlyPlayed } from '../context/recently-played.context';
 import { getThemeColors } from '../constants/theme';
+import { useRecentlyPlayed } from '../context/recently-played.context';
+import { useItemHeight } from '../hooks/ise-item-height';
 
 type ReciterCardProps = {
   reciter: Reciter;

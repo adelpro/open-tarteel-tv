@@ -2,13 +2,15 @@ import React, { useMemo } from 'react';
 import {
   StyleSheet,
   Text,
-  View,
   useColorScheme,
   useWindowDimensions,
+  View,
 } from 'react-native';
+
 import { Ionicons } from '@expo/vector-icons';
-import { getThemeColors } from '../constants/theme';
+
 import { colorPrimary } from '../constants/interaction-colors';
+import { getThemeColors } from '../constants/theme';
 
 type EmptyStateProps = {
   icon: keyof typeof Ionicons.glyphMap;
