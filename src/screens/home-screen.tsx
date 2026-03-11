@@ -18,6 +18,7 @@ import {
 } from 'react-tv-space-navigation';
 
 import BrandHeader from '../components/brand-header';
+import EmptyState from '../components/empty-state';
 import RetryButton from '../components/retry-button';
 import SearchInput from '../components/search-input';
 import SectionFeatured from '../components/section-featured';
@@ -27,14 +28,13 @@ import SectionTopNav from '../components/section-top-nav';
 import { colorPrimary } from '../constants/interaction-colors';
 import { getThemeColors } from '../constants/theme';
 import { useFavorites } from '../context/favorites.context';
+import { useRecentlyPlayed } from '../context/recently-played.context';
 import { useSettings } from '../context/settings.context';
 import { useReciterGridLayout } from '../hooks/use-reciter-grid-layout';
 import { useViewCounts } from '../hooks/use-view-counts';
 import { getAllReciters } from '../services/api';
 import { Reciter, Riwaya } from '../types';
 import { normalizeSearchText } from '../utils/search';
-import EmptyState from '../components/empty-state';
-import { useRecentlyPlayed } from '../context/recently-played.context';
 
 export default function HomeScreen() {
   const { t, i18n } = useTranslation();
