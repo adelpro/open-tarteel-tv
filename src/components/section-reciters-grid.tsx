@@ -46,6 +46,7 @@ export default function SectionRecitersGrid({
             width: itemWidth,
             height: itemHeight,
             marginHorizontal: 4,
+            marginVertical: 8,
           },
         ]}
       >
@@ -78,7 +79,7 @@ export default function SectionRecitersGrid({
         flexDirection: isRTL ? 'row-reverse' : 'row',
       }}
       numberOfColumns={cardsPerRow}
-      itemHeight={itemHeight}
+      itemHeight={itemHeight + 16}
       renderItem={renderItem}
       rowContainerStyle={{}}
     />

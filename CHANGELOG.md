@@ -15,12 +15,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - add adapters for multiple recitations sources and make it reusable (Itqan and MP3Quran)
 - add ascript tp buildthe app for android locally
 - add virtualized grid to fast load reciters list and optimize performance
+- Integrate EmptyState component into HomeScreen for improved empty state handling in reciters and search results
+- Add search results localization for Arabic and English
+- Add GitHub workflows for greeting and package manager detection
 
 ### Fixed
 
 - fixed reciters names in playlist for arabic language
 - fixed layout and navigation for android tv
 - fixed eng reciter cards display
+- Add vertical gap between reciter cards in home grid
+
+### Changed
+
+- Switch from npm to yarn as package manager
 
 ## [1.3.0]
 
