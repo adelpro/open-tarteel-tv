@@ -23,8 +23,6 @@ const styles = StyleSheet.create({
   },
 });
 
-const ITEM_HEIGHT = 120; // must be stable for virtualization
-
 export default function SectionRecitersGrid({
   reciters,
   cardsPerRow,
@@ -37,6 +35,8 @@ export default function SectionRecitersGrid({
   const { itemHeight } = useItemHeight();
   const { i18n } = useTranslation();
   const isRTL = i18n.dir() === "rtl";
+
+  const gridItemHeight = itemHeight + 15;
 
   const renderItem = useCallback(
     ({ item, index }: { item: Reciter; index: number }) => (
@@ -62,6 +62,7 @@ export default function SectionRecitersGrid({
     ),
     [
       favoriteCounts,
+      itemHeight,
       itemWidth,
       onReciterPress,
       preferredFirstFocus,
@@ -78,7 +79,7 @@ export default function SectionRecitersGrid({
         flexDirection: isRTL ? "row-reverse" : "row",
       }}
       numberOfColumns={cardsPerRow}
-      itemHeight={ITEM_HEIGHT}
+      itemHeight={gridItemHeight}
       renderItem={renderItem}
       rowContainerStyle={{}}
     />
