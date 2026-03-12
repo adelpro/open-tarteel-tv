@@ -60,4 +60,7 @@ firebase-debug.*.log
 # GitHub Copilot
 .github/copilot-instructions.md
 
+# Yarn
+.yarn/
+
 .eslintcache

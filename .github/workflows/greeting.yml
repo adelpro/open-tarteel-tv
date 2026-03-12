@@ -13,14 +13,14 @@ jobs:
       issues: write
       pull-requests: write
     steps:
-      - name: Greet on PR
-        if: github.event_name == 'pull_request'
+      - name: Greet PR
         uses: actions/first-interaction@v1
+        if: github.event_name == 'pull_request'
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Greet on Issue
-        if: github.event_name == 'issues'
+      - name: Greet Issue
         uses: actions/first-interaction@v1
+        if: github.event_name == 'issues'
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
