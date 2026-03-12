@@ -52,8 +52,10 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: yarn
 
-      - name: Enable Corepack
-        run: corepack enable
+      - name: Enable Corepack and Yarn
+        run: |
+          corepack enable
+          corepack prepare yarn@4.13.0 --activate
 
       - name: Install dependencies
         run: yarn install --immutable
