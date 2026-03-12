@@ -6,10 +6,10 @@ import {
   SpatialNavigationVirtualizedListRef,
 } from 'react-tv-space-navigation';
 
-import { useRecentlyPlayed } from '../context/recently-played.context';
 import Playlist from '../components/play-list';
 import PlayerComponent from '../components/player';
 import { getThemeColors } from '../constants/theme';
+import { useRecentlyPlayed } from '../context/recently-played.context';
 import { usePlayer } from '../hooks/use-player';
 import { useViewCounts } from '../hooks/use-view-counts';
 

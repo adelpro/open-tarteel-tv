@@ -1,14 +1,16 @@
-import React, { useMemo } from "react";
+import React, { useMemo } from 'react';
 import {
   StyleSheet,
   Text,
-  View,
   useColorScheme,
   useWindowDimensions,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { getThemeColors } from "../constants/theme";
-import { colorPrimary } from "../constants/interaction-colors";
+  View,
+} from 'react-native';
+
+import { Ionicons } from '@expo/vector-icons';
+
+import { colorPrimary } from '../constants/interaction-colors';
+import { getThemeColors } from '../constants/theme';
 
 type EmptyStateProps = {
   icon: keyof typeof Ionicons.glyphMap;
@@ -18,7 +20,7 @@ type EmptyStateProps = {
 
 export default function EmptyState({ icon, title, message }: EmptyStateProps) {
   const colorScheme = useColorScheme();
-  const isDark = colorScheme !== "light";
+  const isDark = colorScheme !== 'light';
   const { width } = useWindowDimensions();
   const { textPrimary, textSecondary } = getThemeColors(isDark);
 
@@ -31,8 +33,8 @@ export default function EmptyState({ icon, title, message }: EmptyStateProps) {
     () =>
       StyleSheet.create({
         container: {
-          alignItems: "center",
-          justifyContent: "center",
+          alignItems: 'center',
+          justifyContent: 'center',
           paddingVertical: isVeryWide ? 60 : isWide ? 48 : 40,
           paddingHorizontal: 40,
         },
@@ -41,29 +43,29 @@ export default function EmptyState({ icon, title, message }: EmptyStateProps) {
           height: iconSize * 2,
           borderRadius: iconSize,
           backgroundColor: isDark
-            ? "rgba(1, 144, 221, 0.1)"
-            : "rgba(1, 144, 221, 0.08)",
-          alignItems: "center",
-          justifyContent: "center",
+            ? 'rgba(1, 144, 221, 0.1)'
+            : 'rgba(1, 144, 221, 0.08)',
+          alignItems: 'center',
+          justifyContent: 'center',
           marginBottom: isVeryWide ? 24 : 16,
         },
         title: {
           fontSize: isVeryWide ? 28 : isWide ? 24 : 20,
-          fontWeight: "700",
+          fontWeight: '700',
           color: textPrimary,
           marginTop: 8,
           marginBottom: 8,
-          textAlign: "center",
+          textAlign: 'center',
         },
         message: {
           fontSize: isVeryWide ? 20 : isWide ? 18 : 16,
           color: textSecondary,
-          textAlign: "center",
+          textAlign: 'center',
           lineHeight: isVeryWide ? 28 : 22,
           maxWidth: 400,
         },
       }),
-    [isDark, width, textPrimary, textSecondary],
+    [isVeryWide, isWide, iconSize, isDark, textPrimary, textSecondary],
   );
 
   return (
