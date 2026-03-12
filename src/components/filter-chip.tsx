@@ -1,11 +1,5 @@
 import React, { memo } from 'react';
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  useWindowDimensions,
-} from 'react-native';
+import { Pressable, StyleSheet, Text, useWindowDimensions } from 'react-native';
 
 import { SpatialNavigationFocusableView } from 'react-tv-space-navigation';
 
@@ -16,6 +10,7 @@ import {
   focusScale,
 } from '../constants/interaction-colors';
 import { getThemeColors } from '../constants/theme';
+import { useSettings } from '../context/settings.context';
 
 type FilterChipProps = {
   label: string;
@@ -24,8 +19,7 @@ type FilterChipProps = {
 };
 
 const FilterChip = ({ label, selected, onPress }: FilterChipProps) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme !== 'light';
+  const { isDark } = useSettings();
   const { textPrimary, cardBg, border } = getThemeColors(isDark);
   const { width } = useWindowDimensions();
   const isVeryWide = width >= 2800;

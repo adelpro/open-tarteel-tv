@@ -1,16 +1,11 @@
 import React, { useMemo } from 'react';
-import {
-  StyleSheet,
-  Text,
-  useColorScheme,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
 
 import { colorPrimary } from '../constants/interaction-colors';
 import { getThemeColors } from '../constants/theme';
+import { useSettings } from '../context/settings.context';
 
 type EmptyStateProps = {
   icon: keyof typeof Ionicons.glyphMap;
@@ -19,8 +14,7 @@ type EmptyStateProps = {
 };
 
 export default function EmptyState({ icon, title, message }: EmptyStateProps) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme !== 'light';
+  const { isDark } = useSettings();
   const { width } = useWindowDimensions();
   const { textPrimary, textSecondary } = getThemeColors(isDark);
 

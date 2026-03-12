@@ -1,5 +1,5 @@
 import React, { memo, useEffect, useMemo } from 'react';
-import { StyleSheet, Text, useColorScheme, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { useTranslation } from 'react-i18next';
 import {
@@ -15,6 +15,7 @@ import {
   colorPrimaryLight,
 } from '../constants/interaction-colors';
 import { getThemeColors } from '../constants/theme';
+import { useSettings } from '../context/settings.context';
 import type { PlayerState } from '../hooks/use-player';
 
 const SURAH_ITEM_HEIGHT = 64;
@@ -26,7 +27,7 @@ type PlaylistProps = {
 
 const Playlist = ({ player, listRef }: PlaylistProps) => {
   const { handleSurahPress, playlistData, selectedSurah } = player;
-  const isDark = useColorScheme() !== 'light';
+  const { isDark } = useSettings();
   const { i18n } = useTranslation();
 
   const isArabic = i18n.language === 'ar';

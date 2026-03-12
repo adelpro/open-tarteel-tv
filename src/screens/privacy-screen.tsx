@@ -1,21 +1,15 @@
 import React from 'react';
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useTranslation } from 'react-i18next';
 
 import { getThemeColors } from '../constants/theme';
+import { useSettings } from '../context/settings.context';
 
 export default function PrivacyScreen() {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme !== 'light';
+  const { isDark } = useSettings();
   const { textPrimary, textSecondary, border, cardBg } = getThemeColors(isDark);
 
   const styles = StyleSheet.create({
