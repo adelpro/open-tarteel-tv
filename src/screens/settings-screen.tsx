@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { I18nManager, StyleSheet, Text, View } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
@@ -36,6 +36,7 @@ const SettingsScreen = () => {
   const { isSourceEnabled, toggleSource, isDark, themeMode, setThemeMode } =
     useSettings();
   const { bg, textPrimary, textSecondary, cardBg } = getThemeColors(isDark);
+  const isRTL = I18nManager.isRTL;
 
   // When this screen becomes active, steal focus from whatever was focused before
   useEffect(() => {
@@ -52,6 +53,7 @@ const SettingsScreen = () => {
       flex: 1,
       backgroundColor: bg,
       padding: 20,
+      paddingHorizontal: 40,
     },
     title: {
       color: textPrimary,
@@ -59,28 +61,46 @@ const SettingsScreen = () => {
       fontWeight: 'bold',
       marginBottom: 20,
     },
+    rowContainer: {
+      flex: 1,
+      // For RTL spatial engine geometric calculations to be correct with flipped TV hardware events,
+      // we must lay out physically LTR and flip visually to RTL using scaleX.
+      flexDirection: 'row',
+      transform: isRTL ? [{ scaleX: -1 }] : [],
+    },
+    column: {
+      flex: 1,
+      paddingRight: isRTL ? 0 : 40,
+      paddingLeft: isRTL ? 40 : 0,
+      // Counter scale to undo the text/content mirroring
+      transform: isRTL ? [{ scaleX: -1 }] : [],
+    },
+    lastColumn: {
+      flex: 1,
+      transform: isRTL ? [{ scaleX: -1 }] : [],
+    },
     section: {
-      marginBottom: 30,
-      padding: 50,
+      marginBottom: 20,
     },
     sectionTitle: {
       color: textSecondary,
       fontSize: 18,
-      marginBottom: 10,
+      marginBottom: 12,
       textTransform: 'uppercase',
+      textAlign: 'left',
     },
     themeRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
       backgroundColor: cardBg,
-      padding: 15,
+      padding: 12,
       paddingHorizontal: 20,
       borderRadius: 8,
       borderWidth: 2,
       borderColor: 'transparent',
       marginBottom: 10,
-      minHeight: 60,
+      minHeight: 50,
     },
     themeRowFocused: {
       backgroundColor: isDark ? colorPrimaryDark : colorPrimaryLight,
@@ -102,51 +122,57 @@ const SettingsScreen = () => {
   return (
     <View style={styles.container}>
       <BrandHeader />
-      <SpatialNavigationView direction="vertical">
-        <Text style={styles.title}>{t('settings')}</Text>
+      <Text style={styles.title}>{t('settings')}</Text>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('theme_appearance')}</Text>
-          {THEME_OPTIONS.map(({ key, labelKey }, index) => (
-            <SpatialNavigationFocusableView
-              key={key}
-              ref={index === 0 ? firstItemRef : undefined}
-              onSelect={() => setThemeMode(key)}
-            >
-              {({ isFocused }) => (
-                <View
-                  style={[
-                    styles.themeRow,
-                    isFocused && styles.themeRowFocused,
-                    themeMode === key && styles.themeRowSelected,
-                  ]}
-                >
-                  <Text style={styles.themeRowLabel}>{t(labelKey)}</Text>
-                  {themeMode === key && (
-                    <Ionicons
-                      name="checkmark-circle"
-                      size={24}
-                      color={colorPrimary}
-                    />
-                  )}
-                </View>
-              )}
-            </SpatialNavigationFocusableView>
-          ))}
-        </View>
+      <SpatialNavigationView direction="horizontal" style={styles.rowContainer}>
+        {/* Column 1: Appearance */}
+        <SpatialNavigationView direction="vertical" style={styles.column}>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('theme_appearance')}</Text>
+            {THEME_OPTIONS.map(({ key, labelKey }, index) => (
+              <SpatialNavigationFocusableView
+                key={key}
+                ref={index === 0 ? firstItemRef : undefined}
+                onSelect={() => setThemeMode(key)}
+              >
+                {({ isFocused }) => (
+                  <View
+                    style={[
+                      styles.themeRow,
+                      isFocused && styles.themeRowFocused,
+                      themeMode === key && styles.themeRowSelected,
+                    ]}
+                  >
+                    <Text style={styles.themeRowLabel}>{t(labelKey)}</Text>
+                    {themeMode === key && (
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={24}
+                        color={colorPrimary}
+                      />
+                    )}
+                  </View>
+                )}
+              </SpatialNavigationFocusableView>
+            ))}
+          </View>
+        </SpatialNavigationView>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('sources_management')}</Text>
-          {sources.map((source) => (
-            <SettingRow
-              key={source}
-              label={t(`source_${source}`)}
-              isEnabled={isSourceEnabled(source)}
-              onToggle={() => toggleSource(source)}
-              isDark={isDark}
-            />
-          ))}
-        </View>
+        {/* Column 2: Sources */}
+        <SpatialNavigationView direction="vertical" style={styles.lastColumn}>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('sources_management')}</Text>
+            {sources.map((source) => (
+              <SettingRow
+                key={source}
+                label={t(`source_${source}`)}
+                isEnabled={isSourceEnabled(source)}
+                onToggle={() => toggleSource(source)}
+                isDark={isDark}
+              />
+            ))}
+          </View>
+        </SpatialNavigationView>
       </SpatialNavigationView>
     </View>
   );
