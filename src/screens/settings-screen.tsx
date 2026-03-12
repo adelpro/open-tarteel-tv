@@ -6,7 +6,6 @@ import { useIsFocused } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import {
   SpatialNavigationFocusableView,
-  SpatialNavigationScrollView,
   SpatialNavigationView,
 } from 'react-tv-space-navigation';
 
@@ -103,54 +102,52 @@ const SettingsScreen = () => {
   return (
     <View style={styles.container}>
       <BrandHeader />
-      <SpatialNavigationScrollView>
-        <SpatialNavigationView direction="vertical">
-          <Text style={styles.title}>{t('settings')}</Text>
+      <SpatialNavigationView direction="vertical">
+        <Text style={styles.title}>{t('settings')}</Text>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t('theme_appearance')}</Text>
-            {THEME_OPTIONS.map(({ key, labelKey }, index) => (
-              <SpatialNavigationFocusableView
-                key={key}
-                ref={index === 0 ? firstItemRef : undefined}
-                onSelect={() => setThemeMode(key)}
-              >
-                {({ isFocused }) => (
-                  <View
-                    style={[
-                      styles.themeRow,
-                      isFocused && styles.themeRowFocused,
-                      themeMode === key && styles.themeRowSelected,
-                    ]}
-                  >
-                    <Text style={styles.themeRowLabel}>{t(labelKey)}</Text>
-                    {themeMode === key && (
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={24}
-                        color={colorPrimary}
-                      />
-                    )}
-                  </View>
-                )}
-              </SpatialNavigationFocusableView>
-            ))}
-          </View>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('theme_appearance')}</Text>
+          {THEME_OPTIONS.map(({ key, labelKey }, index) => (
+            <SpatialNavigationFocusableView
+              key={key}
+              ref={index === 0 ? firstItemRef : undefined}
+              onSelect={() => setThemeMode(key)}
+            >
+              {({ isFocused }) => (
+                <View
+                  style={[
+                    styles.themeRow,
+                    isFocused && styles.themeRowFocused,
+                    themeMode === key && styles.themeRowSelected,
+                  ]}
+                >
+                  <Text style={styles.themeRowLabel}>{t(labelKey)}</Text>
+                  {themeMode === key && (
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={24}
+                      color={colorPrimary}
+                    />
+                  )}
+                </View>
+              )}
+            </SpatialNavigationFocusableView>
+          ))}
+        </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t('sources_management')}</Text>
-            {sources.map((source) => (
-              <SettingRow
-                key={source}
-                label={t(`source_${source}`)}
-                isEnabled={isSourceEnabled(source)}
-                onToggle={() => toggleSource(source)}
-                isDark={isDark}
-              />
-            ))}
-          </View>
-        </SpatialNavigationView>
-      </SpatialNavigationScrollView>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('sources_management')}</Text>
+          {sources.map((source) => (
+            <SettingRow
+              key={source}
+              label={t(`source_${source}`)}
+              isEnabled={isSourceEnabled(source)}
+              onToggle={() => toggleSource(source)}
+              isDark={isDark}
+            />
+          ))}
+        </View>
+      </SpatialNavigationView>
     </View>
   );
 };
