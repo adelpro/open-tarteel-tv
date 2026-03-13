@@ -15,6 +15,7 @@ const ignores = [
   'google-services.json',
   '.firebase',
   '*-lock.json',
+  'yarn.lock',
   '.agent/',
 ];
 

@@ -14,8 +14,8 @@
     "build:tv:android:aab": "cross-env EXPO_TV=1 eas build -p android --profile production",
     "build:tv:android:local": "cross-env EXPO_TV=1 eas build -p android --profile production --local --output ./builds/production-build.aab",
     "build:tv:ios": "cross-env EXPO_TV=1 eas build -p ios --profile production",
-    "lint": "eslint . --cache --concurrency=auto",
-    "lint:fix": "eslint . --fix --cache --concurrency=auto",
+    "lint": "eslint . --cache",
+    "lint:fix": "eslint . --fix --cache",
     "type-check": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -75,7 +75,7 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "eslint --fix --cache --concurrency=auto",
+      "eslint --fix --cache",
       "prettier --write"
     ]
   },
