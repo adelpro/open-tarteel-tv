@@ -38,6 +38,8 @@ export const Player = ({ player }: PlayerProps) => {
     handlePrevious,
     handleNext,
     handleToggleRepeat,
+    handleSeekBackward,
+    handleSeekForward,
   } = player;
 
   const favorited = reciter ? isFavorited(reciter.id.toString()) : false;
@@ -50,11 +52,23 @@ export const Player = ({ player }: PlayerProps) => {
       key: 'backward',
     },
     {
+      icon: 'rotate-left',
+      onSelect: handleSeekBackward,
+      size: 25,
+      key: 'seek-backward',
+    },
+    {
       icon: isPlaying ? 'pause' : 'play',
       onSelect: handlePlayPause,
       size: 28,
       wide: true,
       key: 'play-pause',
+    },
+    {
+      icon: 'rotate-right',
+      onSelect: handleSeekForward,
+      size: 25,
+      key: 'seek-forward',
     },
     { icon: 'step-forward', onSelect: handleNext, size: 28, key: 'forward' },
     {
