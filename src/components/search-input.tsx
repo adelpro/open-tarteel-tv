@@ -65,8 +65,9 @@ const SearchInput = ({
           borderWidth: 2,
           borderColor: border,
           paddingHorizontal: 8,
-          width: '100%',
+          width: `${100 / focusScale}%`,
           marginBottom: 16,
+          alignSelf: 'center',
         },
         searchInputIcon: {
           marginLeft: 10,
@@ -79,7 +80,7 @@ const SearchInput = ({
           transform: [{ scale: focusScale }],
         },
       }),
-    [isDark, isVeryWide, isWide, cardBg, textPrimary, border],
+    [isDark, isVeryWide, isWide, cardBg, textPrimary, border, focusScale],
   );
 
   return (
