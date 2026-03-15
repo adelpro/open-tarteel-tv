@@ -95,6 +95,24 @@ export function usePlayer() {
     }
   }, [selectedSurah, playlistData, handleSurahPress]);
 
+  const handleSeekForward = useCallback(
+    (seconds: number = 10) => {
+      if (!currentUrlRef.current) return;
+      const next = Math.min(player.currentTime + seconds, player.duration);
+      player.seekTo(next);
+    },
+    [player],
+  );
+
+  const handleSeekBackward = useCallback(
+    (seconds: number = 10) => {
+      if (!currentUrlRef.current) return;
+      const prev = Math.max(player.currentTime - seconds, 0);
+      player.seekTo(prev);
+    },
+    [player],
+  );
+
   useEffect(() => {
     onPlaybackEndRef.current = () => {
       if (repeat && selectedSurah) {
@@ -128,6 +146,8 @@ export function usePlayer() {
     handleNext,
     handleToggleRepeat,
     setReciter,
+    handleSeekBackward,
+    handleSeekForward,
   };
 }
 
