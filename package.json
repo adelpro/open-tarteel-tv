@@ -16,6 +16,9 @@
     "build:tv:ios": "cross-env EXPO_TV=1 eas build -p ios --profile production",
     "lint": "eslint . --cache",
     "lint:fix": "eslint . --fix --cache",
+    "test": "vitest run --passWithNoTests",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage --passWithNoTests",
     "type-check": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -59,6 +62,7 @@
     "@react-native-community/cli": "latest",
     "@react-native-tvos/config-tv": "^0.1.4",
     "@types/react": "~19.1.0",
+    "@vitest/coverage-v8": "^4.1.0",
     "commitlint": "^19.4.1",
     "cross-env": "^10.1.0",
     "eslint": "^9.21.0",
@@ -71,7 +75,8 @@
     "husky": "^9.1.5",
     "lint-staged": "^16.2.7",
     "prettier": "^3.3.3",
-    "typescript": "~5.9.2"
+    "typescript": "~5.9.2",
+    "vitest": "^4.1.0"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
