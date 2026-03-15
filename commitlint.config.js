@@ -11,17 +11,17 @@ module.exports = {
       2,
       'always',
       [
-        'feat',
-        'fix',
-        'docs',
-        'style',
-        'refactor',
-        'perf',
-        'test',
-        'chore',
-        'revert',
-        'ci',
-        'wip',
+        'feat', // New feature
+        'fix', // Bug fix
+        'docs', // Documentation only
+        'style', // Code style (formatting, semicolons)
+        'refactor', // Code refactoring
+        'perf', // Performance improvement
+        'test', // Adding/updating tests
+        'chore', // Maintenance/dependencies
+        'revert', // Revert previous commit
+        'ci', // CI/CD changes
+        'wip', // Work in progress
       ],
     ],
   },
