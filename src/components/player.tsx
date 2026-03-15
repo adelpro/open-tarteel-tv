@@ -79,7 +79,7 @@ export const Player = ({ player }: PlayerProps) => {
       key: 'favorite',
     },
     {
-      icon: 'repeat',
+      icon: 'refresh',
       onSelect: handleToggleRepeat,
       size: 22,
       active: repeat,
