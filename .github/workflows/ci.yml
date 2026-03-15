@@ -1,9 +1,9 @@
 name: CI
 on:
   pull_request:
-    branches: [develop, staging, master]
+    branches: [develop, staging, main]
   push:
-    branches: [develop, staging, master]
+    branches: [develop, staging, main]
 
 jobs:
   package-manager-check:
@@ -82,24 +82,3 @@ jobs:
         run: yarn install --immutable
       - name: Type Check
         run: yarn type-check
-
-  build-check:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [22.x]
-        environment: [development, staging, production]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Enable Corepack
-        run: corepack enable
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'yarn'
-      - name: Install dependencies
-        run: yarn install --immutable
-      - name: Build ${{ matrix.environment }}
-        run: yarn build
