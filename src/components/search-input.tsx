@@ -80,7 +80,7 @@ const SearchInput = ({
           transform: [{ scale: focusScale }],
         },
       }),
-    [isDark, isVeryWide, isWide, cardBg, textPrimary, border, focusScale],
+    [isDark, isVeryWide, isWide, cardBg, textPrimary, border],
   );
 
   return (
