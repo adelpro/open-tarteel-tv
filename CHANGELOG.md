@@ -7,7 +7,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+[UNRELEASED]
+
+## [2.0.0-athar] - 2025-12-22
+
+### Fixed
+
+- Dark mode + fix reciters not showing (Mar 12)
+- Ddd vertical gap between reciter cards in home grid (Mar 10)
+- Resolve settings toggler click issue on TV (Feb 22)
+- Use dynamic itemHeight for reciters grid (Feb 19)
+
+### Added
+
+- Improve Search Input Scaling and Alignment for TV
+- Implement TV Player Seeking Functionality
+- Dark mode + fix reciters not showing
+- Implement recently played feature with context and UI integration
+- Enhance search input focus visibility for TV
+- Add empty state illustration for search results
+
+### Changed
+
+- Perf: remove hardcoded timeout from splash screen
+- Docs: add local development environment setup
+
+## [1.4.0]
 
 ### Added
 
