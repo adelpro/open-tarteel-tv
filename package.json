@@ -23,7 +23,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky",
-    "commit": "git-cz"
+    "commit": "git-cz",
+    "postinstall": "expo prebuild --non-interactive || true"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
