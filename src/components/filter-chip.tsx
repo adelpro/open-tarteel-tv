@@ -28,14 +28,14 @@ const FilterChip = ({ label, selected, onPress }: FilterChipProps) => {
   const styles = StyleSheet.create({
     filterChip: {
       backgroundColor: cardBg,
-      paddingVertical: isVeryWide ? 12 : isWide ? 10 : 10,
-      paddingHorizontal: isVeryWide ? 20 : isWide ? 18 : 16,
-      borderRadius: 8,
+      paddingVertical: isVeryWide ? 8 : isWide ? 6 : 6,
+      paddingHorizontal: isVeryWide ? 16 : isWide ? 14 : 12,
+      borderRadius: 6,
       borderWidth: 2,
       borderColor: border,
-      margin: 4,
-      marginRight: 12,
-      marginBottom: 12,
+      margin: 2,
+      marginRight: 8,
+      marginBottom: 4,
     },
     filterChipText: {
       color: textPrimary,

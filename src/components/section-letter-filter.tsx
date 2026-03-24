@@ -30,6 +30,7 @@ const SectionLetterFilter = ({
   const styles = StyleSheet.create({
     row: {
       flexDirection: 'row',
+      direction: 'ltr',
       alignItems: 'center',
       justifyContent: 'flex-start',
       flexWrap: 'wrap',

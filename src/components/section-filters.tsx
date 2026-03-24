@@ -27,7 +27,7 @@ const SectionFilters = ({
       alignItems: 'center',
       justifyContent: 'flex-start',
       flexWrap: 'wrap',
-      marginVertical: 12,
+      marginVertical: 4,
     },
   });
 

@@ -339,19 +339,6 @@ export default function HomeScreen() {
       <SectionTopNav isRTL={isRTL} isDark={isDark} />
       <BrandHeader />
 
-      <SectionFilters
-        selectedRiwaya={selectedRiwaya}
-        onSelectRiwaya={setSelectedRiwaya}
-        isRTL={isRTL}
-      />
-
-      <SectionLetterFilter
-        letters={lettersForCurrentLang}
-        selectedLetter={selectedLetter}
-        onSelectLetter={setSelectedLetter}
-        isRTL={isRTL}
-      />
-
       <SpatialNavigationScrollView>
         <SpatialNavigationView direction="vertical">
           <SearchInput
@@ -359,6 +346,19 @@ export default function HomeScreen() {
             onChangeText={setSearchQuery}
             onFocusChange={setSearchFocused}
             isDark={isDark}
+          />
+
+          <SectionFilters
+            selectedRiwaya={selectedRiwaya}
+            onSelectRiwaya={setSelectedRiwaya}
+            isRTL={isRTL}
+          />
+
+          <SectionLetterFilter
+            letters={lettersForCurrentLang}
+            selectedLetter={selectedLetter}
+            onSelectLetter={setSelectedLetter}
+            isRTL={isRTL}
           />
 
           {recentlyPlayedReciters.length > 0 && (
@@ -417,6 +417,17 @@ export default function HomeScreen() {
 
           {filteredReciters.length > 0 ? (
             <View style={{ marginTop: 20 }}>
+              <Text
+                style={{
+                  color: textPrimary,
+                  fontSize: isVeryWide ? 28 : isWide ? 24 : 20,
+                  fontWeight: '700',
+                  marginBottom: 12,
+                  paddingHorizontal: 20,
+                }}
+              >
+                {t('reciters')} ({filteredReciters.length})
+              </Text>
               <SectionRecitersGrid
                 reciters={filteredReciters}
                 cardsPerRow={cardsPerRow}
