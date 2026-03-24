@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { StyleSheet } from 'react-native';
 
 import { useTranslation } from 'react-i18next';
@@ -21,13 +21,6 @@ const SectionLetterFilter = ({
 }: SectionLetterFilterProps) => {
   const { t } = useTranslation();
 
-  const handleSelect = useCallback(
-    (letter: string | null) => {
-      onSelectLetter(letter === selectedLetter ? null : letter);
-    },
-    [onSelectLetter, selectedLetter],
-  );
-
   const styles = StyleSheet.create({
     row: {
       flexDirection: 'row',
@@ -42,16 +35,19 @@ const SectionLetterFilter = ({
   return (
     <SpatialNavigationView direction="horizontal" style={styles.row}>
       <FilterChip
+        key="__all__"
         label={t('filter_all')}
         selected={selectedLetter === null}
-        onPress={() => handleSelect(null)}
+        onPress={() => onSelectLetter(null)}
       />
       {letters.map((letter) => (
         <FilterChip
           key={letter}
           label={letter}
           selected={selectedLetter === letter}
-          onPress={() => handleSelect(letter)}
+          onPress={() =>
+            onSelectLetter(selectedLetter === letter ? null : letter)
+          }
         />
       ))}
     </SpatialNavigationView>

@@ -33,6 +33,10 @@ import { useSettings } from '../context/settings.context';
 import { useReciterGridLayout } from '../hooks/use-reciter-grid-layout';
 import { useViewCounts } from '../hooks/use-view-counts';
 import { getAllReciters } from '../services/api';
+import {
+  getCachedReciters,
+  setCachedReciters,
+} from '../services/reciters-cache';
 import { Reciter, Riwaya } from '../types';
 import { normalizeArabicLetter, normalizeSearchText } from '../utils/search';
 
@@ -105,9 +109,19 @@ export default function HomeScreen() {
       setLoading(true);
       setError(null);
       try {
-        const data = await getAllReciters(lang, enabledSources);
-        setReciters(data);
-        setError(null);
+        const cachedData = await getCachedReciters(lang);
+        if (cachedData) {
+          setReciters(cachedData);
+          setLoading(false);
+          const freshData = await getAllReciters(lang, enabledSources);
+          setReciters(freshData);
+          await setCachedReciters(freshData, lang);
+        } else {
+          const data = await getAllReciters(lang, enabledSources);
+          setReciters(data);
+          await setCachedReciters(data, lang);
+          setError(null);
+        }
       } catch (err) {
         console.error('Failed to load reciters:', err);
         const errorMsg =

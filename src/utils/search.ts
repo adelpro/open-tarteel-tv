@@ -31,5 +31,9 @@ export const normalizeSearchText = (
 };
 
 export const normalizeArabicLetter = (char: string): string => {
-  return char.replace(/أ|إ|آ/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه');
+  const withoutDiacritics = char.replace(/[\u064B-\u0652\u0640]/g, '');
+  return withoutDiacritics
+    .replace(/أ|إ|آ/g, 'ا')
+    .replace(/ى/g, 'ي')
+    .replace(/ة/g, 'ه');
 };
