@@ -42,7 +42,7 @@ const SectionFeatured = ({
 
   const styles = StyleSheet.create({
     container: {
-      marginBottom: 5,
+      marginBottom: 24,
     },
     contentContainer: {
       height: containerHeight,

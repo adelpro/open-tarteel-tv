@@ -21,6 +21,8 @@
   "recently_played_badge": "Recent",
   "settings": "Settings",
   "sources_management": "Sources Management",
+  "playback_settings": "Playback",
+  "keep_screen_awake": "Keep Screen Awake",
   "theme_appearance": "Appearance",
   "theme_system": "Default",
   "theme_light": "Light",

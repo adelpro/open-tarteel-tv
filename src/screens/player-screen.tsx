@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import {
   SpatialNavigationView,
   SpatialNavigationVirtualizedListRef,
@@ -15,7 +16,7 @@ import { usePlayer } from '../hooks/use-player';
 import { useViewCounts } from '../hooks/use-view-counts';
 
 export default function PlayerScreen() {
-  const { isDark } = useSettings();
+  const { isDark, keepScreenAwake } = useSettings();
   const styles = createStyles(isDark);
   const playlistRef = useRef<SpatialNavigationVirtualizedListRef | null>(null);
 
@@ -40,6 +41,17 @@ export default function PlayerScreen() {
       playlistRef.current?.focus(index);
     }
   }, [playlistData, selectedSurah]);
+
+  useEffect(() => {
+    if (keepScreenAwake) {
+      activateKeepAwakeAsync('player-screen');
+    } else {
+      deactivateKeepAwake('player-screen');
+    }
+    return () => {
+      deactivateKeepAwake('player-screen');
+    };
+  }, [keepScreenAwake]);
 
   if (!reciter) {
     return (

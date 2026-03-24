@@ -33,8 +33,15 @@ const SettingsScreen = () => {
   const { t } = useTranslation();
   const isFocused = useIsFocused();
   const firstItemRef = useRef<SpatialRef | null>(null);
-  const { isSourceEnabled, toggleSource, isDark, themeMode, setThemeMode } =
-    useSettings();
+  const {
+    isSourceEnabled,
+    toggleSource,
+    isDark,
+    themeMode,
+    setThemeMode,
+    keepScreenAwake,
+    toggleKeepScreenAwake,
+  } = useSettings();
   const { bg, textPrimary, textSecondary, cardBg } = getThemeColors(isDark);
   const isRTL = I18nManager.isRTL;
 
@@ -158,8 +165,18 @@ const SettingsScreen = () => {
           </View>
         </SpatialNavigationView>
 
-        {/* Column 2: Sources */}
+        {/* Column 2: Sources & Playback */}
         <SpatialNavigationView direction="vertical" style={styles.lastColumn}>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('playback_settings')}</Text>
+            <SettingRow
+              label={t('keep_screen_awake')}
+              isEnabled={keepScreenAwake}
+              onToggle={toggleKeepScreenAwake}
+              isDark={isDark}
+            />
+          </View>
+
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{t('sources_management')}</Text>
             {sources.map((source) => (

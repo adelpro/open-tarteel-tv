@@ -13,6 +13,7 @@ import { LinkSource } from '../types';
 
 const SETTINGS_STORAGE_KEY = '@open_tarteel_settings';
 const THEME_STORAGE_KEY = '@open_tarteel_theme';
+const KEEP_AWAKE_STORAGE_KEY = '@open_tarteel_keep_awake';
 
 export type ThemeMode = 'system' | 'light' | 'dark';
 
@@ -23,6 +24,8 @@ type SettingsContextValue = {
   themeMode: ThemeMode;
   setThemeMode: (mode: ThemeMode) => void;
   isDark: boolean;
+  keepScreenAwake: boolean;
+  toggleKeepScreenAwake: () => void;
 };
 
 const SettingsContext = createContext<SettingsContextValue | null>(null);
@@ -30,14 +33,14 @@ const SettingsContext = createContext<SettingsContextValue | null>(null);
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const systemColorScheme = useColorScheme();
 
-  // Default source enablement (MP3QURAN enabled, ITQAN disabled)
   const [enabledSources, setEnabledSources] = useState<Record<string, boolean>>(
     {
       [LinkSource.MP3QURAN]: true,
-      [LinkSource.ITQAN]: false,
+      [LinkSource.ITQAN]: true,
     },
   );
   const [themeMode, setThemeModeState] = useState<ThemeMode>('system');
+  const [keepScreenAwake, setKeepScreenAwake] = useState<boolean>(true);
 
   /* load once */
   useEffect(() => {
@@ -58,11 +61,29 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         }
       })
       .catch(() => {});
+
+    AsyncStorage.getItem(KEEP_AWAKE_STORAGE_KEY)
+      .then((stored) => {
+        if (stored !== null) {
+          setKeepScreenAwake(stored === 'true');
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const setThemeMode = useCallback((mode: ThemeMode) => {
     setThemeModeState(mode);
     AsyncStorage.setItem(THEME_STORAGE_KEY, mode).catch(() => {});
+  }, []);
+
+  const toggleKeepScreenAwake = useCallback(() => {
+    setKeepScreenAwake((prev) => {
+      const newValue = !prev;
+      AsyncStorage.setItem(KEEP_AWAKE_STORAGE_KEY, String(newValue)).catch(
+        () => {},
+      );
+      return newValue;
+    });
   }, []);
 
   const isDark =
@@ -107,6 +128,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         themeMode,
         setThemeMode,
         isDark,
+        keepScreenAwake,
+        toggleKeepScreenAwake,
       }}
     >
       {children}

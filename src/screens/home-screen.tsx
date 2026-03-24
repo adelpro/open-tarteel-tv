@@ -368,15 +368,17 @@ export default function HomeScreen() {
           />
 
           {filteredReciters.length > 0 ? (
-            <SectionRecitersGrid
-              reciters={filteredReciters}
-              cardsPerRow={cardsPerRow}
-              itemWidth={itemWidth}
-              onReciterPress={handleReciterPress}
-              preferredFirstFocus={!searchFocused}
-              viewCounts={viewCounts}
-              favoriteCounts={favoriteCounts}
-            />
+            <View style={{ marginTop: 20 }}>
+              <SectionRecitersGrid
+                reciters={filteredReciters}
+                cardsPerRow={cardsPerRow}
+                itemWidth={itemWidth}
+                onReciterPress={handleReciterPress}
+                preferredFirstFocus={!searchFocused}
+                viewCounts={viewCounts}
+                favoriteCounts={favoriteCounts}
+              />
+            </View>
           ) : (
             <EmptyState
               icon="search-outline"

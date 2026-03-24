@@ -9013,6 +9013,7 @@ __metadata:
     expo-dev-client: "npm:~6.0.20"
     expo-file-system: "npm:^19.0.21"
     expo-font: "npm:~14.0.10"
+    expo-keep-awake: "npm:~15.0.8"
     expo-splash-screen: "npm:^31.0.12"
     expo-status-bar: "npm:~3.0.9"
     expo-system-ui: "npm:~6.0.9"
