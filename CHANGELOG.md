@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [UNRELEASED]
 
+[2.0.1]
+
+### Added
+
+- Audio caching with LRU eviction (10 surah limit) for smoother playback
+- Pre-fetch next 2 surahs during playback
+- API response caching for reciters list (24h TTL, language-aware)
+
 ## [2.0.0-athar] - 2025-12-22
 
 ### Fixed

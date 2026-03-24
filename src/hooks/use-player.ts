@@ -4,6 +4,11 @@ import { RouteProp, useRoute } from '@react-navigation/native';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 
 import { SURAHS } from '../constants/surahs';
+import {
+  cacheAudio,
+  getCachedAudioPath,
+  preFetchAudio,
+} from '../services/audio-cache';
 import { Reciter, Surah } from '../types';
 
 type PlayerScreenRouteProp = RouteProp<
@@ -39,28 +44,46 @@ export function usePlayer() {
   }, [reciter, selectedSurah, playlistData]);
 
   const handleSurahPress = useCallback(
-    (surahId: number, reciterOverride?: Reciter | null) => {
+    async (surahId: number, reciterOverride?: Reciter | null) => {
       const effectiveReciter = reciterOverride ?? reciter;
       if (!effectiveReciter) return;
 
       setSelectedSurah(surahId);
 
-      const audioUrl = effectiveReciter.moshaf.playlist.find(
-        (item) => parseInt(item.surahId) === surahId,
-      )?.link;
+      const playlistItem = effectiveReciter.moshaf.playlist.find(
+        (item) => parseInt(item.surahId, 10) === surahId,
+      );
 
-      if (!audioUrl) {
-        return;
-      }
+      if (!playlistItem) return;
 
-      if (currentUrlRef.current === audioUrl && isPlaying) {
+      const remoteUrl = playlistItem.link;
+      const cachedPath = await getCachedAudioPath(
+        effectiveReciter.id.toString(),
+        surahId,
+      );
+
+      const audioToPlay = cachedPath ?? remoteUrl;
+
+      if (currentUrlRef.current === audioToPlay && isPlaying) {
         return;
       }
 
       try {
-        player.replace({ uri: audioUrl });
-        currentUrlRef.current = audioUrl;
+        player.replace({ uri: audioToPlay });
+        currentUrlRef.current = audioToPlay;
         player.play();
+
+        if (!cachedPath) {
+          cacheAudio(effectiveReciter.id.toString(), surahId, remoteUrl).catch(
+            () => {},
+          );
+        }
+
+        preFetchAudio(
+          effectiveReciter.id.toString(),
+          effectiveReciter.moshaf.playlist,
+          surahId,
+        );
       } catch {}
     },
     [reciter, player, isPlaying],
