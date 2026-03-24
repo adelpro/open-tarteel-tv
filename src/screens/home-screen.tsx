@@ -22,6 +22,7 @@ import RetryButton from '../components/retry-button';
 import SearchInput from '../components/search-input';
 import SectionFeatured from '../components/section-featured';
 import SectionFilters from '../components/section-filters';
+import SectionLetterFilter from '../components/section-letter-filter';
 import SectionRecitersGrid from '../components/section-reciters-grid';
 import SectionTopNav from '../components/section-top-nav';
 import { colorPrimary } from '../constants/interaction-colors';
@@ -52,6 +53,7 @@ export default function HomeScreen() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRiwaya, setSelectedRiwaya] = useState<Riwaya | 'all'>('all');
+  const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [searchFocused, setSearchFocused] = useState(false);
 
   const { favorites } = useFavorites(); // local favorites
@@ -125,6 +127,11 @@ export default function HomeScreen() {
     const lang = i18n.language === 'ar' ? 'ar' : 'en';
     loadReciters(lang);
   }, [i18n.language, loadReciters]);
+
+  // Reset letter filter when language changes to avoid stale filter
+  useEffect(() => {
+    setSelectedLetter(null);
+  }, [i18n.language]);
 
   useEffect(() => {
     const rn = route.name as string | undefined;
@@ -210,6 +217,19 @@ export default function HomeScreen() {
     return favorited;
   }, [reciters, favoriteCounts]);
 
+  const lettersForCurrentLang = useMemo(() => {
+    const letters = new Set<string>();
+    reciters.forEach((r) => {
+      const ch = r.name.charAt(0);
+      // Only include actual letters (reject empty, whitespace, punctuation)
+      if (!ch || !/[A-Za-z\u0600-\u06FF]/.test(ch)) return;
+      letters.add(ch);
+    });
+    return Array.from(letters).sort((a, b) =>
+      a.localeCompare(b, lang === 'ar' ? 'ar' : undefined),
+    );
+  }, [reciters, lang]);
+
   const filteredReciters = useMemo(() => {
     const matchesRiwaya = (reciter: Reciter) =>
       selectedRiwaya === 'all' || reciter.moshaf.riwaya === selectedRiwaya;
@@ -221,7 +241,16 @@ export default function HomeScreen() {
 
     // 2. If no search query, sort alphabetically and return
     if (!normalizedQuery.length) {
-      const sorted = baseList.sort((a, b) => {
+      let result = baseList;
+
+      // Apply letter filter when no search query
+      if (selectedLetter) {
+        result = result.filter(
+          (r) => r.name.charAt(0).toUpperCase() === selectedLetter,
+        );
+      }
+
+      const sorted = result.sort((a, b) => {
         return a.name.localeCompare(b.name, lang);
       });
       return sorted;
@@ -251,7 +280,7 @@ export default function HomeScreen() {
 
     const results = fuse.search(normalizedQuery);
     return results.map((entry) => entry.item);
-  }, [reciters, searchQuery, lang, selectedRiwaya]);
+  }, [reciters, searchQuery, lang, selectedRiwaya, selectedLetter]);
 
   const { cardsPerRow, itemWidth } = useReciterGridLayout(
     filteredReciters,
@@ -301,6 +330,13 @@ export default function HomeScreen() {
       <SectionFilters
         selectedRiwaya={selectedRiwaya}
         onSelectRiwaya={setSelectedRiwaya}
+        isRTL={isRTL}
+      />
+
+      <SectionLetterFilter
+        letters={lettersForCurrentLang}
+        selectedLetter={selectedLetter}
+        onSelectLetter={setSelectedLetter}
         isRTL={isRTL}
       />
 
