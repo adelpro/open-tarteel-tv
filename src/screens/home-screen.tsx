@@ -57,7 +57,7 @@ export default function HomeScreen() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRiwaya, setSelectedRiwaya] = useState<Riwaya | 'all'>('all');
-  const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
+  const [selectedLetter, setSelectedLetter] = useState<string>('all');
   const [searchFocused, setSearchFocused] = useState(false);
 
   const { favorites } = useFavorites(); // local favorites
@@ -144,7 +144,7 @@ export default function HomeScreen() {
 
   useEffect(() => {
     setSelectedRiwaya('all');
-    setSelectedLetter(null);
+    setSelectedLetter('all');
   }, [i18n.language]);
 
   useEffect(() => {
@@ -262,7 +262,7 @@ export default function HomeScreen() {
       let result = baseList;
 
       // Apply letter filter when no search query
-      if (selectedLetter) {
+      if (selectedLetter && selectedLetter !== 'all') {
         result = result.filter((r) => {
           let reciterFirstChar = r.name.charAt(0);
           if (lang === 'ar') {

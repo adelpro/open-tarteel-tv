@@ -8,8 +8,8 @@ import FilterChip from './filter-chip';
 
 type SectionLetterFilterProps = {
   letters: string[];
-  selectedLetter: string | null;
-  onSelectLetter: (letter: string | null) => void;
+  selectedLetter: string;
+  onSelectLetter: (letter: string) => void;
   isRTL: boolean;
 };
 
@@ -35,10 +35,10 @@ const SectionLetterFilter = ({
   return (
     <SpatialNavigationView direction="horizontal" style={styles.row}>
       <FilterChip
-        key="__all__"
+        key="all"
         label={t('filter_all')}
-        selected={selectedLetter === null}
-        onPress={() => onSelectLetter(null)}
+        selected={selectedLetter === 'all'}
+        onPress={() => onSelectLetter('all')}
       />
       {letters.map((letter) => (
         <FilterChip
@@ -46,7 +46,7 @@ const SectionLetterFilter = ({
           label={letter}
           selected={selectedLetter === letter}
           onPress={() =>
-            onSelectLetter(selectedLetter === letter ? null : letter)
+            onSelectLetter(selectedLetter === letter ? 'all' : letter)
           }
         />
       ))}
