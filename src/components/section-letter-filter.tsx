@@ -17,6 +17,7 @@ const SectionLetterFilter = ({
   letters,
   selectedLetter,
   onSelectLetter,
+  isRTL,
 }: SectionLetterFilterProps) => {
   const { t } = useTranslation();
 
@@ -30,11 +31,11 @@ const SectionLetterFilter = ({
   const styles = StyleSheet.create({
     row: {
       flexDirection: 'row',
-      direction: 'ltr',
+      direction: isRTL ? 'rtl' : 'ltr',
       alignItems: 'center',
       justifyContent: 'flex-start',
       flexWrap: 'wrap',
-      marginVertical: 12,
+      marginVertical: 4,
     },
   });
 

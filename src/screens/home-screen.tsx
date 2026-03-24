@@ -128,8 +128,8 @@ export default function HomeScreen() {
     loadReciters(lang);
   }, [i18n.language, loadReciters]);
 
-  // Reset letter filter when language changes to avoid stale filter
   useEffect(() => {
+    setSelectedRiwaya('all');
     setSelectedLetter(null);
   }, [i18n.language]);
 
