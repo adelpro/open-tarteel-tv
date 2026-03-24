@@ -249,39 +249,17 @@ export default function HomeScreen() {
 
       // Apply letter filter when no search query
       if (selectedLetter) {
-        console.log('🔍 Clicked letter:', selectedLetter, '| Lang:', lang);
-        const beforeFilter = result.length;
         result = result.filter((r) => {
           let reciterFirstChar = r.name.charAt(0);
           if (lang === 'ar') {
             const normalizedChar = normalizeArabicLetter(reciterFirstChar);
-            console.log(
-              `   "${r.name}" -> raw="${reciterFirstChar}" normalized="${normalizedChar}" ?= "${selectedLetter}"`,
-            );
             return normalizedChar === selectedLetter;
           }
           const match =
             reciterFirstChar.toUpperCase() === selectedLetter.toUpperCase();
-          console.log(
-            `   "${r.name}" -> "${reciterFirstChar.toUpperCase()}" ?= "${selectedLetter.toUpperCase()}" = ${match}`,
-          );
+
           return match;
         });
-        console.log(
-          '✅ Filtered:',
-          beforeFilter,
-          '->',
-          result.length,
-          'reciters',
-        );
-        console.log(
-          '📋 Result names:',
-          result
-            .slice(0, 5)
-            .map((r) => r.name)
-            .join(', '),
-          result.length > 5 ? '...' : '',
-        );
       }
 
       const sorted = result.sort((a, b) => {
