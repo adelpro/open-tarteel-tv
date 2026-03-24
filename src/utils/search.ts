@@ -30,4 +30,6 @@ export const normalizeSearchText = (
   return normalizeEnglishText(value);
 };
 
-export {};
+export const normalizeArabicLetter = (char: string): string => {
+  return char.replace(/أ|إ|آ/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه');
+};

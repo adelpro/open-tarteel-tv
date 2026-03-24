@@ -34,7 +34,7 @@ import { useReciterGridLayout } from '../hooks/use-reciter-grid-layout';
 import { useViewCounts } from '../hooks/use-view-counts';
 import { getAllReciters } from '../services/api';
 import { Reciter, Riwaya } from '../types';
-import { normalizeSearchText } from '../utils/search';
+import { normalizeArabicLetter, normalizeSearchText } from '../utils/search';
 
 export default function HomeScreen() {
   const { t, i18n } = useTranslation();
@@ -219,16 +219,20 @@ export default function HomeScreen() {
 
   const lettersForCurrentLang = useMemo(() => {
     const letters = new Set<string>();
-    reciters.forEach((r) => {
-      const ch = r.name.charAt(0);
-      // Only include actual letters (reject empty, whitespace, punctuation)
+    const matchesRiwaya = (r: Reciter) =>
+      selectedRiwaya === 'all' || r.moshaf.riwaya === selectedRiwaya;
+    reciters.filter(matchesRiwaya).forEach((r) => {
+      let ch = r.name.charAt(0);
       if (!ch || !/[A-Za-z\u0600-\u06FF]/.test(ch)) return;
+      if (lang === 'ar') {
+        ch = normalizeArabicLetter(ch);
+      }
       letters.add(ch);
     });
     return Array.from(letters).sort((a, b) =>
       a.localeCompare(b, lang === 'ar' ? 'ar' : undefined),
     );
-  }, [reciters, lang]);
+  }, [reciters, lang, selectedRiwaya]);
 
   const filteredReciters = useMemo(() => {
     const matchesRiwaya = (reciter: Reciter) =>
@@ -245,8 +249,38 @@ export default function HomeScreen() {
 
       // Apply letter filter when no search query
       if (selectedLetter) {
-        result = result.filter(
-          (r) => r.name.charAt(0).toUpperCase() === selectedLetter,
+        console.log('🔍 Clicked letter:', selectedLetter, '| Lang:', lang);
+        const beforeFilter = result.length;
+        result = result.filter((r) => {
+          let reciterFirstChar = r.name.charAt(0);
+          if (lang === 'ar') {
+            const normalizedChar = normalizeArabicLetter(reciterFirstChar);
+            console.log(
+              `   "${r.name}" -> raw="${reciterFirstChar}" normalized="${normalizedChar}" ?= "${selectedLetter}"`,
+            );
+            return normalizedChar === selectedLetter;
+          }
+          const match =
+            reciterFirstChar.toUpperCase() === selectedLetter.toUpperCase();
+          console.log(
+            `   "${r.name}" -> "${reciterFirstChar.toUpperCase()}" ?= "${selectedLetter.toUpperCase()}" = ${match}`,
+          );
+          return match;
+        });
+        console.log(
+          '✅ Filtered:',
+          beforeFilter,
+          '->',
+          result.length,
+          'reciters',
+        );
+        console.log(
+          '📋 Result names:',
+          result
+            .slice(0, 5)
+            .map((r) => r.name)
+            .join(', '),
+          result.length > 5 ? '...' : '',
         );
       }
 
