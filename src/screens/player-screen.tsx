@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import {
@@ -9,6 +9,8 @@ import {
 
 import Playlist from '../components/play-list';
 import PlayerComponent from '../components/player';
+import RetryButton from '../components/retry-button';
+import { colorPrimary } from '../constants/interaction-colors';
 import { getThemeColors } from '../constants/theme';
 import { useRecentlyPlayed } from '../context/recently-played.context';
 import { useSettings } from '../context/settings.context';
@@ -23,7 +25,14 @@ export default function PlayerScreen() {
   const { incrementView } = useViewCounts();
   const { addToRecentlyPlayed } = useRecentlyPlayed();
   const player = usePlayer();
-  const { playlistData, reciter, selectedSurah } = player;
+  const {
+    playlistData,
+    reciter,
+    selectedSurah,
+    playlistLoading,
+    playlistError,
+    retryLoadPlaylist,
+  } = player;
 
   useEffect(() => {
     if (reciter?.id) {
@@ -52,6 +61,24 @@ export default function PlayerScreen() {
       deactivateKeepAwake('player-screen');
     };
   }, [keepScreenAwake]);
+
+  if (playlistLoading) {
+    return (
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color={colorPrimary} />
+        <Text style={styles.errorText}>Loading playlist…</Text>
+      </View>
+    );
+  }
+
+  if (playlistError) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text style={styles.errorText}>Failed to load playlist</Text>
+        <RetryButton onPress={retryLoadPlaylist} />
+      </View>
+    );
+  }
 
   if (!reciter) {
     return (

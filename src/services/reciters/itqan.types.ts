@@ -1,4 +1,5 @@
 export type ItqanRecitationResponse = {
+  count: number;
   results: {
     id: number;
     name: string;
@@ -14,7 +15,7 @@ export type ItqanRecitationResponse = {
     riwayah: {
       id: number;
       name: string;
-    };
+    } | null;
     surahs_count: number;
   }[];
 };
@@ -30,6 +31,14 @@ export type ItqanSurah = {
   revelation_place: string;
   ayahs_count: number;
   ayahs_timings: unknown[]; // empty array in your example, can refine later
+};
+
+export type ItqanReciterResponse = {
+  count: number;
+  results: {
+    id: number;
+    name: string;
+  }[];
 };
 
 export type ItqanRecitationDetailResponse = {

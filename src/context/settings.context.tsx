@@ -9,6 +9,9 @@ import { useColorScheme } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { clearCache } from '../services/audio-cache';
+import { clearItqanPlaylistCache } from '../services/reciters/itqan-playlist-cache';
+import { clearRecitersCache } from '../services/reciters-cache';
 import { LinkSource } from '../types';
 
 const SETTINGS_STORAGE_KEY = '@open_tarteel_settings';
@@ -26,6 +29,8 @@ type SettingsContextValue = {
   isDark: boolean;
   keepScreenAwake: boolean;
   toggleKeepScreenAwake: () => void;
+  cacheEpoch: number;
+  clearCaches: () => Promise<void>;
 };
 
 const SettingsContext = createContext<SettingsContextValue | null>(null);
@@ -41,6 +46,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   );
   const [themeMode, setThemeModeState] = useState<ThemeMode>('system');
   const [keepScreenAwake, setKeepScreenAwake] = useState<boolean>(true);
+  const [cacheEpoch, setCacheEpoch] = useState(0);
 
   /* load once */
   useEffect(() => {
@@ -119,6 +125,16 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const clearCaches = useCallback(async () => {
+    await Promise.all([
+      clearRecitersCache(),
+      clearItqanPlaylistCache(),
+      clearCache(),
+    ]);
+    // Bump the epoch so mounted screens (e.g. Home) refetch immediately.
+    setCacheEpoch((prev) => prev + 1);
+  }, []);
+
   return (
     <SettingsContext.Provider
       value={{
@@ -130,6 +146,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         isDark,
         keepScreenAwake,
         toggleKeepScreenAwake,
+        cacheEpoch,
+        clearCaches,
       }}
     >
       {children}

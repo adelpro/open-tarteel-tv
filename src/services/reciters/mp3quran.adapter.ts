@@ -10,11 +10,14 @@ import { LinkSource, Reciter } from '../../types';
 export const Mp3QuranAdapter: ReciterSource = {
   source: LinkSource.MP3QURAN,
 
-  async getReciters(lang: 'ar' | 'en') {
+  async getReciters(lang: 'ar' | 'en', signal?: AbortSignal) {
     const apiLang = lang === 'en' ? 'eng' : 'ar';
 
     const response = await retryFetch(
       `https://www.mp3quran.net/api/v3/reciters?language=${apiLang}`,
+      3,
+      undefined,
+      signal,
     );
 
     const data: Mp3QuranApiResponse = await response.json();

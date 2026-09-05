@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   ActivityIndicator,
   StyleSheet,
@@ -53,7 +59,28 @@ export default function HomeScreen() {
   const { viewCounts } = useViewCounts();
   const { favoriteCounts } = useFavorites();
   const { recentlyPlayed } = useRecentlyPlayed();
-  const { enabledSources, isDark } = useSettings();
+  const { enabledSources, isDark, cacheEpoch } = useSettings();
+
+  // Read the latest enabled sources without recreating loadReciters on every
+  // identity change (SettingsProvider rebuilds the object on mount).
+  const enabledSourcesRef = useRef(enabledSources);
+  enabledSourcesRef.current = enabledSources;
+
+  // Content-based signature so the load effect only re-fires when the actual
+  // set of enabled sources changes, not when the object identity changes.
+  const sourcesSignature = useMemo(
+    () =>
+      Object.keys(enabledSources)
+        .sort()
+        .map((source) => `${source}:${enabledSources[source] !== false}`)
+        .join('|'),
+    [enabledSources],
+  );
+
+  // Guards against stale responses racing each other (fast language switches,
+  // rapid retries) and cancels in-flight HTTP on unmount.
+  const requestIdRef = useRef(0);
+  const abortRef = useRef<AbortController | null>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRiwaya, setSelectedRiwaya] = useState<Riwaya | 'all'>('all');
@@ -104,43 +131,74 @@ export default function HomeScreen() {
     },
   });
 
-  const loadReciters = useCallback(
-    async (lang: 'ar' | 'en') => {
-      setLoading(true);
-      setError(null);
-      try {
-        const cachedData = await getCachedReciters(lang);
-        if (cachedData) {
-          setReciters(cachedData);
-          setLoading(false);
-          const freshData = await getAllReciters(lang, enabledSources);
-          setReciters(freshData);
-          await setCachedReciters(freshData, lang);
-        } else {
-          const data = await getAllReciters(lang, enabledSources);
-          setReciters(data);
-          await setCachedReciters(data, lang);
-          setError(null);
-        }
-      } catch (err) {
-        console.error('Failed to load reciters:', err);
-        const errorMsg =
-          err instanceof Error
-            ? err.message
-            : 'Failed to load reciters. Please try again.';
-        setError(errorMsg);
-        setReciters([]);
-      } finally {
+  const loadReciters = useCallback(async (lang: 'ar' | 'en') => {
+    const requestId = ++requestIdRef.current;
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    setLoading(true);
+    setError(null);
+    try {
+      const cachedData = await getCachedReciters(lang);
+      if (requestId !== requestIdRef.current) return;
+
+      if (cachedData) {
+        setReciters(cachedData);
+        setLoading(false);
+        const freshData = await getAllReciters(
+          lang,
+          enabledSourcesRef.current,
+          controller.signal,
+        );
+        if (requestId !== requestIdRef.current) return;
+
+        setReciters(freshData);
+        await setCachedReciters(freshData, lang);
+      } else {
+        const data = await getAllReciters(
+          lang,
+          enabledSourcesRef.current,
+          controller.signal,
+        );
+        if (requestId !== requestIdRef.current) return;
+
+        setReciters(data);
+        await setCachedReciters(data, lang);
+        setError(null);
+      }
+    } catch (err) {
+      if (requestId !== requestIdRef.current) return;
+      // Aborts (superseded/unmounted) are not real failures.
+      if (err instanceof Error && err.name === 'AbortError') return;
+
+      console.error('Failed to load reciters:', err);
+      const errorMsg =
+        err instanceof Error
+          ? err.message
+          : 'Failed to load reciters. Please try again.';
+      setError(errorMsg);
+      setReciters([]);
+    } finally {
+      if (requestId === requestIdRef.current) {
         setLoading(false);
       }
-    },
-    [enabledSources],
-  );
+    }
+  }, []);
 
   useEffect(() => {
     const lang = i18n.language === 'ar' ? 'ar' : 'en';
     loadReciters(lang);
-  }, [i18n.language, loadReciters]);
+  }, [i18n.language, sourcesSignature, cacheEpoch, loadReciters]);
+
+  // Cancel any in-flight load when the screen unmounts so stale responses
+  // cannot write state afterwards.
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+      requestIdRef.current += 1;
+    };
+  }, []);
 
   useEffect(() => {
     setSelectedRiwaya('all');

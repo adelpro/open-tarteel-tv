@@ -9,13 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [UNRELEASED]
 
-[2.0.1]
+## [2.0.1] - 2026-09-05
 
 ### Added
 
 - Audio caching with LRU eviction (10 surah limit) for smoother playback
 - Pre-fetch next 2 surahs during playback
-- API response caching for reciters list (24h TTL, language-aware)
+- API response caching for reciters list (3-day TTL, language-aware)
+- Itqan provider: load all 70 recitations and all 114 surahs per recitation via `page_size=1000`
+- Lazy Itqan playlists: audio URLs fetched once per reciter on first open, then cached (3-day TTL)
+- Arabic reciter names for the Itqan provider in the Arabic UI (join with `/reciters/`)
+- Settings: "Clear Cache" action and cache last-updated date in a new Storage section
+- Dedupe concurrent reciter fetches so Home and Search share one network request
+
+### Fixed
+
+- Itqan recitations with a null riwayah (2 of 70) no longer crash the whole provider
+- Itqan playlists truncated to 20 surahs — surahs 21–114 now play
+- Duplicate reciter fetch on startup (enabled-sources object identity churn)
+- Stale language-switch responses overriding the current UI language
+- Settings Storage row unreachable off-screen (content now scrolls)
+- Unhandled fetch rejections and leaked timeout timers in the fetch helper
+
+### Changed
+
+- Reciter and Itqan playlist cache TTL raised from 24h to 3 days
+- Fetch helper now supports `AbortSignal` cancellation and cleans up its timeout timer
 
 ## [2.0.0-athar] - 2025-12-22
 

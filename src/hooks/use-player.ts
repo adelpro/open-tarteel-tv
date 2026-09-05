@@ -9,7 +9,8 @@ import {
   getCachedAudioPath,
   preFetchAudio,
 } from '../services/audio-cache';
-import { Reciter, Surah } from '../types';
+import { getItqanPlaylist } from '../services/reciters/itqan.adapter';
+import { LinkSource, Reciter, Surah } from '../types';
 
 type PlayerScreenRouteProp = RouteProp<
   { PlayerScreen: { reciter?: Reciter; reciterId?: number; surahId?: number } },
@@ -28,9 +29,15 @@ export function usePlayer() {
   );
   const [selectedSurah, setSelectedSurah] = useState<number | null>(null);
   const [repeat, setRepeat] = useState(false);
+  const [playlistLoading, setPlaylistLoading] = useState(false);
+  const [playlistError, setPlaylistError] = useState(false);
+  const [playlistRetry, setPlaylistRetry] = useState(0);
 
   const currentUrlRef = useRef<string | null>(null);
   const onPlaybackEndRef = useRef<(() => void) | null>(null);
+  // Reciters whose playlist was already attempted, so an empty/errored result
+  // does not retrigger the lazy load on every render.
+  const playlistAttemptedRef = useRef<Set<string>>(new Set());
 
   const playlistData: Surah[] = useMemo(
     () => SURAHS.slice().sort((a, b) => a.id - b.id),
@@ -42,6 +49,45 @@ export function usePlayer() {
     if (!playlistData.length) return;
     setSelectedSurah(playlistData[0].id);
   }, [reciter, selectedSurah, playlistData]);
+
+  // Lazy-load the Itqan playlist (audio URLs) on first open.
+  // mp3quran playlists ship with the reciter metadata.
+  useEffect(() => {
+    if (!reciter) return;
+    if (reciter.source !== LinkSource.ITQAN) return;
+    if (reciter.moshaf.playlist.length > 0) return;
+    if (playlistAttemptedRef.current.has(reciter.id)) return;
+
+    playlistAttemptedRef.current.add(reciter.id);
+    let cancelled = false;
+    setPlaylistLoading(true);
+    setPlaylistError(false);
+
+    getItqanPlaylist(reciter)
+      .then((playlist) => {
+        if (cancelled) return;
+        setReciter((prev) =>
+          prev ? { ...prev, moshaf: { ...prev.moshaf, playlist } } : prev,
+        );
+      })
+      .catch(() => {
+        if (!cancelled) setPlaylistError(true);
+      })
+      .finally(() => {
+        if (!cancelled) setPlaylistLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [reciter, playlistRetry]);
+
+  const retryLoadPlaylist = useCallback(() => {
+    if (reciter) {
+      playlistAttemptedRef.current.delete(reciter.id);
+    }
+    setPlaylistRetry((prev) => prev + 1);
+  }, [reciter]);
 
   const handleSurahPress = useCallback(
     async (surahId: number, reciterOverride?: Reciter | null) => {
@@ -163,6 +209,9 @@ export function usePlayer() {
     repeat,
     position: currentTime,
     duration,
+    playlistLoading,
+    playlistError,
+    retryLoadPlaylist,
     handleSurahPress,
     handlePlayPause,
     handlePrevious,

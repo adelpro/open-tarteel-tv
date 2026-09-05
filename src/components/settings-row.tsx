@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 import { StyleSheet, Switch, Text, View } from 'react-native';
 
+import { Ionicons } from '@expo/vector-icons';
 import { SpatialNavigationFocusableView } from 'react-tv-space-navigation';
 
 import {
@@ -16,10 +17,12 @@ type SettingRowProps = {
   isEnabled: boolean;
   onToggle: () => void;
   isDark: boolean;
+  /** Render as an action row (no switch) instead of a toggle. */
+  action?: boolean;
 };
 
 export const SettingRow = memo(
-  ({ label, isEnabled, onToggle, isDark }: SettingRowProps) => {
+  ({ label, isEnabled, onToggle, isDark, action }: SettingRowProps) => {
     const { textPrimary, cardBg } = getThemeColors(isDark);
 
     const styles = StyleSheet.create({
@@ -54,14 +57,18 @@ export const SettingRow = memo(
         {({ isFocused }) => (
           <View style={[styles.row, isFocused && styles.rowFocused]}>
             <Text style={styles.label}>{label}</Text>
-            <View pointerEvents="none">
-              <Switch
-                value={isEnabled}
-                trackColor={{ false: '#767577', true: colorPrimary }}
-                thumbColor={isEnabled ? '#fff' : '#f4f3f4'}
-                focusable={false}
-              />
-            </View>
+            {action ? (
+              <Ionicons name="trash-outline" size={22} color={textPrimary} />
+            ) : (
+              <View pointerEvents="none">
+                <Switch
+                  value={isEnabled}
+                  trackColor={{ false: '#767577', true: colorPrimary }}
+                  thumbColor={isEnabled ? '#fff' : '#f4f3f4'}
+                  focusable={false}
+                />
+              </View>
+            )}
           </View>
         )}
       </SpatialNavigationFocusableView>

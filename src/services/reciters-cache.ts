@@ -3,7 +3,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Reciter } from '../types';
 
 const RECITERS_CACHE_KEY = '@open_tarteel_reciters_cache';
-const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+// Reciter catalogs are near-static; 3 days avoids useless refetches on launch.
+const CACHE_TTL_MS = 3 * 24 * 60 * 60 * 1000;
 
 interface CachedReciters {
   data: Reciter[];
@@ -41,6 +42,18 @@ export async function setCachedReciters(
     };
     await AsyncStorage.setItem(RECITERS_CACHE_KEY, JSON.stringify(cached));
   } catch {}
+}
+
+export async function getRecitersCacheTimestamp(): Promise<number | null> {
+  try {
+    const stored = await AsyncStorage.getItem(RECITERS_CACHE_KEY);
+    if (!stored) return null;
+
+    const cached: CachedReciters = JSON.parse(stored);
+    return cached.timestamp;
+  } catch {
+    return null;
+  }
 }
 
 export async function clearRecitersCache(): Promise<void> {
