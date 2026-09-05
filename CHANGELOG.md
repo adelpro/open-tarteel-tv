@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Arabic reciter names for the Itqan provider in the Arabic UI (join with `/reciters/`)
 - Settings: "Clear Cache" action and cache last-updated date in a new Storage section
 - Dedupe concurrent reciter fetches so Home and Search share one network request
+- Per-source cache merge: a provider that fails keeps its previously cached reciters
+- Fetch-on-stale revalidation: cached reciter list is served without a background refresh while fresh
 
 ### Fixed
 
@@ -30,11 +32,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Stale language-switch responses overriding the current UI language
 - Settings Storage row unreachable off-screen (content now scrolls)
 - Unhandled fetch rejections and leaked timeout timers in the fetch helper
+- Cache no longer overwritten with an empty result when every provider fails on refresh
+- "Most viewed" / "Most favorited" rows now actually sorted by count before slicing to 10
 
 ### Changed
 
 - Reciter and Itqan playlist cache TTL raised from 24h to 3 days
-- Fetch helper now supports `AbortSignal` cancellation and cleans up its timeout timer
+- Fetch helper now supports `AbortSignal` cancellation, aborts the request on timeout, and cleans up its timeout timer
+- Backoff sleep skipped after the final retry attempt
+- `app.json` version aligned to `2.0.1` to match `package.json`
 
 ## [2.0.0-athar] - 2025-12-22
 

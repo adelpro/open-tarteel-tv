@@ -38,10 +38,11 @@ import { useRecentlyPlayed } from '../context/recently-played.context';
 import { useSettings } from '../context/settings.context';
 import { useReciterGridLayout } from '../hooks/use-reciter-grid-layout';
 import { useViewCounts } from '../hooks/use-view-counts';
-import { getAllReciters } from '../services/api';
+import { fetchRecitersBySource } from '../services/api';
 import {
-  getCachedReciters,
+  getCachedRecitersInfo,
   setCachedReciters,
+  SOFT_CACHE_TTL_MS,
 } from '../services/reciters-cache';
 import { Reciter, Riwaya } from '../types';
 import { normalizeArabicLetter, normalizeSearchText } from '../utils/search';
@@ -140,32 +141,50 @@ export default function HomeScreen() {
     setLoading(true);
     setError(null);
     try {
-      const cachedData = await getCachedReciters(lang);
+      const cached = await getCachedRecitersInfo(lang);
       if (requestId !== requestIdRef.current) return;
 
-      if (cachedData) {
-        setReciters(cachedData);
+      // Serve cached data instantly.
+      if (cached && cached.data.length > 0) {
+        setReciters(cached.data);
         setLoading(false);
-        const freshData = await getAllReciters(
-          lang,
-          enabledSourcesRef.current,
-          controller.signal,
-        );
-        if (requestId !== requestIdRef.current) return;
 
-        setReciters(freshData);
-        await setCachedReciters(freshData, lang);
-      } else {
-        const data = await getAllReciters(
-          lang,
-          enabledSourcesRef.current,
-          controller.signal,
-        );
-        if (requestId !== requestIdRef.current) return;
+        // Fresh cache + same enabled sources -> skip the background refresh.
+        const currentSourcesKey = Object.keys(enabledSourcesRef.current)
+          .sort()
+          .join('|');
+        if (
+          cached.sourcesKey === currentSourcesKey &&
+          Date.now() - cached.timestamp < SOFT_CACHE_TTL_MS
+        ) {
+          return;
+        }
+      }
 
-        setReciters(data);
-        await setCachedReciters(data, lang);
-        setError(null);
+      const sourceResults = await fetchRecitersBySource(
+        lang,
+        enabledSourcesRef.current,
+        controller.signal,
+      );
+      if (requestId !== requestIdRef.current) return;
+
+      // Merge: a source that returned empty keeps its previously cached
+      // reciters (e.g. a temporary outage) instead of vanishing.
+      const cachedSources = cached?.sources ?? {};
+      const mergedSources: Record<string, Reciter[]> = {};
+      for (const result of sourceResults) {
+        mergedSources[result.source] =
+          result.reciters.length > 0
+            ? result.reciters
+            : (cachedSources[result.source] ?? []);
+      }
+
+      const merged = Object.values(mergedSources).flat();
+      setReciters(merged);
+
+      // Never overwrite the cache with an empty result.
+      if (merged.length > 0) {
+        await setCachedReciters(mergedSources, lang);
       }
     } catch (err) {
       if (requestId !== requestIdRef.current) return;
@@ -236,16 +255,15 @@ export default function HomeScreen() {
       return [];
     }
 
-    const withViews = reciters
+    return reciters
       .map((reciter) => {
         const viewCount = viewCounts[String(reciter.id)] ?? 0;
         return { reciter, viewCount };
       })
       .filter(({ viewCount }) => viewCount > 0)
+      .sort((a, b) => b.viewCount - a.viewCount)
       .slice(0, 10)
       .map(({ reciter }) => reciter);
-
-    return withViews;
   }, [reciters, viewCounts]);
 
   const myFavoritedReciters = useMemo(() => {
@@ -283,6 +301,11 @@ export default function HomeScreen() {
         const idStr = String(r.id);
         const count = favoriteCounts[idStr] || 0;
         return count > 0;
+      })
+      .sort((a, b) => {
+        const aCount = favoriteCounts[String(a.id)] || 0;
+        const bCount = favoriteCounts[String(b.id)] || 0;
+        return bCount - aCount;
       })
       .slice(0, 10);
 

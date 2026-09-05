@@ -16,7 +16,12 @@ const RECITER_SOURCES: readonly ReciterSource[] = [
  * In-flight fetch dedupe: Home and Search both mount HomeScreen, so concurrent
  * identical loads (same lang + sources) share one network request.
  */
-const inFlightFetches = new Map<string, Promise<Reciter[]>>();
+const inFlightFetches = new Map<string, Promise<ReciterSourceResult[]>>();
+
+export type ReciterSourceResult = {
+  source: string;
+  reciters: Reciter[];
+};
 
 function getSourcesSignature(enabledSources?: Record<string, boolean>): string {
   if (!enabledSources) return 'all';
@@ -27,19 +32,20 @@ function getSourcesSignature(enabledSources?: Record<string, boolean>): string {
 }
 
 /**
- * Public API – DO NOT CHANGE SIGNATURE
+ * Fetch reciters split per source. A source that fails yields an empty
+ * `reciters` array so callers can merge with previously cached data.
  */
-export function getAllReciters(
+export function fetchRecitersBySource(
   lang: 'ar' | 'en',
   enabledSources?: Record<string, boolean>,
   signal?: AbortSignal,
-): Promise<Reciter[]> {
+): Promise<ReciterSourceResult[]> {
   const key = `${lang}:${getSourcesSignature(enabledSources)}`;
 
   const existing = inFlightFetches.get(key);
   if (existing) return existing;
 
-  const promise = fetchAllReciters(lang, enabledSources, signal);
+  const promise = doFetchRecitersBySource(lang, enabledSources, signal);
   inFlightFetches.set(key, promise);
   promise.finally(() => {
     if (inFlightFetches.get(key) === promise) {
@@ -49,33 +55,37 @@ export function getAllReciters(
   return promise;
 }
 
-async function fetchAllReciters(
+async function doFetchRecitersBySource(
   lang: 'ar' | 'en',
   enabledSources?: Record<string, boolean>,
   signal?: AbortSignal,
-): Promise<Reciter[]> {
+): Promise<ReciterSourceResult[]> {
   const sourcesToFetch = RECITER_SOURCES.filter(
     (source) => !enabledSources || enabledSources[source.source] !== false,
   );
 
-  const results = await Promise.allSettled(
+  const results = await Promise.all(
     sourcesToFetch.map(async (source) => {
       try {
         const reciters = await source.getReciters(lang, signal);
-        return reciters;
+        return { source: source.source, reciters };
       } catch {
-        return [];
+        return { source: source.source, reciters: [] };
       }
     }),
   );
 
-  // Filter out rejected promises and flatten successful results
-  const successfulResults = results
-    .filter(
-      (result): result is PromiseFulfilledResult<Reciter[]> =>
-        result.status === 'fulfilled',
-    )
-    .map((result) => result.value);
+  return results;
+}
 
-  return successfulResults.flat();
+/**
+ * Public API – flattened list of reciters from all enabled sources.
+ */
+export async function getAllReciters(
+  lang: 'ar' | 'en',
+  enabledSources?: Record<string, boolean>,
+  signal?: AbortSignal,
+): Promise<Reciter[]> {
+  const results = await fetchRecitersBySource(lang, enabledSources, signal);
+  return results.flatMap((result) => result.reciters);
 }
