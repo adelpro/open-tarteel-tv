@@ -3,9 +3,9 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useTranslation } from 'react-i18next';
 
-import { version } from '../../package.json';
 import { getThemeColors } from '../constants/theme';
 import { useSettings } from '../context/settings.context';
+import { getAppVersion } from '../utils/app-info';
 
 export default function AboutScreen() {
   const { t, i18n } = useTranslation();
@@ -94,7 +94,7 @@ export default function AboutScreen() {
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            © {currentYear} v{version}
+            © {currentYear} v{getAppVersion()}
           </Text>
           <Text style={styles.footerText}>{t('about.created_by')}</Text>
           <Text style={styles.footerText}>{t('about.source_code')}</Text>

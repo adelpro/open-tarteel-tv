@@ -12,10 +12,16 @@ import type { ReciterSource } from './reciter-source';
 import { retryFetch } from './shared-fetch';
 import type { Playlist, Reciter } from '../../types';
 import { LinkSource } from '../../types';
+import { getAppVersion, getClientName } from '../../utils/app-info';
 
 const BASE_URL = 'https://api.cms.itqan.dev';
 // API max page size — fetches every recitation/track in a single request.
 const PAGE_SIZE = 1000;
+// Identify this app to the Itqan CMS for error tracking and analytics.
+const ITQAN_CLIENT_HEADERS = {
+  'X-Client-Name': getClientName(),
+  'X-Client-Version': getAppVersion(),
+};
 
 export const ItqanAdapter: ReciterSource = {
   source: LinkSource.ITQAN,
@@ -30,7 +36,7 @@ export const ItqanAdapter: ReciterSource = {
       const recitationsResponse = await retryFetch(
         `${BASE_URL}/recitations/?page_size=${PAGE_SIZE}`,
         3,
-        { 'Accept-Language': acceptLanguage },
+        { 'Accept-Language': acceptLanguage, ...ITQAN_CLIENT_HEADERS },
         signal,
       );
       if (!recitationsResponse.ok) {
@@ -104,7 +110,7 @@ async function fetchArabicReciterNames(
     const response = await retryFetch(
       `${BASE_URL}/reciters/?page_size=${PAGE_SIZE}`,
       3,
-      { 'Accept-Language': 'ar' },
+      { 'Accept-Language': 'ar', ...ITQAN_CLIENT_HEADERS },
       signal,
     );
     if (!response.ok) return null;
@@ -135,6 +141,8 @@ export async function getItqanPlaylist(reciter: Reciter): Promise<Playlist> {
   const recitationId = reciter.moshaf.id;
   const response = await retryFetch(
     `${BASE_URL}/recitations/${recitationId}?page_size=${PAGE_SIZE}`,
+    3,
+    ITQAN_CLIENT_HEADERS,
   );
   if (!response.ok) {
     throw new Error(`Failed to fetch Itqan playlist: HTTP ${response.status}`);
