@@ -10,11 +10,11 @@ import type {
 import { getRiwayaKeyFromMoshafName } from './mp3quran.helpers';
 import type { ReciterSource } from './reciter-source';
 import { retryFetch } from './shared-fetch';
+import { getItqanConfig } from '../../config/providers';
 import type { Playlist, Reciter } from '../../types';
 import { LinkSource } from '../../types';
 import { getAppVersion, getClientName } from '../../utils/app-info';
 
-const BASE_URL = 'https://api.cms.itqan.dev';
 // API max page size — fetches every recitation/track in a single request.
 const PAGE_SIZE = 1000;
 // Identify this app to the Itqan CMS for error tracking and analytics.
@@ -22,6 +22,25 @@ const ITQAN_CLIENT_HEADERS = {
   'X-Client-Name': getClientName(),
   'X-Client-Version': getAppVersion(),
 };
+
+/**
+ * Build the per-request API root and headers. The API root and optional API
+ * key come from providers.ts; the app name/version stay tied to app-info.
+ */
+function getItqanRequest(lang: 'ar' | 'en'): {
+  baseUrl: string;
+  headers: Record<string, string>;
+} {
+  const { baseUrl, apiKey } = getItqanConfig();
+  return {
+    baseUrl,
+    headers: {
+      'Accept-Language': lang === 'ar' ? 'ar' : 'en',
+      ...ITQAN_CLIENT_HEADERS,
+      ...(apiKey ? { 'X-API-Key': apiKey } : {}),
+    },
+  };
+}
 
 export const ItqanAdapter: ReciterSource = {
   source: LinkSource.ITQAN,
@@ -31,12 +50,12 @@ export const ItqanAdapter: ReciterSource = {
     signal?: AbortSignal,
   ): Promise<Reciter[]> {
     try {
-      const acceptLanguage = lang === 'ar' ? 'ar' : 'en';
+      const { baseUrl, headers } = getItqanRequest(lang);
 
       const recitationsResponse = await retryFetch(
-        `${BASE_URL}/recitations/?page_size=${PAGE_SIZE}`,
+        `${baseUrl}/recitations/?page_size=${PAGE_SIZE}`,
         3,
-        { 'Accept-Language': acceptLanguage, ...ITQAN_CLIENT_HEADERS },
+        headers,
         signal,
       );
       if (!recitationsResponse.ok) {
@@ -53,7 +72,7 @@ export const ItqanAdapter: ReciterSource = {
       const arabicReciterNames = await fetchArabicReciterNames(lang, signal);
 
       // Metadata only. Audio URLs live in the per-recitation tracks endpoint
-      // and are fetched lazily on first playback via getItqanPlaylist.
+      // and are fetched lazily on first playback via getPlaylist.
       // Guard each record so one malformed recitation cannot wipe the whole source.
       const reciters: (Reciter | null)[] = recitationsData.results.map(
         (recitation) => {
@@ -93,6 +112,49 @@ export const ItqanAdapter: ReciterSource = {
       return [];
     }
   },
+
+  async getPlaylist(
+    reciter: Reciter,
+    lang: 'ar' | 'en',
+    signal?: AbortSignal,
+  ): Promise<Playlist> {
+    if (reciter.source !== LinkSource.ITQAN) {
+      throw new Error('getPlaylist called for a non-Itqan reciter');
+    }
+
+    const cached = await getCachedItqanPlaylist(reciter.id);
+    if (cached) return cached;
+
+    const { baseUrl, headers } = getItqanRequest(lang);
+    const response = await retryFetch(
+      `${baseUrl}/recitations/${reciter.moshaf.id}?page_size=${PAGE_SIZE}`,
+      3,
+      headers,
+      signal,
+    );
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch Itqan playlist: HTTP ${response.status}`,
+      );
+    }
+
+    const data: ItqanRecitationDetailResponse = await response.json();
+    // Guard each record so one bad track cannot discard the whole playlist.
+    const playlist: Playlist = (data.results ?? []).flatMap((surah) => {
+      try {
+        if (!surah || !surah.audio_url) {
+          throw new Error('missing audio URL');
+        }
+        return [{ surahId: String(surah.surah_number), link: surah.audio_url }];
+      } catch {
+        console.warn('Skipping malformed Itqan surah:', surah);
+        return [];
+      }
+    });
+
+    await setCachedItqanPlaylist(reciter.id, playlist);
+    return playlist;
+  },
 };
 
 /**
@@ -107,10 +169,11 @@ async function fetchArabicReciterNames(
   if (lang !== 'ar') return null;
 
   try {
+    const { baseUrl, headers } = getItqanRequest(lang);
     const response = await retryFetch(
-      `${BASE_URL}/reciters/?page_size=${PAGE_SIZE}`,
+      `${baseUrl}/reciters/?page_size=${PAGE_SIZE}`,
       3,
-      { 'Accept-Language': 'ar', ...ITQAN_CLIENT_HEADERS },
+      headers,
       signal,
     );
     if (!response.ok) return null;
@@ -124,36 +187,4 @@ async function fetchArabicReciterNames(
   } catch {
     return null;
   }
-}
-
-/**
- * Fetch the full 114-surah playlist (audio URLs) for an Itqan reciter.
- * Cache-first; falls back to the recitation tracks endpoint.
- */
-export async function getItqanPlaylist(reciter: Reciter): Promise<Playlist> {
-  if (reciter.source !== LinkSource.ITQAN) {
-    throw new Error('getItqanPlaylist called for a non-Itqan reciter');
-  }
-
-  const cached = await getCachedItqanPlaylist(reciter.id);
-  if (cached) return cached;
-
-  const recitationId = reciter.moshaf.id;
-  const response = await retryFetch(
-    `${BASE_URL}/recitations/${recitationId}?page_size=${PAGE_SIZE}`,
-    3,
-    ITQAN_CLIENT_HEADERS,
-  );
-  if (!response.ok) {
-    throw new Error(`Failed to fetch Itqan playlist: HTTP ${response.status}`);
-  }
-
-  const data: ItqanRecitationDetailResponse = await response.json();
-  const playlist: Playlist = data.results.map((surah) => ({
-    surahId: String(surah.surah_number),
-    link: surah.audio_url,
-  }));
-
-  await setCachedItqanPlaylist(reciter.id, playlist);
-  return playlist;
 }

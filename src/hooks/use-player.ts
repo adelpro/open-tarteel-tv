@@ -2,15 +2,16 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
+import { useTranslation } from 'react-i18next';
 
 import { SURAHS } from '../constants/surahs';
+import { getReciterPlaylist } from '../services/api';
 import {
   cacheAudio,
   getCachedAudioPath,
   preFetchAudio,
 } from '../services/audio-cache';
-import { getItqanPlaylist } from '../services/reciters/itqan.adapter';
-import { LinkSource, Reciter, Surah } from '../types';
+import { Reciter, Surah } from '../types';
 
 type PlayerScreenRouteProp = RouteProp<
   { PlayerScreen: { reciter?: Reciter; reciterId?: number; surahId?: number } },
@@ -19,6 +20,8 @@ type PlayerScreenRouteProp = RouteProp<
 
 export function usePlayer() {
   const route = useRoute<PlayerScreenRouteProp>();
+  const { i18n } = useTranslation();
+  const lang: 'ar' | 'en' = i18n.language === 'ar' ? 'ar' : 'en';
   const player = useAudioPlayer();
   const status = useAudioPlayerStatus(player);
 
@@ -50,11 +53,10 @@ export function usePlayer() {
     setSelectedSurah(playlistData[0].id);
   }, [reciter, selectedSurah, playlistData]);
 
-  // Lazy-load the Itqan playlist (audio URLs) on first open.
-  // mp3quran playlists ship with the reciter metadata.
+  // Lazy-load playlists (audio URLs) on first open for sources that need it.
+  // Other sources ship their playlist with the reciter metadata.
   useEffect(() => {
     if (!reciter) return;
-    if (reciter.source !== LinkSource.ITQAN) return;
     if (reciter.moshaf.playlist.length > 0) return;
     if (playlistAttemptedRef.current.has(reciter.id)) return;
 
@@ -63,9 +65,9 @@ export function usePlayer() {
     setPlaylistLoading(true);
     setPlaylistError(false);
 
-    getItqanPlaylist(reciter)
+    getReciterPlaylist(reciter.source, reciter, lang)
       .then((playlist) => {
-        if (cancelled) return;
+        if (cancelled || !playlist) return;
         setReciter((prev) =>
           prev ? { ...prev, moshaf: { ...prev.moshaf, playlist } } : prev,
         );
@@ -80,7 +82,7 @@ export function usePlayer() {
     return () => {
       cancelled = true;
     };
-  }, [reciter, playlistRetry]);
+  }, [reciter, playlistRetry, lang]);
 
   const retryLoadPlaylist = useCallback(() => {
     if (reciter) {

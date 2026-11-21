@@ -1,4 +1,4 @@
-import type { Reciter } from '../types';
+import type { LinkSource, Playlist, Reciter } from '../types';
 import { ItqanAdapter } from './reciters/itqan.adapter';
 import { Mp3QuranAdapter } from './reciters/mp3quran.adapter';
 import type { ReciterSource } from './reciters/reciter-source';
@@ -21,6 +21,7 @@ const inFlightFetches = new Map<string, Promise<ReciterSourceResult[]>>();
 export type ReciterSourceResult = {
   source: string;
   reciters: Reciter[];
+  error?: string;
 };
 
 function getSourcesSignature(enabledSources?: Record<string, boolean>): string {
@@ -33,7 +34,8 @@ function getSourcesSignature(enabledSources?: Record<string, boolean>): string {
 
 /**
  * Fetch reciters split per source. A source that fails yields an empty
- * `reciters` array so callers can merge with previously cached data.
+ * `reciters` array plus an `error` message, so callers can both merge with
+ * previously cached data and tell a failure apart from an empty catalog.
  */
 export function fetchRecitersBySource(
   lang: 'ar' | 'en',
@@ -69,8 +71,12 @@ async function doFetchRecitersBySource(
       try {
         const reciters = await source.getReciters(lang, signal);
         return { source: source.source, reciters };
-      } catch {
-        return { source: source.source, reciters: [] };
+      } catch (error) {
+        return {
+          source: source.source,
+          reciters: [],
+          error: error instanceof Error ? error.message : String(error),
+        };
       }
     }),
   );
@@ -88,4 +94,20 @@ export async function getAllReciters(
 ): Promise<Reciter[]> {
   const results = await fetchRecitersBySource(lang, enabledSources, signal);
   return results.flatMap((result) => result.reciters);
+}
+
+/**
+ * Dispatch a lazy playlist request to the adapter registered for `source`.
+ * Returns null when the source has no getPlaylist; failures from the adapter
+ * are propagated so the player can show its error/retry UI.
+ */
+export async function getReciterPlaylist(
+  source: LinkSource,
+  reciter: Reciter,
+  lang: 'ar' | 'en',
+  signal?: AbortSignal,
+): Promise<Playlist | null> {
+  const adapter = RECITER_SOURCES.find((item) => item.source === source);
+  if (!adapter?.getPlaylist) return null;
+  return adapter.getPlaylist(reciter, lang, signal);
 }
