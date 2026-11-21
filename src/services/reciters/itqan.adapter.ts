@@ -109,6 +109,11 @@ export const ItqanAdapter: ReciterSource = {
 
       return reciters.filter((r): r is Reciter => r !== null);
     } catch (error) {
+      // An abort is a cancelled/superseded load, not a source failure: letting
+      // it throw would set ReciterSourceResult.error and flash a false warning.
+      if (error instanceof Error && error.name === 'AbortError') {
+        return [];
+      }
       console.error('Itqan API error:', error);
       // Propagate so fetchRecitersBySource records `error` and the UI can tell
       // a dead source apart from a legitimately empty catalog. Individual bad

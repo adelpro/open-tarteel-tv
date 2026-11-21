@@ -105,6 +105,17 @@ describe('Itqan source-level failures reach the result', () => {
     expect(getSourceErrorCount(results)).toBe(1);
   });
 
+  it('does not count an aborted Itqan fetch as a source error', async () => {
+    mocks.retryFetch.mockRejectedValue(
+      Object.assign(new Error('aborted'), { name: 'AbortError' }),
+    );
+
+    const results = await fetchRecitersBySource('en', ONLY_ITQAN);
+
+    expect(results[0].error).toBeUndefined();
+    expect(getSourceErrorCount(results)).toBe(0);
+  });
+
   it('records an HTTP failure as an error', async () => {
     mocks.retryFetch.mockResolvedValue({ ok: false, status: 503 } as Response);
 

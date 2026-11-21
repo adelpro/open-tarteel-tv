@@ -177,6 +177,14 @@ describe('ItqanAdapter', () => {
     await expect(ItqanAdapter.getReciters('en')).rejects.toThrow('HTTP 503');
   });
 
+  it('returns an empty catalog for an aborted recitations fetch', async () => {
+    mocks.retryFetch.mockRejectedValue(
+      Object.assign(new Error('aborted'), { name: 'AbortError' }),
+    );
+
+    await expect(ItqanAdapter.getReciters('en')).resolves.toEqual([]);
+  });
+
   it('throws on a malformed recitations payload', async () => {
     setApiResponses({
       recitations: { count: 0 } as unknown as ItqanRecitationResponse,
