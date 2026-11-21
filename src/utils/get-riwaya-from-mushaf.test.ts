@@ -43,6 +43,66 @@ describe('getRiwayaKeyFromMoshafName', () => {
     );
   });
 
+  it('matches bare and mixed-case short names instead of falling back to Hafs', () => {
+    expect(getRiwayaKeyFromMoshafName('Qalun', 'en')).toBe(
+      Riwaya.QALUN_AN_NAFI,
+    );
+    expect(getRiwayaKeyFromMoshafName('wArSh', 'en')).toBe(
+      Riwaya.WARSH_AN_NAFI,
+    );
+    expect(getRiwayaKeyFromMoshafName('kHaLaF', 'en')).toBe(
+      Riwaya.KHALAF_AN_HAMZAH,
+    );
+    expect(getRiwayaKeyFromMoshafName('hAfS', 'en')).toBe(Riwaya.HAFS_A_ASIM);
+    expect(getRiwayaKeyFromMoshafName('AL-BAZZI', 'en')).toBe(
+      Riwaya.AL_BAZZI_AN_IBN_KATHIR,
+    );
+    expect(getRiwayaKeyFromMoshafName('QUNBUL an ibn kathir', 'en')).toBe(
+      Riwaya.AL_BAZZI_AN_IBN_KATHIR,
+    );
+    expect(getRiwayaKeyFromMoshafName('SuSi', 'en')).toBe(
+      Riwaya.AL_SOOSI_AN_ABU_AMR,
+    );
+    expect(getRiwayaKeyFromMoshafName("SHU'BA", 'en')).toBe(
+      Riwaya.SHUABA_AN_ASIM,
+    );
+    expect(getRiwayaKeyFromMoshafName('Ibn Zakwan', 'en')).toBe(
+      Riwaya.IBN_ZAKWAN,
+    );
+    expect(getRiwayaKeyFromMoshafName('Abu Amr', 'en')).toBe(
+      Riwaya.AL_DOORI_AN_ABU_AMR,
+    );
+  });
+
+  it('recognises Latin names for the five riwayas that had empty English arrays', () => {
+    expect(getRiwayaKeyFromMoshafName('Khalaf', 'en')).toBe(
+      Riwaya.KHALAF_AN_HAMZAH,
+    );
+    expect(getRiwayaKeyFromMoshafName('Susi an Abi Amr', 'en')).toBe(
+      Riwaya.AL_SOOSI_AN_ABU_AMR,
+    );
+    expect(getRiwayaKeyFromMoshafName('Hisham an Ibn Amir', 'en')).toBe(
+      Riwaya.HISHAM,
+    );
+    expect(getRiwayaKeyFromMoshafName('Ibn Jammaz', 'en')).toBe(
+      Riwaya.IBN_JAMMAZ,
+    );
+    expect(getRiwayaKeyFromMoshafName('Yaqoub', 'en')).toBe(Riwaya.YAQOUB);
+    expect(getRiwayaKeyFromMoshafName('ruways_an_yaqub', 'en')).toBe(
+      Riwaya.YAQOUB,
+    );
+  });
+
+  it('still maps Kisai correctly when bare/mixed-case aliases are used', () => {
+    expect(getRiwayaKeyFromMoshafName('al-dori an kisai', 'en')).toBe(
+      Riwaya.ALDURI_AN_ALKAISSAI,
+    );
+    // The Abu Amr "Dori" alias must not swallow a Kisai name.
+    expect(getRiwayaKeyFromMoshafName("AlDorai A'n Al-Kisa'ai", 'en')).toBe(
+      Riwaya.ALDURI_AN_ALKAISSAI,
+    );
+  });
+
   it('keeps the four pre-existing riwaya slugs unchanged', () => {
     expect(Riwaya.HAFS_A_ASIM).toBe('hafs-a-asim');
     expect(Riwaya.WARSH_AN_NAFI).toBe('warsh-an-nafi');

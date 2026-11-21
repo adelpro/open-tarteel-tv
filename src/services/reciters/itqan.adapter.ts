@@ -14,6 +14,7 @@ import { getItqanConfig } from '../../config/providers';
 import type { Playlist, Reciter } from '../../types';
 import { LinkSource } from '../../types';
 import { getAppVersion, getClientName } from '../../utils/app-info';
+import { isAbortError } from '../../utils/is-abort-error';
 
 // API max page size — fetches every recitation/track in a single request.
 const PAGE_SIZE = 1000;
@@ -111,7 +112,7 @@ export const ItqanAdapter: ReciterSource = {
     } catch (error) {
       // An abort is a cancelled/superseded load, not a source failure: letting
       // it throw would set ReciterSourceResult.error and flash a false warning.
-      if (error instanceof Error && error.name === 'AbortError') {
+      if (isAbortError(error)) {
         return [];
       }
       console.error('Itqan API error:', error);

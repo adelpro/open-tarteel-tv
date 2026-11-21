@@ -37,8 +37,16 @@ const fetchAll = async (
   const locale = lang === 'ar' ? 'ar' : 'en';
   let url: string | undefined = `${baseUrl}${path}?locale=${locale}`;
   const items: Mp3QuranV4Recitation[] = [];
+  // A provider that echoes the same links.next forever must not spin the
+  // serialized catalog load indefinitely.
+  const visited = new Set<string>();
 
   while (url) {
+    if (visited.has(url)) {
+      throw new Error('MP3Quran v4 pagination cycle detected');
+    }
+    visited.add(url);
+
     const response = await retryFetch(url, 3, undefined, signal);
     const body: Mp3QuranV4List<Mp3QuranV4Recitation> = await response.json();
     if (!Array.isArray(body.data)) {
@@ -79,7 +87,9 @@ export const Mp3QuranV4Adapter: ReciterSource = {
       };
 
       return {
-        id: `${LinkSource.MP3QURAN_V4}-${recitation.reciter.code}`,
+        // One reciter can have several recitations (qiraah/tariq variants).
+        // Folding the numeric recitation id avoids colliding ids/caches.
+        id: `${LinkSource.MP3QURAN_V4}-${recitation.reciter.code}-${recitation.id}`,
         name: recitation.reciter.name,
         source: LinkSource.MP3QURAN_V4,
         moshaf,

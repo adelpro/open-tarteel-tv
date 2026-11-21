@@ -140,6 +140,130 @@ describe('quran-foundation client', () => {
     expect(mocks.fetch).toHaveBeenCalledTimes(2);
   });
 
+  it('falls back to the public path when the token endpoint returns 401', async () => {
+    mocks.getQfConfig.mockReturnValue({ ...CREDENTIALS });
+    mocks.fetch.mockResolvedValue(jsonResponse({}, 401));
+    const publicResponse = jsonResponse({ ok: true });
+    mocks.retryFetch.mockResolvedValue(publicResponse);
+
+    const result = await qfFetch(
+      '/content/api/v4/resources/chapter_reciters?language=ar',
+    );
+
+    expect(result).toBe(publicResponse);
+    // Token endpoint retried within fetchFreshToken, then public fallback.
+    expect(mocks.fetch).toHaveBeenCalledTimes(3);
+    expect(mocks.fetchWithTimeout).not.toHaveBeenCalled();
+    expect(mocks.retryFetch).toHaveBeenCalledTimes(1);
+    expect(mocks.retryFetch.mock.calls[0][0]).toBe(
+      'https://api.quran.com/api/v4/resources/chapter_reciters?language=ar',
+    );
+  });
+
+  it('falls back to the public path when the token response has no access_token', async () => {
+    mocks.getQfConfig.mockReturnValue({ ...CREDENTIALS });
+    mocks.fetch.mockResolvedValue(
+      jsonResponse({ token: 'not-an-access-token' }),
+    );
+    const publicResponse = jsonResponse({ ok: true });
+    mocks.retryFetch.mockResolvedValue(publicResponse);
+
+    expect(
+      await qfFetch('/content/api/v4/resources/chapter_reciters?language=en'),
+    ).toBe(publicResponse);
+    expect(mocks.fetch).toHaveBeenCalledTimes(1);
+    expect(mocks.retryFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('forwards caller-supplied headers and signal on the public fallback', async () => {
+    mocks.retryFetch.mockResolvedValue(jsonResponse({ ok: true }));
+    const controller = new AbortController();
+
+    await qfFetch('/content/api/v4/resources/chapter_reciters?language=ar', {
+      headers: { 'X-Trace-Id': 'trace-1' },
+      signal: controller.signal,
+    });
+
+    expect(mocks.retryFetch.mock.calls[0][2]).toEqual({
+      'X-Trace-Id': 'trace-1',
+    });
+    expect(mocks.retryFetch.mock.calls[0][3]).toBe(controller.signal);
+  });
+
+  it('bounds a hung token POST with a timeout', async () => {
+    vi.useFakeTimers();
+    try {
+      mocks.getQfConfig.mockReturnValue({ ...CREDENTIALS });
+      mocks.fetch.mockImplementation(() => new Promise<Response>(() => {}));
+
+      const rejection = expect(getAccessToken()).rejects.toThrow(/timeout/i);
+      // Three bounded token attempts (3 x 10s), then a hard failure.
+      await vi.advanceTimersByTimeAsync(30_000);
+      await rejection;
+      expect(mocks.fetch).toHaveBeenCalledTimes(3);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('forwards the abort signal to the token POST and does not fall back', async () => {
+    mocks.getQfConfig.mockReturnValue({ ...CREDENTIALS });
+    const controller = new AbortController();
+    let internalSignal: AbortSignal | undefined;
+    mocks.fetch.mockImplementation(
+      (_url, init) =>
+        new Promise<Response>((_resolve, reject) => {
+          internalSignal = (init as RequestInit).signal as AbortSignal;
+          internalSignal?.addEventListener('abort', () =>
+            reject(new Error('aborted')),
+          );
+        }),
+    );
+
+    const pending = qfFetch('/content/api/v4/chapter_recitations/42', {
+      signal: controller.signal,
+    });
+    await vi.waitFor(() => expect(internalSignal).toBeDefined());
+    controller.abort();
+
+    await expect(pending).rejects.toThrow('aborted');
+    expect(mocks.retryFetch).not.toHaveBeenCalled();
+  });
+
+  it('refreshes at most once per qfFetch, keeps pacing and degrades after repeated 401s', async () => {
+    mocks.getQfConfig.mockReturnValue({ ...CREDENTIALS, rateLimitMs: 25 });
+    mocks.fetch.mockResolvedValue(
+      jsonResponse({ access_token: 'tok', expires_in: 3600 }),
+    );
+    mocks.fetchWithTimeout.mockResolvedValue(jsonResponse({}, 401));
+    const publicResponse = jsonResponse({ ok: true });
+    mocks.retryFetch.mockResolvedValue(publicResponse);
+    const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout');
+
+    const result = await qfFetch('/content/api/v4/chapter_recitations/42');
+
+    expect(result).toBe(publicResponse);
+    // Initial token fetch + exactly one forced refresh, never one per attempt.
+    expect(mocks.fetch).toHaveBeenCalledTimes(2);
+    expect(mocks.fetchWithTimeout).toHaveBeenCalledTimes(3);
+    // The 401 retry still used the configured rate-limit spacing.
+    expect(setTimeoutSpy.mock.calls.some(([, ms]) => ms === 25)).toBe(true);
+    setTimeoutSpy.mockRestore();
+  });
+
+  it('applies the 60s expiry margin only once', async () => {
+    mocks.getQfConfig.mockReturnValue({ ...CREDENTIALS });
+    // 120s = two margins. With a double margin this token would be refreshed
+    // immediately; with one margin it must still be reused.
+    mocks.fetch.mockResolvedValue(
+      jsonResponse({ access_token: 'tok-1', expires_in: 120 }),
+    );
+
+    expect(await getAccessToken()).toBe('tok-1');
+    expect(await getAccessToken()).toBe('tok-1');
+    expect(mocks.fetch).toHaveBeenCalledTimes(1);
+  });
+
   it('resetQuranFoundationClientCache forces the next call to fetch a fresh token', async () => {
     mocks.getQfConfig.mockReturnValue({ ...CREDENTIALS });
     mocks.fetch

@@ -5,6 +5,7 @@ import { encodeBase64 } from '../../utils/base64';
 const TOKEN_MAX_ATTEMPTS = 3;
 const REQUEST_MAX_ATTEMPTS = 3;
 const TOKEN_EXPIRY_MARGIN_MS = 60_000;
+const TOKEN_TIMEOUT_MS = 10_000;
 const REQUEST_TIMEOUT_MS = 10_000;
 const DEFAULT_TOKEN_EXPIRY_SECONDS = 3600;
 
@@ -28,6 +29,60 @@ const toHeaderObject = (headers?: HeadersInit): Record<string, string> => {
   return result;
 };
 
+/**
+ * POST the OAuth token request with the same abort/timeout pattern as the
+ * shared fetch helper (which only supports GET). A hung token endpoint must
+ * not stall the serialized catalog queue forever, and Home's AbortController
+ * must be able to cancel it.
+ */
+const postTokenRequest = (
+  url: string,
+  headers: Record<string, string>,
+  body: string,
+  externalSignal?: AbortSignal,
+): Promise<Response> =>
+  new Promise<Response>((resolve, reject) => {
+    const controller = new AbortController();
+    const onExternalAbort = () => controller.abort();
+
+    if (externalSignal) {
+      if (externalSignal.aborted) {
+        controller.abort();
+      } else {
+        externalSignal.addEventListener('abort', onExternalAbort);
+      }
+    }
+
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    const cleanup = () => {
+      if (timeoutId !== undefined) clearTimeout(timeoutId);
+      externalSignal?.removeEventListener('abort', onExternalAbort);
+    };
+
+    timeoutId = setTimeout(() => {
+      cleanup();
+      // Abort the underlying request so the connection/body is released.
+      controller.abort();
+      reject(new Error('Token request timeout'));
+    }, TOKEN_TIMEOUT_MS);
+
+    fetch(url, {
+      method: 'POST',
+      headers,
+      body,
+      signal: controller.signal,
+    }).then(
+      (res) => {
+        cleanup();
+        resolve(res);
+      },
+      (err) => {
+        cleanup();
+        reject(err);
+      },
+    );
+  });
+
 let cachedToken: { value: string; expiresAt: number } | null = null;
 
 /** Test/debug helper: drop the cached access token so the next call re-auths. */
@@ -39,6 +94,7 @@ const fetchFreshToken = async (
   config: QfConfig,
   clientId: string,
   clientSecret: string,
+  signal?: AbortSignal,
 ): Promise<{ access_token: string; expires_in?: number }> => {
   // Basic auth credentials must be base64 encoded; RN has no Node Buffer.
   const basicAuth = encodeBase64(`${clientId}:${clientSecret}`);
@@ -47,19 +103,23 @@ const fetchFreshToken = async (
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt < TOKEN_MAX_ATTEMPTS; attempt++) {
+    if (signal?.aborted) throw new Error('Aborted');
     try {
-      const candidate = await fetch(config.tokenUrl, {
-        method: 'POST',
-        headers: {
+      const candidate = await postTokenRequest(
+        config.tokenUrl,
+        {
           'Content-Type': 'application/x-www-form-urlencoded',
           Authorization: `Basic ${basicAuth}`,
         },
-        body: 'grant_type=client_credentials&scope=content',
-      });
+        'grant_type=client_credentials&scope=content',
+        signal,
+      );
       if (!candidate.ok) throw new Error(`HTTP ${candidate.status}`);
       response = candidate;
       break;
     } catch (error) {
+      // An abort is a cancelled load, not a retryable token error.
+      if (signal?.aborted) throw error;
       lastError = error instanceof Error ? error : new Error(String(error));
       if (attempt < TOKEN_MAX_ATTEMPTS - 1) await backoff(2 ** attempt * 1000);
     }
@@ -83,14 +143,15 @@ const fetchFreshToken = async (
 
 /**
  * Return a valid OAuth access token, fetching a fresh one when the cache is
- * empty, expired (minus a 60s safety margin) or a refresh is forced.
+ * empty, expired or a refresh is forced. The 60s safety margin is applied
+ * exactly once: it is baked into `expiresAt` when the token is stored, so the
+ * freshness check below compares against the real current time.
  */
-export const getAccessToken = async (forceRefresh = false): Promise<string> => {
-  if (
-    !forceRefresh &&
-    cachedToken &&
-    cachedToken.expiresAt > Date.now() + TOKEN_EXPIRY_MARGIN_MS
-  ) {
+export const getAccessToken = async (
+  forceRefresh = false,
+  signal?: AbortSignal,
+): Promise<string> => {
+  if (!forceRefresh && cachedToken && cachedToken.expiresAt > Date.now()) {
     return cachedToken.value;
   }
 
@@ -100,7 +161,7 @@ export const getAccessToken = async (forceRefresh = false): Promise<string> => {
     throw new Error('quran.foundation credentials are not configured');
   }
 
-  const data = await fetchFreshToken(config, clientId, clientSecret);
+  const data = await fetchFreshToken(config, clientId, clientSecret, signal);
   cachedToken = {
     value: data.access_token,
     expiresAt:
@@ -114,9 +175,10 @@ export const getAccessToken = async (forceRefresh = false): Promise<string> => {
 /**
  * Fetch a Quran Foundation API path. Without credentials it falls back to the
  * public api.quran.com endpoints by stripping the `/content/api/v4` prefix.
- * With credentials it attaches the OAuth token + client id, forces one token
- * refresh on a 401, and retries a bounded number of times with configurable
- * pacing.
+ * With credentials it attaches the OAuth token + client id, forces at most one
+ * token refresh on a 401, and retries a bounded number of times with the
+ * configured pacing. Any OAuth failure degrades to the public path rather
+ * than silently failing the source.
  */
 export async function qfFetch(
   path: string,
@@ -124,15 +186,20 @@ export async function qfFetch(
 ): Promise<Response> {
   const config = getQfConfig();
   const signal = options?.signal ?? undefined;
+  const callerHeaders = toHeaderObject(options?.headers);
 
-  if (!config.clientId || !config.clientSecret) {
+  const publicFallback = (): Promise<Response> => {
     const publicPath = path.replace(/^\/content\/api\/v4/, '');
     return retryFetch(
       `${config.publicApiBase}${publicPath}`,
       REQUEST_MAX_ATTEMPTS,
-      undefined,
+      Object.keys(callerHeaders).length > 0 ? callerHeaders : undefined,
       signal,
     );
+  };
+
+  if (!config.clientId || !config.clientSecret) {
+    return publicFallback();
   }
 
   const clientId = config.clientId;
@@ -140,12 +207,22 @@ export async function qfFetch(
   const intervalMs = config.rateLimitMs;
   const backoff = intervalMs > 0 ? delay : noop;
 
-  let currentToken = await getAccessToken();
+  let currentToken: string;
+  try {
+    currentToken = await getAccessToken(false, signal);
+  } catch (error) {
+    // A cancelled load must stay cancelled — never start a fallback request.
+    if (signal?.aborted) throw error;
+    return publicFallback();
+  }
+
+  let refreshUsed = false;
   let lastError: Error | null = null;
+  let authFailure = false;
 
   for (let index = 0; index < REQUEST_MAX_ATTEMPTS; index++) {
     try {
-      const headers = toHeaderObject(options?.headers);
+      const headers = { ...callerHeaders };
       headers['x-auth-token'] = currentToken;
       headers['x-client-id'] = clientId;
 
@@ -157,8 +234,24 @@ export async function qfFetch(
       );
 
       if (response.status === 401) {
-        currentToken = await getAccessToken(true);
+        if (refreshUsed) {
+          // Never refresh on every attempt: one refresh per qfFetch, then
+          // degrade to the public endpoint.
+          authFailure = true;
+          throw new Error('HTTP 401 after token refresh');
+        }
+        refreshUsed = true;
+        try {
+          currentToken = await getAccessToken(true, signal);
+        } catch (error) {
+          if (signal?.aborted) throw error;
+          authFailure = true;
+          return publicFallback();
+        }
         lastError = new Error('HTTP 401');
+        // Keep the configured pacing on the 401 retry — the old `continue`
+        // skipped it entirely.
+        await backoff(intervalMs);
         continue;
       }
 
@@ -166,10 +259,14 @@ export async function qfFetch(
       if (intervalMs > 0) await delay(intervalMs);
       return response;
     } catch (error) {
+      if (signal?.aborted) throw error;
       lastError = error instanceof Error ? error : new Error(String(error));
       if (index < REQUEST_MAX_ATTEMPTS - 1) await backoff(2 ** index * 1000);
     }
   }
 
+  if (authFailure) {
+    return publicFallback();
+  }
   throw lastError ?? new Error('quran.foundation request failed');
 }

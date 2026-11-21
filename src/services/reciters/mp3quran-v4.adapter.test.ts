@@ -65,7 +65,7 @@ const callGetPlaylist = (
 };
 
 const v4Reciter = (): Reciter => ({
-  id: 'mp3quran-v4-reciter-code',
+  id: 'mp3quran-v4-reciter-code-101',
   name: 'Test Reciter',
   source: LinkSource.MP3QURAN_V4,
   moshaf: {
@@ -146,7 +146,7 @@ describe('Mp3QuranV4Adapter', () => {
     expect(reciters).toHaveLength(2);
 
     expect(reciters[0]).toEqual({
-      id: 'mp3quran-v4-reciter-code',
+      id: 'mp3quran-v4-reciter-code-101',
       name: 'Test Reciter',
       source: LinkSource.MP3QURAN_V4,
       moshaf: {
@@ -164,6 +164,43 @@ describe('Mp3QuranV4Adapter', () => {
     expect(reciters[1].moshaf.id).toBe(202);
     expect(reciters[1].moshaf.riwaya).toBe(Riwaya.AL_BAZZI_AN_IBN_KATHIR);
     expect(reciters[1].moshaf.hasTimings).toBe(false);
+    expect(reciters[1].id).toBe('mp3quran-v4-second-reciter-202');
+  });
+
+  it('does not collide ids when one reciter has several recitations', async () => {
+    mocks.config.enabled = true;
+    mocks.retryFetch.mockImplementation(() =>
+      Promise.resolve(
+        jsonResponse(
+          list([
+            recitation({ id: 1, code: 'rec-a' }),
+            recitation({ id: 2, code: 'rec-b' }),
+          ]),
+        ),
+      ),
+    );
+
+    const reciters = await Mp3QuranV4Adapter.getReciters('en');
+
+    expect(reciters).toHaveLength(2);
+    expect(reciters[0].id).toBe('mp3quran-v4-reciter-code-1');
+    expect(reciters[1].id).toBe('mp3quran-v4-reciter-code-2');
+    expect(reciters[0].id).not.toBe(reciters[1].id);
+  });
+
+  it('throws when links.next repeats a visited page URL', async () => {
+    mocks.config.enabled = true;
+    mocks.retryFetch.mockImplementation((url: string) =>
+      Promise.resolve(
+        jsonResponse(url === FIRST_URL ? list([], FIRST_URL) : list([])),
+      ),
+    );
+
+    await expect(Mp3QuranV4Adapter.getReciters('en')).rejects.toThrow(
+      'MP3Quran v4 pagination cycle detected',
+    );
+    // The repeated URL is rejected before a second network call is made.
+    expect(mocks.retryFetch).toHaveBeenCalledTimes(1);
   });
 
   it('maps all 15 riwaya codes', async () => {
@@ -190,8 +227,9 @@ describe('Mp3QuranV4Adapter', () => {
       Promise.resolve(
         jsonResponse(
           list(
-            codes.map(([code]) =>
+            codes.map(([code], index) =>
               recitation({
+                id: 101 + index,
                 riwayahs: [{ code, qiraah: code, name: code }],
               }),
             ),

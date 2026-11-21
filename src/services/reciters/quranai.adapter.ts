@@ -165,7 +165,20 @@ export const QuranAiAdapter: ReciterSource = {
       },
     );
 
-    return results.filter((reciter): reciter is Reciter => reciter !== null);
+    const reciters = results.filter(
+      (reciter): reciter is Reciter => reciter !== null,
+    );
+
+    // Individual bad editions are skipped above, but losing *every* candidate
+    // is a source outage, not an empty catalog. Surface it so the home screen
+    // shows the "sources unavailable" warning instead of "no reciters".
+    if (editions.length > 0 && reciters.length === 0 && !signal?.aborted) {
+      throw new Error(
+        `Quran.ai: all ${editions.length} surah edition(s) failed to resolve playable audio`,
+      );
+    }
+
+    return reciters;
   },
 
   async getPlaylist(reciter: Reciter): Promise<Playlist> {

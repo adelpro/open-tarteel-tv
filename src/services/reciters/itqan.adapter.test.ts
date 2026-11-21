@@ -185,6 +185,15 @@ describe('ItqanAdapter', () => {
     await expect(ItqanAdapter.getReciters('en')).resolves.toEqual([]);
   });
 
+  it('treats a non-Error DOMException-like abort as a cancellation too', async () => {
+    // Hermes can reject with a DOMException that is not an Error instance.
+    const abortObject = { name: 'AbortError', message: 'aborted' };
+    expect(abortObject instanceof Error).toBe(false);
+    mocks.retryFetch.mockRejectedValue(abortObject);
+
+    await expect(ItqanAdapter.getReciters('en')).resolves.toEqual([]);
+  });
+
   it('throws on a malformed recitations payload', async () => {
     setApiResponses({
       recitations: { count: 0 } as unknown as ItqanRecitationResponse,

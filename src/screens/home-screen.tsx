@@ -45,6 +45,7 @@ import {
   SOFT_CACHE_TTL_MS,
 } from '../services/reciters-cache';
 import { Reciter, Riwaya } from '../types';
+import { isAbortError } from '../utils/is-abort-error';
 import { normalizeArabicLetter, normalizeSearchText } from '../utils/search';
 
 export default function HomeScreen() {
@@ -198,7 +199,7 @@ export default function HomeScreen() {
     } catch (err) {
       if (requestId !== requestIdRef.current) return;
       // Aborts (superseded/unmounted) are not real failures.
-      if (err instanceof Error && err.name === 'AbortError') return;
+      if (isAbortError(err)) return;
       setSourceErrorCount(0);
 
       console.error('Failed to load reciters:', err);

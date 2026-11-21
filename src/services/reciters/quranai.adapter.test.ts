@@ -170,6 +170,19 @@ describe('QuranAiAdapter', () => {
     expect(reciters[0].moshaf.riwaya).toBe(Riwaya.WARSH_AN_NAFI);
   });
 
+  it('throws when all candidate editions fail instead of returning an empty catalog', async () => {
+    // Every probe returns no playable audio; individual failures are skipped,
+    // but losing the whole edition list must surface as a source error.
+    mockApi({
+      editions: [edition(), edition({ identifier: SILENT_ID })],
+      probeAudio: {},
+    });
+
+    await expect(QuranAiAdapter.getReciters('ar')).rejects.toThrow(
+      /all 2 surah edition\(s\) failed to resolve playable audio/,
+    );
+  });
+
   it('returns an empty list when the editions payload has no data array', async () => {
     mocks.retryFetch.mockImplementation((url: string) => {
       if (url === `${BASE_URL}/edition/?format=audio`) {
