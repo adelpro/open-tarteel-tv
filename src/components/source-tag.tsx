@@ -22,6 +22,18 @@ const SourceTag = ({ source }: SourceTagProps) => {
       label: LinkSource.ITQAN,
       backgroundColor: '#004D40',
     },
+    [LinkSource.QURANAI]: {
+      label: LinkSource.QURANAI,
+      backgroundColor: '#4527A0',
+    },
+    [LinkSource.QURAN_FOUNDATION]: {
+      label: LinkSource.QURAN_FOUNDATION,
+      backgroundColor: '#AD1457',
+    },
+    [LinkSource.MP3QURAN_V4]: {
+      label: LinkSource.MP3QURAN_V4,
+      backgroundColor: '#E65100',
+    },
   };
 
   const { label, backgroundColor } = SOURCE_TAG[source];

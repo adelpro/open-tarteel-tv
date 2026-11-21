@@ -3,6 +3,9 @@
 export enum LinkSource {
   MP3QURAN = 'mp3quran',
   ITQAN = 'itqan',
+  QURANAI = 'qurani',
+  QURAN_FOUNDATION = 'quran-foundation',
+  MP3QURAN_V4 = 'mp3quran-v4',
 }
 
 export enum Riwaya {
