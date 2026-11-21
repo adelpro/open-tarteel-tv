@@ -13,6 +13,15 @@ export enum Riwaya {
   WARSH_AN_NAFI = 'warsh-an-nafi',
   QALUN_AN_NAFI = 'qalun-an-nafi',
   ALDURI_AN_ALKAISSAI = 'alduri-an-alkaissai',
+  KHALAF_AN_HAMZAH = 'khalaf-an-hamzah',
+  AL_BAZZI_AN_IBN_KATHIR = 'al-bazzi-an-ibn-kathir',
+  AL_SOOSI_AN_ABU_AMR = 'al-soosi-an-abu-amr',
+  AL_DOORI_AN_ABU_AMR = 'al-doori-an-abu-amr',
+  SHUABA_AN_ASIM = 'shuaba-an-asim',
+  IBN_ZAKWAN = 'ibn-zakwan',
+  HISHAM = 'hisham',
+  IBN_JAMMAZ = 'ibn-jammaz',
+  YAQOUB = 'yaqoub',
 }
 
 export type Surah = {

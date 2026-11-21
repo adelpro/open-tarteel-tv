@@ -47,7 +47,16 @@
     "hafs": "Hafs",
     "warsh": "Warsh",
     "qalun": "Qalun",
-    "alduri": "Ad Duri"
+    "alduri": "Ad Duri",
+    "khalaf": "Khalaf",
+    "alBazzi": "Al-Bazzi",
+    "alSoosi": "Al-Soosi",
+    "alDooriAbuAmr": "Al-Doori (Abu Amr)",
+    "shuaba": "Shu'ba",
+    "ibnZakwan": "Ibn Zakwan",
+    "hisham": "Hisham",
+    "ibnJammaz": "Ibn Jammaz",
+    "yaqoub": "Ya'qoub"
   },
   "privacy": {
     "title": "Privacy Policy",

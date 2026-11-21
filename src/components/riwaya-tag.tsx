@@ -34,6 +34,42 @@ const RiwayaTag = ({ riwaya }: RiwayaTagProps) => {
       label: t('riwaya.alduri'),
       backgroundColor: '#EF6C00',
     },
+    [Riwaya.KHALAF_AN_HAMZAH]: {
+      label: t('riwaya.khalaf'),
+      backgroundColor: '#00838F',
+    },
+    [Riwaya.AL_BAZZI_AN_IBN_KATHIR]: {
+      label: t('riwaya.alBazzi'),
+      backgroundColor: '#C62828',
+    },
+    [Riwaya.AL_SOOSI_AN_ABU_AMR]: {
+      label: t('riwaya.alSoosi'),
+      backgroundColor: '#4527A0',
+    },
+    [Riwaya.AL_DOORI_AN_ABU_AMR]: {
+      label: t('riwaya.alDooriAbuAmr'),
+      backgroundColor: '#AD1457',
+    },
+    [Riwaya.SHUABA_AN_ASIM]: {
+      label: t('riwaya.shuaba'),
+      backgroundColor: '#283593',
+    },
+    [Riwaya.IBN_ZAKWAN]: {
+      label: t('riwaya.ibnZakwan'),
+      backgroundColor: '#558B2F',
+    },
+    [Riwaya.HISHAM]: {
+      label: t('riwaya.hisham'),
+      backgroundColor: '#D84315',
+    },
+    [Riwaya.IBN_JAMMAZ]: {
+      label: t('riwaya.ibnJammaz'),
+      backgroundColor: '#4E342E',
+    },
+    [Riwaya.YAQOUB]: {
+      label: t('riwaya.yaqoub'),
+      backgroundColor: '#37474F',
+    },
   };
   const { label, backgroundColor } = RIWAYA_TAG[riwaya];
 

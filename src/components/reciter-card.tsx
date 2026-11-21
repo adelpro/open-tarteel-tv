@@ -37,6 +37,15 @@ const RIWAYA_LABEL: Record<Riwaya, string> = {
   [Riwaya.WARSH_AN_NAFI]: 'Warsh',
   [Riwaya.QALUN_AN_NAFI]: 'Qalun',
   [Riwaya.ALDURI_AN_ALKAISSAI]: 'Ad-Duri',
+  [Riwaya.KHALAF_AN_HAMZAH]: 'Khalaf',
+  [Riwaya.AL_BAZZI_AN_IBN_KATHIR]: 'Al-Bazzi',
+  [Riwaya.AL_SOOSI_AN_ABU_AMR]: 'Al-Soosi',
+  [Riwaya.AL_DOORI_AN_ABU_AMR]: 'Al-Doori (Abu Amr)',
+  [Riwaya.SHUABA_AN_ASIM]: "Shu'ba",
+  [Riwaya.IBN_ZAKWAN]: 'Ibn Zakwan',
+  [Riwaya.HISHAM]: 'Hisham',
+  [Riwaya.IBN_JAMMAZ]: 'Ibn Jammaz',
+  [Riwaya.YAQOUB]: "Ya'qoub",
 };
 
 const ReciterCard = ({
