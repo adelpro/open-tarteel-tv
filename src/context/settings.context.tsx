@@ -19,6 +19,17 @@ const SETTINGS_STORAGE_KEY = '@open_tarteel_settings';
 const THEME_STORAGE_KEY = '@open_tarteel_theme';
 const KEEP_AWAKE_STORAGE_KEY = '@open_tarteel_keep_awake';
 
+// Typed as Record<LinkSource, …> so a newly added source cannot be forgotten
+// here without a compile error. MP3Quran v4 stays opt-in because its upstream
+// is staging; the feature flag is what decides whether it is shown at all.
+const DEFAULT_ENABLED_SOURCES: Record<LinkSource, boolean> = {
+  [LinkSource.MP3QURAN]: true,
+  [LinkSource.ITQAN]: true,
+  [LinkSource.QURANAI]: true,
+  [LinkSource.QURAN_FOUNDATION]: true,
+  [LinkSource.MP3QURAN_V4]: false,
+};
+
 export type ThemeMode = 'system' | 'light' | 'dark';
 
 type SettingsContextValue = {
@@ -40,10 +51,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const systemColorScheme = useColorScheme();
 
   const [enabledSources, setEnabledSources] = useState<Record<string, boolean>>(
-    {
-      [LinkSource.MP3QURAN]: true,
-      [LinkSource.ITQAN]: true,
-    },
+    DEFAULT_ENABLED_SOURCES,
   );
   const [themeMode, setThemeModeState] = useState<ThemeMode>('system');
   const [keepScreenAwake, setKeepScreenAwake] = useState<boolean>(true);

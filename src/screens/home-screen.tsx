@@ -38,7 +38,7 @@ import { useRecentlyPlayed } from '../context/recently-played.context';
 import { useSettings } from '../context/settings.context';
 import { useReciterGridLayout } from '../hooks/use-reciter-grid-layout';
 import { useViewCounts } from '../hooks/use-view-counts';
-import { fetchRecitersBySource } from '../services/api';
+import { fetchRecitersBySource, getSourceErrorCount } from '../services/api';
 import {
   getCachedRecitersInfo,
   setCachedReciters,
@@ -54,6 +54,7 @@ export default function HomeScreen() {
   const [reciters, setReciters] = useState<Reciter[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sourceErrorCount, setSourceErrorCount] = useState(0);
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const { width } = useWindowDimensions();
@@ -119,6 +120,12 @@ export default function HomeScreen() {
       marginBottom: 24,
       lineHeight: 24,
     },
+    sourceWarning: {
+      fontSize: isVeryWide ? 18 : isWide ? 16 : 14,
+      color: errorPrimary,
+      textAlign: 'center',
+      marginBottom: 12,
+    },
     errorContainer: {
       alignItems: 'center',
       paddingHorizontal: 40,
@@ -140,6 +147,7 @@ export default function HomeScreen() {
 
     setLoading(true);
     setError(null);
+    setSourceErrorCount(0);
     try {
       const cached = await getCachedRecitersInfo(lang);
       if (requestId !== requestIdRef.current) return;
@@ -167,6 +175,7 @@ export default function HomeScreen() {
         controller.signal,
       );
       if (requestId !== requestIdRef.current) return;
+      setSourceErrorCount(getSourceErrorCount(sourceResults));
 
       // Merge: a source that returned empty keeps its previously cached
       // reciters (e.g. a temporary outage) instead of vanishing.
@@ -190,6 +199,7 @@ export default function HomeScreen() {
       if (requestId !== requestIdRef.current) return;
       // Aborts (superseded/unmounted) are not real failures.
       if (err instanceof Error && err.name === 'AbortError') return;
+      setSourceErrorCount(0);
 
       console.error('Failed to load reciters:', err);
       const errorMsg =
@@ -394,6 +404,16 @@ export default function HomeScreen() {
     width,
   );
 
+  // One warning line for any failed source, shown alongside cached/other
+  // sources and on the empty state so a dead source is never mistaken for a
+  // genuinely empty catalog.
+  const sourceWarning =
+    sourceErrorCount > 0 ? (
+      <Text style={styles.sourceWarning} accessibilityRole="alert">
+        {t('sources_unavailable')}
+      </Text>
+    ) : null;
+
   if (loading) {
     return (
       <View style={styles.centerContainer}>
@@ -419,6 +439,7 @@ export default function HomeScreen() {
   if (!loading && reciters.length === 0) {
     return (
       <View style={styles.centerContainer}>
+        {sourceWarning}
         <EmptyState
           icon="library-outline"
           title={t('No_Reciters_Found_Title')}
@@ -433,6 +454,7 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <SectionTopNav isRTL={isRTL} isDark={isDark} />
       <BrandHeader />
+      {sourceWarning}
 
       <SpatialNavigationScrollView>
         <SpatialNavigationView direction="vertical">

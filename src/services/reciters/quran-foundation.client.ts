@@ -1,6 +1,6 @@
+import { fetchWithTimeout, retryFetch } from './shared-fetch';
 import { getQfConfig, type QfConfig } from '../../config/providers';
 import { encodeBase64 } from '../../utils/base64';
-import { fetchWithTimeout, retryFetch } from './shared-fetch';
 
 const TOKEN_MAX_ATTEMPTS = 3;
 const REQUEST_MAX_ATTEMPTS = 3;

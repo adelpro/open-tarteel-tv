@@ -12,6 +12,7 @@ import {
 
 import BrandHeader from '../components/brand-header';
 import { SettingRow } from '../components/settings-row';
+import { ACTIVE_SOURCES } from '../config/providers';
 import {
   colorPrimary,
   colorPrimaryDark,
@@ -21,7 +22,6 @@ import {
 import { getThemeColors } from '../constants/theme';
 import { ThemeMode, useSettings } from '../context/settings.context';
 import { getRecitersCacheTimestamp } from '../services/reciters-cache';
-import { LinkSource } from '../types';
 
 type SpatialRef = { focus: () => void };
 
@@ -160,7 +160,7 @@ const SettingsScreen = () => {
     },
   });
 
-  const sources = Object.values(LinkSource);
+  const sources = ACTIVE_SOURCES;
 
   return (
     <View style={styles.container}>

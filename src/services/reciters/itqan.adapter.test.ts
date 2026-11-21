@@ -171,6 +171,22 @@ describe('ItqanAdapter', () => {
     expect(reciters[0].id).toBe('itqan-7-11');
   });
 
+  it('throws on an HTTP error from the recitations endpoint', async () => {
+    mocks.retryFetch.mockResolvedValue({ ok: false, status: 503 } as Response);
+
+    await expect(ItqanAdapter.getReciters('en')).rejects.toThrow('HTTP 503');
+  });
+
+  it('throws on a malformed recitations payload', async () => {
+    setApiResponses({
+      recitations: { count: 0 } as unknown as ItqanRecitationResponse,
+    });
+
+    await expect(ItqanAdapter.getReciters('en')).rejects.toThrow(
+      'Invalid Itqan recitations payload',
+    );
+  });
+
   it('keys the playlist cache by reciter.id and skips malformed surahs', async () => {
     const reciter = makeItqanReciter();
     setApiResponses({
@@ -206,6 +222,19 @@ describe('ItqanAdapter', () => {
 
     expect(await callGetPlaylist(makeItqanReciter(), 'ar')).toBe(cached);
     expect(mocks.retryFetch).not.toHaveBeenCalled();
+  });
+
+  it('treats an empty cached playlist as a miss and refetches', async () => {
+    const reciter = makeItqanReciter();
+    const fresh: Playlist = [
+      { surahId: '1', link: 'https://audio.example/1.mp3' },
+    ];
+    mocks.getCached.mockResolvedValue([]);
+    setApiResponses({ detail: { count: 1, results: [surah(1)] } });
+
+    expect(await callGetPlaylist(reciter, 'en')).toEqual(fresh);
+    expect(mocks.retryFetch).toHaveBeenCalledTimes(1);
+    expect(mocks.setCached).toHaveBeenCalledWith(reciter.id, fresh);
   });
 
   it('forwards the abort signal and does not retry an aborted request itself', async () => {

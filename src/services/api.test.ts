@@ -12,7 +12,11 @@ const fakes = vi.hoisted(() => ({
     getReciters: vi.fn(),
     getPlaylist: vi.fn(),
   },
-  qf: { source: 'quran-foundation', getReciters: vi.fn(), getPlaylist: vi.fn() },
+  qf: {
+    source: 'quran-foundation',
+    getReciters: vi.fn(),
+    getPlaylist: vi.fn(),
+  },
 }));
 
 vi.mock('./reciters/mp3quran.adapter', () => ({ Mp3QuranAdapter: fakes.mp3 }));

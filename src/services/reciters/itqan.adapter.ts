@@ -66,6 +66,9 @@ export const ItqanAdapter: ReciterSource = {
 
       const recitationsData: ItqanRecitationResponse =
         await recitationsResponse.json();
+      if (!recitationsData || !Array.isArray(recitationsData.results)) {
+        throw new Error('Invalid Itqan recitations payload');
+      }
 
       // /recitations/ is not localized (returns English for any Accept-Language).
       // For the Arabic UI, join with /reciters/ to get localized reciter names.
@@ -107,9 +110,10 @@ export const ItqanAdapter: ReciterSource = {
       return reciters.filter((r): r is Reciter => r !== null);
     } catch (error) {
       console.error('Itqan API error:', error);
-      // Return empty array to gracefully handle Itqan API failures
-      // MP3Quran will still provide reciters
-      return [];
+      // Propagate so fetchRecitersBySource records `error` and the UI can tell
+      // a dead source apart from a legitimately empty catalog. Individual bad
+      // records are still skipped by the guard in the map above.
+      throw error;
     }
   },
 
@@ -123,7 +127,9 @@ export const ItqanAdapter: ReciterSource = {
     }
 
     const cached = await getCachedItqanPlaylist(reciter.id);
-    if (cached) return cached;
+    // An empty cached playlist usually came from a transient malformed detail
+    // response; treat it as a miss so the next playback can refetch.
+    if (cached && cached.length > 0) return cached;
 
     const { baseUrl, headers } = getItqanRequest(lang);
     const response = await retryFetch(

@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import {
+  QuranFoundationAdapter,
+  resetQuranFoundationCache,
+} from './quranfoundation.adapter';
 import { LinkSource, Riwaya } from '../../types';
 
 const mocks = vi.hoisted(() => ({
@@ -12,11 +16,6 @@ vi.mock('./quran-foundation.client', () => ({
   resetQuranFoundationClientCache: mocks.resetClientCache,
 }));
 
-import {
-  QuranFoundationAdapter,
-  resetQuranFoundationCache,
-} from './quranfoundation.adapter';
-
 const jsonResponse = (body: unknown): Response =>
   ({ ok: true, status: 200, json: async () => body }) as Response;
 
@@ -28,15 +27,15 @@ const chapterReciter = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
-const listResponse = (reciters: unknown[]) =>
-  jsonResponse({ reciters });
+const listResponse = (reciters: unknown[]) => jsonResponse({ reciters });
 
 const getReciters = (lang: 'ar' | 'en' = 'ar') =>
   QuranFoundationAdapter.getReciters(lang);
 
 const getPlaylistOf = (id: number) => {
   const getPlaylist = QuranFoundationAdapter.getPlaylist;
-  if (!getPlaylist) throw new Error('QuranFoundationAdapter.getPlaylist missing');
+  if (!getPlaylist)
+    throw new Error('QuranFoundationAdapter.getPlaylist missing');
   return getPlaylist(
     {
       id: `quran-foundation-${id}`,

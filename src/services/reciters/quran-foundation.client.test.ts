@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import {
+  getAccessToken,
+  qfFetch,
+  resetQuranFoundationClientCache,
+} from './quran-foundation.client';
 import type { QfConfig } from '../../config/providers';
 
 const mocks = vi.hoisted(() => ({
@@ -19,12 +24,6 @@ vi.mock('./shared-fetch', () => ({
   retryFetch: mocks.retryFetch,
   fetchWithTimeout: mocks.fetchWithTimeout,
 }));
-
-import {
-  getAccessToken,
-  qfFetch,
-  resetQuranFoundationClientCache,
-} from './quran-foundation.client';
 
 const BASE_CONFIG: QfConfig = {
   tokenUrl: 'https://oauth.example/token',

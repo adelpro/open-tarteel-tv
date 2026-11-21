@@ -31,6 +31,12 @@ export type ReciterSourceResult = {
   error?: string;
 };
 
+/** Number of sources that failed, so the UI can warn once regardless of how
+ * many catalogs came back empty for legitimate reasons. */
+export function getSourceErrorCount(results: ReciterSourceResult[]): number {
+  return results.reduce((count, result) => count + (result.error ? 1 : 0), 0);
+}
+
 function getSourcesSignature(enabledSources?: Record<string, boolean>): string {
   if (!enabledSources) return 'all';
   return Object.keys(enabledSources)
