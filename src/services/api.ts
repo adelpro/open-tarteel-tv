@@ -2,6 +2,7 @@ import type { LinkSource, Playlist, Reciter } from '../types';
 import { ItqanAdapter } from './reciters/itqan.adapter';
 import { Mp3QuranAdapter } from './reciters/mp3quran.adapter';
 import { QuranAiAdapter } from './reciters/quranai.adapter';
+import { QuranFoundationAdapter } from './reciters/quranfoundation.adapter';
 import type { ReciterSource } from './reciters/reciter-source';
 
 /**
@@ -12,6 +13,7 @@ const RECITER_SOURCES: readonly ReciterSource[] = [
   Mp3QuranAdapter,
   ItqanAdapter,
   QuranAiAdapter,
+  QuranFoundationAdapter,
 ];
 
 /**

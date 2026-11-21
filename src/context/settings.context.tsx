@@ -11,6 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { clearCache } from '../services/audio-cache';
 import { clearItqanPlaylistCache } from '../services/reciters/itqan-playlist-cache';
+import { resetQuranFoundationCache } from '../services/reciters/quranfoundation.adapter';
 import { clearRecitersCache } from '../services/reciters-cache';
 import { LinkSource } from '../types';
 
@@ -126,6 +127,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const clearCaches = useCallback(async () => {
+    resetQuranFoundationCache();
     await Promise.all([
       clearRecitersCache(),
       clearItqanPlaylistCache(),

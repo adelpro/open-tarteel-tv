@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { LinkSource, type Playlist, type Reciter, Riwaya } from '../types';
 import { fetchRecitersBySource, getReciterPlaylist } from './api';
 
-// Fake the two registered adapters at module scope; Vitest hoists vi.mock
-// above the imports, so api.ts builds RECITER_SOURCES from these two objects.
+// Fake the registered adapters at module scope; Vitest hoists vi.mock
+// above the imports, so api.ts builds RECITER_SOURCES from these objects.
 const fakes = vi.hoisted(() => ({
   mp3: { source: 'mp3quran', getReciters: vi.fn() },
   itqan: {
@@ -12,10 +12,17 @@ const fakes = vi.hoisted(() => ({
     getReciters: vi.fn(),
     getPlaylist: vi.fn(),
   },
+  qf: { source: 'quran-foundation', getReciters: vi.fn(), getPlaylist: vi.fn() },
 }));
 
 vi.mock('./reciters/mp3quran.adapter', () => ({ Mp3QuranAdapter: fakes.mp3 }));
 vi.mock('./reciters/itqan.adapter', () => ({ ItqanAdapter: fakes.itqan }));
+vi.mock('./reciters/quranai.adapter', () => ({
+  QuranAiAdapter: { source: 'qurani', getReciters: vi.fn() },
+}));
+vi.mock('./reciters/quranfoundation.adapter', () => ({
+  QuranFoundationAdapter: fakes.qf,
+}));
 
 const makeReciter = (id: string, source: LinkSource): Reciter => ({
   id,
@@ -50,6 +57,7 @@ describe('fetchRecitersBySource', () => {
       mp3quran: true,
       itqan: true,
       qurani: false,
+      'quran-foundation': false,
     });
 
     expect(results).toHaveLength(2);
