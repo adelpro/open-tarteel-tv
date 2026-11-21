@@ -2,7 +2,10 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 
 import { useTranslation } from 'react-i18next';
-import { SpatialNavigationView } from 'react-tv-space-navigation';
+import {
+  SpatialNavigationScrollView,
+  SpatialNavigationView,
+} from 'react-tv-space-navigation';
 
 import FilterChip from './filter-chip';
 import { Riwaya } from '../types';
@@ -11,6 +14,40 @@ type FilterSectionProps = {
   selectedRiwaya: Riwaya | 'all';
   onSelectRiwaya: (riwaya: Riwaya | 'all') => void;
   isRTL: boolean;
+};
+
+// Explicit list (rather than Object.values(Riwaya)) so the test catches a
+// future Riwaya that was added to the enum but forgotten in the filter row.
+export const RIWAYA_FILTER_VALUES: readonly Riwaya[] = [
+  Riwaya.HAFS_A_ASIM,
+  Riwaya.WARSH_AN_NAFI,
+  Riwaya.QALUN_AN_NAFI,
+  Riwaya.ALDURI_AN_ALKAISSAI,
+  Riwaya.KHALAF_AN_HAMZAH,
+  Riwaya.AL_BAZZI_AN_IBN_KATHIR,
+  Riwaya.AL_SOOSI_AN_ABU_AMR,
+  Riwaya.AL_DOORI_AN_ABU_AMR,
+  Riwaya.SHUABA_AN_ASIM,
+  Riwaya.IBN_ZAKWAN,
+  Riwaya.HISHAM,
+  Riwaya.IBN_JAMMAZ,
+  Riwaya.YAQOUB,
+];
+
+const RIWAYA_LABEL_KEYS: Record<Riwaya, string> = {
+  [Riwaya.HAFS_A_ASIM]: 'riwaya.hafs',
+  [Riwaya.WARSH_AN_NAFI]: 'riwaya.warsh',
+  [Riwaya.QALUN_AN_NAFI]: 'riwaya.qalun',
+  [Riwaya.ALDURI_AN_ALKAISSAI]: 'riwaya.alduri',
+  [Riwaya.KHALAF_AN_HAMZAH]: 'riwaya.khalaf',
+  [Riwaya.AL_BAZZI_AN_IBN_KATHIR]: 'riwaya.alBazzi',
+  [Riwaya.AL_SOOSI_AN_ABU_AMR]: 'riwaya.alSoosi',
+  [Riwaya.AL_DOORI_AN_ABU_AMR]: 'riwaya.alDooriAbuAmr',
+  [Riwaya.SHUABA_AN_ASIM]: 'riwaya.shuaba',
+  [Riwaya.IBN_ZAKWAN]: 'riwaya.ibnZakwan',
+  [Riwaya.HISHAM]: 'riwaya.hisham',
+  [Riwaya.IBN_JAMMAZ]: 'riwaya.ibnJammaz',
+  [Riwaya.YAQOUB]: 'riwaya.yaqoub',
 };
 
 const SectionFilters = ({
@@ -22,43 +59,32 @@ const SectionFilters = ({
 
   const styles = StyleSheet.create({
     filterRow: {
-      flexDirection: 'row',
       direction: isRTL ? 'rtl' : 'ltr',
+      flexDirection: isRTL ? 'row-reverse' : 'row',
       alignItems: 'center',
-      justifyContent: 'flex-start',
-      flexWrap: 'wrap',
       marginVertical: 4,
+      paddingHorizontal: 20,
     },
   });
 
   return (
-    <SpatialNavigationView direction="horizontal" style={styles.filterRow}>
-      <FilterChip
-        label={t('filter_all')}
-        selected={selectedRiwaya === 'all'}
-        onPress={() => onSelectRiwaya('all')}
-      />
-      <FilterChip
-        label={t('filter_hafs')}
-        selected={selectedRiwaya === Riwaya.HAFS_A_ASIM}
-        onPress={() => onSelectRiwaya(Riwaya.HAFS_A_ASIM)}
-      />
-      <FilterChip
-        label={t('filter_warsh')}
-        selected={selectedRiwaya === Riwaya.WARSH_AN_NAFI}
-        onPress={() => onSelectRiwaya(Riwaya.WARSH_AN_NAFI)}
-      />
-      <FilterChip
-        label={t('filter_qalun')}
-        selected={selectedRiwaya === Riwaya.QALUN_AN_NAFI}
-        onPress={() => onSelectRiwaya(Riwaya.QALUN_AN_NAFI)}
-      />
-      <FilterChip
-        label={t('filter_ad_duri')}
-        selected={selectedRiwaya === Riwaya.ALDURI_AN_ALKAISSAI}
-        onPress={() => onSelectRiwaya(Riwaya.ALDURI_AN_ALKAISSAI)}
-      />
-    </SpatialNavigationView>
+    <SpatialNavigationScrollView horizontal offsetFromStart={20}>
+      <SpatialNavigationView direction="horizontal" style={styles.filterRow}>
+        <FilterChip
+          label={t('filter_all')}
+          selected={selectedRiwaya === 'all'}
+          onPress={() => onSelectRiwaya('all')}
+        />
+        {RIWAYA_FILTER_VALUES.map((riwaya) => (
+          <FilterChip
+            key={riwaya}
+            label={t(RIWAYA_LABEL_KEYS[riwaya])}
+            selected={selectedRiwaya === riwaya}
+            onPress={() => onSelectRiwaya(riwaya)}
+          />
+        ))}
+      </SpatialNavigationView>
+    </SpatialNavigationScrollView>
   );
 };
 
