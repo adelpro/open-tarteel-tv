@@ -47,6 +47,10 @@ export type Moshaf = {
   surah_total: number;
   /** Stable provider identifier when it cannot be stored in numeric `id`. */
   recitationCode?: string;
+  /** Comma-separated surah IDs for lazy, URL-derived playlists. */
+  surahIds?: string;
+  /** Whether the provider exposes per-ayah timing data. */
+  hasTimings?: boolean;
   playlist: Playlist;
 };
 

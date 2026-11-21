@@ -1,5 +1,7 @@
+import { getMp3QuranV4Config } from '../config/providers';
 import type { LinkSource, Playlist, Reciter } from '../types';
 import { ItqanAdapter } from './reciters/itqan.adapter';
+import { Mp3QuranV4Adapter } from './reciters/mp3quran-v4.adapter';
 import { Mp3QuranAdapter } from './reciters/mp3quran.adapter';
 import { QuranAiAdapter } from './reciters/quranai.adapter';
 import { QuranFoundationAdapter } from './reciters/quranfoundation.adapter';
@@ -14,6 +16,7 @@ const RECITER_SOURCES: readonly ReciterSource[] = [
   ItqanAdapter,
   QuranAiAdapter,
   QuranFoundationAdapter,
+  ...(getMp3QuranV4Config().enabled ? [Mp3QuranV4Adapter] : []),
 ];
 
 /**
