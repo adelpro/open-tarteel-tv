@@ -45,6 +45,8 @@ export type Moshaf = {
   riwaya: Riwaya;
   server: string;
   surah_total: number;
+  /** Stable provider identifier when it cannot be stored in numeric `id`. */
+  recitationCode?: string;
   playlist: Playlist;
 };
 

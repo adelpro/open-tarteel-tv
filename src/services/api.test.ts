@@ -49,6 +49,7 @@ describe('fetchRecitersBySource', () => {
     const results = await fetchRecitersBySource('ar', {
       mp3quran: true,
       itqan: true,
+      qurani: false,
     });
 
     expect(results).toHaveLength(2);
