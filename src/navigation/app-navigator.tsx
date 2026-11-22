@@ -12,6 +12,11 @@ import {
   SpatialNavigationRoot,
 } from 'react-tv-space-navigation';
 
+import {
+  LINKING_PREFIXES,
+  parseReciterIdParam,
+  parseSurahIdParam,
+} from './deep-link';
 import { useSettings } from '../context/settings.context';
 import AboutScreen from '../screens/about-screen';
 import HomeScreen from '../screens/home-screen';
@@ -49,7 +54,7 @@ SpatialNavigation.configureRemoteControl({
 });
 
 const linking: LinkingOptions<any> = {
-  prefixes: ['opentarteel://'],
+  prefixes: LINKING_PREFIXES,
   config: {
     screens: {
       Home: 'home',
@@ -63,8 +68,8 @@ const linking: LinkingOptions<any> = {
       Player: {
         path: 'player/:reciterId?/:surahId?',
         parse: {
-          reciterId: (id: string) => (id ? Number(id) : undefined),
-          surahId: (id: string) => (id ? Number(id) : undefined),
+          reciterId: parseReciterIdParam,
+          surahId: parseSurahIdParam,
         },
       },
       About: 'about',
