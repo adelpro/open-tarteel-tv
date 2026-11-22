@@ -5,13 +5,14 @@ import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { useTranslation } from 'react-i18next';
 
 import { SURAHS } from '../constants/surahs';
-import { getReciterPlaylist } from '../services/api';
+import { findReciterById, getReciterPlaylist } from '../services/api';
 import {
   cacheAudio,
   getCachedAudioPath,
   preFetchAudio,
 } from '../services/audio-cache';
 import { Reciter, Surah } from '../types';
+import { resolveAutoplay } from '../utils/player-autoplay';
 
 type PlayerScreenRouteProp = RouteProp<
   { PlayerScreen: { reciter?: Reciter; reciterId?: number; surahId?: number } },
@@ -20,6 +21,8 @@ type PlayerScreenRouteProp = RouteProp<
 
 export function usePlayer() {
   const route = useRoute<PlayerScreenRouteProp>();
+  const routeReciterId = route.params?.reciterId;
+  const explicitSurahId = route.params?.surahId ?? null;
   const { i18n } = useTranslation();
   const lang: 'ar' | 'en' = i18n.language === 'ar' ? 'ar' : 'en';
   const player = useAudioPlayer();
@@ -30,7 +33,11 @@ export function usePlayer() {
   const [reciter, setReciter] = useState<Reciter | null>(
     route.params?.reciter ?? null,
   );
-  const [selectedSurah, setSelectedSurah] = useState<number | null>(null);
+  // Eager default keeps the highlighted surah non-null on the first render,
+  // so the playlist's legacy "start surah 1" fallback cannot race the deep link.
+  const [selectedSurah, setSelectedSurah] = useState<number | null>(
+    explicitSurahId ?? SURAHS[0].id,
+  );
   const [repeat, setRepeat] = useState(false);
   const [playlistLoading, setPlaylistLoading] = useState(false);
   const [playlistError, setPlaylistError] = useState(false);
@@ -41,17 +48,31 @@ export function usePlayer() {
   // Reciters whose playlist was already attempted, so an empty/errored result
   // does not retrigger the lazy load on every render.
   const playlistAttemptedRef = useRef<Set<string>>(new Set());
+  // Reciters whose initial autoplay was already attempted: at most one attempt
+  // per reciter visit, and never before the (possibly lazy) playlist resolves.
+  const autoPlayAttemptedRef = useRef<Set<string>>(new Set());
 
   const playlistData: Surah[] = useMemo(
     () => SURAHS.slice().sort((a, b) => a.id - b.id),
     [],
   );
 
+  // In-app navigation supplies the reciter object; a deep link only supplies
+  // its id, so resolve that id from the cached catalog (or a fresh fetch).
   useEffect(() => {
-    if (!reciter || selectedSurah !== null) return;
-    if (!playlistData.length) return;
-    setSelectedSurah(playlistData[0].id);
-  }, [reciter, selectedSurah, playlistData]);
+    if (reciter || routeReciterId == null) return;
+    let cancelled = false;
+
+    findReciterById(routeReciterId, lang)
+      .then((found) => {
+        if (!cancelled && found) setReciter(found);
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [reciter, routeReciterId, lang]);
 
   // Lazy-load playlists (audio URLs) on first open for sources that need it.
   // Other sources ship their playlist with the reciter metadata.
@@ -136,6 +157,33 @@ export function usePlayer() {
     },
     [reciter, player, isPlaying],
   );
+
+  // Start the chosen surah once per reciter visit, only when the playlist is
+  // actually available (a lazy playlist may still be loading on first open).
+  useEffect(() => {
+    if (!reciter || autoPlayAttemptedRef.current.has(reciter.id)) return;
+
+    const { shouldPlay, surahId } = resolveAutoplay({
+      reciterId: reciter.id,
+      selectedSurah,
+      explicitSurahId,
+      playlist: reciter.moshaf.playlist,
+      playlistLoading,
+      alreadyAttempted: autoPlayAttemptedRef.current.has(reciter.id),
+    });
+
+    if (!shouldPlay || surahId === null) return;
+
+    autoPlayAttemptedRef.current.add(reciter.id);
+    setSelectedSurah(surahId);
+    handleSurahPress(surahId);
+  }, [
+    reciter,
+    selectedSurah,
+    explicitSurahId,
+    playlistLoading,
+    handleSurahPress,
+  ]);
 
   const handlePlayPause = useCallback(() => {
     if (!selectedSurah) return;

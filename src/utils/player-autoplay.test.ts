@@ -61,4 +61,28 @@ describe('resolveAutoplay', () => {
       surahId: 2,
     });
   });
+
+  it('prefers an explicit deep-link surahId over the default surah 1', () => {
+    const playlistWithSurahOne: Playlist = [
+      { surahId: '1', link: 'https://example.test/1.mp3' },
+      ...playlist,
+    ];
+
+    expect(
+      resolveAutoplay(
+        makeInput({
+          playlist: playlistWithSurahOne,
+          selectedSurah: 1,
+          explicitSurahId: 3,
+        }),
+      ),
+    ).toEqual({ shouldPlay: true, surahId: 3 });
+  });
+
+  it('falls back to the first playlist item when an explicit surahId is absent', () => {
+    expect(resolveAutoplay(makeInput({ explicitSurahId: 99 }))).toEqual({
+      shouldPlay: true,
+      surahId: 2,
+    });
+  });
 });

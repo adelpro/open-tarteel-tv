@@ -42,14 +42,16 @@ export default function PlayerScreen() {
   }, [reciter?.id, incrementView, addToRecentlyPlayed]);
 
   useEffect(() => {
-    if (!selectedSurah) return;
+    // Autoplay can pick the surah while a lazy playlist is still loading; wait
+    // until the list is mounted before focusing its item.
+    if (!selectedSurah || playlistLoading || !reciter) return;
 
     const index = playlistData.findIndex((s) => s.id === selectedSurah);
 
     if (index >= 0) {
       playlistRef.current?.focus(index);
     }
-  }, [playlistData, selectedSurah]);
+  }, [playlistData, selectedSurah, playlistLoading, reciter]);
 
   useEffect(() => {
     if (keepScreenAwake) {

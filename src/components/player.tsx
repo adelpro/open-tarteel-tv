@@ -2,6 +2,7 @@ import React, { memo, useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { FontAwesome } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import {
   SpatialNavigationFocusableView,
   SpatialNavigationView,
@@ -16,6 +17,7 @@ import { getThemeColors } from '../constants/theme';
 import { useFavorites } from '../context/favorites.context';
 import { useSettings } from '../context/settings.context';
 import type { PlayerState } from '../hooks/use-player';
+import { getPlayerStatusLabel } from '../utils/player-label';
 
 const isArabicText = (text: string) => /[\u0600-\u06FF]/.test(text);
 
@@ -25,6 +27,7 @@ export const Player = ({ player }: PlayerProps) => {
   const { isDark } = useSettings();
   const styles = createStyles(isDark);
   const { isFavorited, toggleFavorite } = useFavorites();
+  const { t } = useTranslation();
 
   const {
     playlistData,
@@ -154,7 +157,9 @@ export const Player = ({ player }: PlayerProps) => {
         <View style={styles.playerControls}>
           <Text style={styles.nowPlaying}>
             {hasSelection
-              ? `Now Playing: ${currentSurah?.englishName ?? ''}`
+              ? `${t(getPlayerStatusLabel(isPlaying))}: ${
+                  currentSurah?.englishName ?? currentSurah?.name ?? ''
+                }`
               : 'Select a surah to start playing'}
           </Text>
 

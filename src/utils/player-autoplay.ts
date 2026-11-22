@@ -3,6 +3,8 @@ import type { Playlist } from '../types';
 export type AutoplayInput = {
   reciterId: string | null;
   selectedSurah: number | null;
+  /** Deep-link surah id; takes precedence over `selectedSurah` when valid. */
+  explicitSurahId?: number | null;
   playlist: Playlist;
   playlistLoading: boolean;
   alreadyAttempted: boolean;
@@ -21,6 +23,7 @@ export type AutoplayDecision = {
 export const resolveAutoplay = ({
   reciterId,
   selectedSurah,
+  explicitSurahId,
   playlist,
   playlistLoading,
   alreadyAttempted,
@@ -34,12 +37,16 @@ export const resolveAutoplay = ({
     return { shouldPlay: false, surahId: null };
   }
 
-  const hasSelectedSurah =
-    selectedSurah !== null &&
-    playlist.some((item) => Number(item.surahId) === selectedSurah);
+  const isAvailable = (surahId: number | null | undefined) =>
+    surahId !== null &&
+    surahId !== undefined &&
+    playlist.some((item) => Number(item.surahId) === surahId);
 
-  return {
-    shouldPlay: true,
-    surahId: hasSelectedSurah ? selectedSurah : Number(playlist[0].surahId),
-  };
+  // The deep link is authoritative, then the in-app selection, then the first
+  // available item — any id missing from this reciter's playlist is skipped.
+  const preferred =
+    [explicitSurahId, selectedSurah].find(isAvailable) ??
+    Number(playlist[0].surahId);
+
+  return { shouldPlay: true, surahId: preferred };
 };
