@@ -138,6 +138,16 @@ describe('QuranFoundationAdapter', () => {
     );
   });
 
+  it('throws on a malformed audio detail payload', async () => {
+    mocks.qfFetch.mockResolvedValue(
+      jsonResponse({ audio_files: { notAnArray: true } }),
+    );
+
+    await expect(getPlaylistOf(42)).rejects.toThrow(
+      'Unexpected audio response for reciter 42',
+    );
+  });
+
   it('resetQuranFoundationCache clears the results cache and the token cache', async () => {
     mocks.qfFetch
       .mockResolvedValueOnce(

@@ -231,6 +231,19 @@ describe('ItqanAdapter', () => {
     });
   });
 
+  it('throws on a malformed detail payload instead of caching an empty playlist', async () => {
+    const reciter = makeItqanReciter();
+    setApiResponses({
+      detail: {
+        count: 1,
+        results: { notAnArray: true },
+      } as unknown as ItqanRecitationDetailResponse,
+    });
+
+    await expect(callGetPlaylist(reciter, 'ar')).rejects.toThrow();
+    expect(mocks.setCached).not.toHaveBeenCalled();
+  });
+
   it('returns the cached playlist without a network call', async () => {
     const cached: Playlist = [
       { surahId: '1', link: 'https://audio.example/cached.mp3' },
