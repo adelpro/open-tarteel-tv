@@ -14,8 +14,13 @@ import { clearItqanPlaylistCache } from '../services/reciters/itqan-playlist-cac
 import { resetQuranFoundationCache } from '../services/reciters/quranfoundation.adapter';
 import { clearRecitersCache } from '../services/reciters-cache';
 import { LinkSource } from '../types';
+import {
+  migrateEnabledSources,
+  SETTINGS_MIGRATION_VERSION,
+} from '../utils/settings-migration';
 
 const SETTINGS_STORAGE_KEY = '@open_tarteel_settings';
+const SETTINGS_VERSION_STORAGE_KEY = '@open_tarteel_settings_version';
 const THEME_STORAGE_KEY = '@open_tarteel_theme';
 const KEEP_AWAKE_STORAGE_KEY = '@open_tarteel_keep_awake';
 
@@ -59,13 +64,47 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
   /* load once */
   useEffect(() => {
-    AsyncStorage.getItem(SETTINGS_STORAGE_KEY)
-      .then((stored) => {
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          // Merge with defaults to ensure new sources are handled if added later
-          setEnabledSources((prev) => ({ ...prev, ...parsed }));
+    Promise.all([
+      AsyncStorage.getItem(SETTINGS_STORAGE_KEY),
+      AsyncStorage.getItem(SETTINGS_VERSION_STORAGE_KEY),
+    ])
+      .then(([stored, storedVersion]) => {
+        const parsedJson = stored ? JSON.parse(stored) : null;
+        const parsed: Record<string, unknown> =
+          parsedJson !== null &&
+          typeof parsedJson === 'object' &&
+          !Array.isArray(parsedJson)
+            ? (parsedJson as Record<string, unknown>)
+            : {};
+
+        const rawVersion =
+          storedVersion !== null && storedVersion.trim() !== ''
+            ? Number(storedVersion)
+            : undefined;
+        const version =
+          rawVersion !== undefined && !Number.isNaN(rawVersion)
+            ? rawVersion
+            : undefined;
+
+        const migrated = migrateEnabledSources(parsed, version);
+
+        // Merge with defaults so newly added sources are still handled.
+        setEnabledSources((prev) => ({ ...prev, ...migrated.enabledSources }));
+
+        // Persist the migrated toggles so the fix is durable: otherwise the
+        // untouched stale value would be re-merged on the next launch, when
+        // the version is already 2 and migration no longer runs.
+        if (version === undefined || version < SETTINGS_MIGRATION_VERSION) {
+          AsyncStorage.setItem(
+            SETTINGS_STORAGE_KEY,
+            JSON.stringify(migrated.enabledSources),
+          ).catch(() => {});
         }
+        // Write the schema version exactly once per load.
+        AsyncStorage.setItem(
+          SETTINGS_VERSION_STORAGE_KEY,
+          String(migrated.version),
+        ).catch(() => {});
       })
       .catch(() => {});
 
