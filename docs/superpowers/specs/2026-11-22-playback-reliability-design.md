@@ -19,13 +19,14 @@ Opening a reciter currently lands on a player that says "Now Playing: Al-Faatiha
 
 ## Goals
 
-1. Auto-play the selected surah (first by default) on entering the player, exactly once per reciter visit, and only after its playlist is available.
-2. Replace the misleading "Now Playing" label with an honest pre-play state.
-3. Verify and, if needed, fix lazy playlist loading for Itqan and QF; prove playback for both.
-4. Re-enable Qurani.ai via a one-time settings migration, and verify it on device.
-5. Enable the v4 flag for this test environment and verify v4 appears and plays; keep the shipped default off until upstream is promoted.
-6. Replace the single oversized cache row with chunked storage so the catalog cache actually loads.
-7. Add automated tests for every changed behavior and a device runbook with per-source evidence.
+1. Auto-play the selected surah (first by default) on entering the player, exactly once per reciter visit, and only after its playlist is available; if that surah is missing from the playlist, fall back to the first available item and update the selection.
+2. Support deep-link entry (`opentarteel://player/:reciterId?/:surahId?`) by resolving the reciter from the catalog and honoring an explicit `surahId`, then applying the same autoplay rule.
+3. Replace the misleading "Now Playing" label with an honest pre-play state.
+4. Verify and, if needed, fix lazy playlist loading for Itqan and QF; prove playback for both.
+5. Re-enable Qurani.ai via a one-time settings migration, and verify it on device.
+6. Enable the v4 flag for this test environment and verify v4 appears and plays; keep the shipped default off until upstream is promoted.
+7. Replace the single oversized cache row with chunked storage so the catalog cache actually loads.
+8. Add automated tests for every changed behavior and a device runbook with per-source evidence.
 
 ## Non-goals
 
@@ -51,7 +52,15 @@ Opening a reciter currently lands on a player that says "Now Playing: Al-Faatiha
 
 ### Decision: autoplay trigger
 
-Use an effect in `usePlayer` keyed on `reciter?.id`, `selectedSurah`, `playlistLoading` and playlist availability. A ref `autoPlayAttemptedRef: Set<string>` records reciter IDs already auto-played; it is cleared when the user picks a different reciter or taps retry. The effect calls `handleSurahPress(selectedSurah)` only when `reciter.moshaf.playlist.length > 0`, `!playlistLoading` and not already attempted. "Current surah" means the highlighted `selectedSurah` (surah 1 by default), not a persisted last-played surah.
+Use an effect in `usePlayer` keyed on `reciter?.id`, `selectedSurah`, `playlistLoading` and playlist availability. A ref `autoPlayAttemptedRef: Set<string>` records reciter IDs already auto-played; it is cleared when the user picks a different reciter or taps retry. The effect calls `handleSurahPress(selectedSurah)` only when `reciter.moshaf.playlist.length > 0`, `!playlistLoading` and not already attempted. "Current surah" means the highlighted `selectedSurah` (surah 1 by default), not a persisted last-played surah. If that surah ID is absent from the loaded playlist, set `selectedSurah` to `playlist[0].surahId` and autoplay that item instead — never leave the player idle because a reciter has a partial playlist.
+
+### Decision: deep links (in scope)
+
+`usePlayer` must also accept `route.params.reciterId` and `route.params.surahId`. `reciterId` is compared loosely (`String(reciter.id)`) against the cached catalog first, then a fresh `getAllReciters()` fetch if absent; an explicit `surahId` overrides the surah-1 default. If the explicit surah is not in the playlist, apply the same first-available fallback. Deep-link entry then follows the identical autoplay gate. `src/navigation/app-navigator.tsx` already declares the `Player` path; no new prefix is needed.
+
+### Decision: tests (builder call, recorded)
+
+Do not add a rendering stack (`@testing-library/react-native`, jsdom, native-module mocks). Extract the decisions into pure helpers in the existing node-environment Vitest setup: a helper that, given `{ reciterId, selectedSurah, playlist, playlistLoading, alreadyAttempted }`, returns `{ shouldPlay, surahId }`; a pure label selector over `isPlaying` and surah name; and pure functions for settings migration and cache chunking. Component wiring stays thin and is verified by `yarn type-check` plus the device runbook.
 
 ### Decision: pre-play label
 
@@ -85,8 +94,9 @@ Set `EXPO_PUBLIC_OTTV_ENABLE_MP3QURAN_V4=true` in gitignored `.env.local` for ve
 ### Phase 1 — player behavior
 
 - Add `autoPlayAttemptedRef` and the autoplay effect in `src/hooks/use-player.ts`.
+- Resolve `route.params.reciterId` / `surahId` (cached catalog first, then a fresh fetch) and apply the explicit surah or the first-available fallback.
 - Fix the label in `src/components/player.tsx` and add locale keys.
-- Tests: autoplay fires once per reciter; does not fire before a lazy playlist resolves; does not re-fire after pause; label switches on `isPlaying`.
+- Tests (pure helpers only): autoplay fires once per reciter; does not fire before a lazy playlist resolves; does not re-fire after pause; missing surah falls back to the first available item; explicit deep-link surah wins; label switches on `isPlaying`.
 
 ### Phase 2 — settings migration and v4 verification
 
@@ -111,6 +121,7 @@ Set `EXPO_PUBLIC_OTTV_ENABLE_MP3QURAN_V4=true` in gitignored `.env.local` for ve
 
 - Run `yarn test`, `yarn type-check`, `yarn lint`.
 - Run the device matrix: mp3quran, Itqan, QF, Qurani, v4 — catalog count and playback result for each.
+- Verify one deep link (`opentarteel://player/<reciterId>/<surahId>`) resolves and autoplays the requested surah.
 - If Metro serves a corrupt bundle again, restart Metro and cold-launch; note in the runbook.
 
 ## What is left to the builder
