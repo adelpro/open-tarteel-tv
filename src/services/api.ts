@@ -6,6 +6,7 @@ import { Mp3QuranAdapter } from './reciters/mp3quran.adapter';
 import { QuranAiAdapter } from './reciters/quranai.adapter';
 import { QuranFoundationAdapter } from './reciters/quranfoundation.adapter';
 import type { ReciterSource } from './reciters/reciter-source';
+import { getCachedRecitersInfo } from './reciters-cache';
 
 /**
  * Register all reciter sources here.
@@ -107,6 +108,27 @@ export async function getAllReciters(
 ): Promise<Reciter[]> {
   const results = await fetchRecitersBySource(lang, enabledSources, signal);
   return results.flatMap((result) => result.reciters);
+}
+
+/**
+ * Resolve a reciter from a deep-link id. Reads the cached catalog first and
+ * only hits the network (via `getAllReciters`) on a miss. Ids are compared as
+ * strings so numeric and string forms of the same id both match.
+ */
+export async function findReciterById(
+  reciterId: string | number,
+  lang: 'ar' | 'en',
+): Promise<Reciter | null> {
+  const target = String(reciterId);
+
+  const cached = await getCachedRecitersInfo(lang);
+  const fromCache = cached?.data.find(
+    (reciter) => String(reciter.id) === target,
+  );
+  if (fromCache) return fromCache;
+
+  const fresh = await getAllReciters(lang);
+  return fresh.find((reciter) => String(reciter.id) === target) ?? null;
 }
 
 /**
