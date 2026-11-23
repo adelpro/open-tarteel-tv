@@ -47,7 +47,7 @@ The Home screen currently mounts every reciter card at once. With all five provi
 - RTL: `rowContainerStyle` uses `flexDirection: isRTL ? 'row-reverse' : 'row'`; the app already maps DPAD left/right inversely in `app-navigator.tsx`.
 - Default focus: call `gridRef.current?.focus(0)` after the grid mounts/data is ready when `searchFocused` is false, replacing `preferredFirstFocus` on the first card.
 - Filter/data changes: when `filteredReciters` shrinks below the currently focused index, clamp focus to the new last valid index (or index 0 when empty). Focus must never be left pointing at a removed row. (Builder call, recorded.)
-- Search-focus behavior: PENDING OWNER DECISION — see below.
+- Search-focus behavior (owner decision): never steal focus from the search input while it is focused. When search loses focus (or on initial Home entry with search unfocused), move focus to the first grid card. Implement as an effect keyed on `searchFocused` that calls `gridRef.current?.focus(0)` on the false transition, in addition to the mount-time focus call.
 - When `filteredReciters.length === 0`, render the existing `EmptyState` below the header instead of the grid (no behavior change).
 
 ## Approaches considered
@@ -56,9 +56,9 @@ The Home screen currently mounts every reciter card at once. With all five provi
 2. **Single virtualized grid as the whole Home list, with header (chosen).** One vertical scroller, true row virtualization, featured sections preserved. Larger diff and requires careful header measurement/focus verification.
 3. **Keep current layout and cap the catalog shown.** Avoids TV-component risk but does not scale and changes what users can browse. Rejected.
 
-## Pending owner decision
+## Owner decision (resolved)
 
-Focus while searching: the existing `preferredFirstFocus={!searchFocused}` deliberately keeps the first card from stealing focus from the search input. In the new layout the search field lives in the grid header, so we need to decide what happens when search gains or loses focus — stay in the header, move to the first card on exit, or follow a different rule. This changes whether focus logic is a one-time mount call or an effect keyed on `searchFocused`.
+Focus while searching: never steal focus from the search input while it is focused; return focus to the first grid card when search loses focus. Resolved in the decisions section above.
 
 ## What is left to the builder
 
