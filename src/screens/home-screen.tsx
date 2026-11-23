@@ -24,11 +24,8 @@ import {
 
 import BrandHeader from '../components/brand-header';
 import EmptyState from '../components/empty-state';
+import HomeHeader from '../components/home-header';
 import RetryButton from '../components/retry-button';
-import SearchInput from '../components/search-input';
-import SectionFeatured from '../components/section-featured';
-import SectionFilters from '../components/section-filters';
-import SectionLetterFilter from '../components/section-letter-filter';
 import SectionRecitersGrid from '../components/section-reciters-grid';
 import SectionTopNav from '../components/section-top-nav';
 import { colorPrimary } from '../constants/interaction-colors';
@@ -89,6 +86,9 @@ export default function HomeScreen() {
   const [selectedRiwaya, setSelectedRiwaya] = useState<Riwaya | 'all'>('all');
   const [selectedLetter, setSelectedLetter] = useState<string>('all');
   const [searchFocused, setSearchFocused] = useState(false);
+  // Measured by HomeHeader; the virtualized grid consumes this in the next task.
+  const [headerHeight, setHeaderHeight] = useState<number | null>(null);
+  void headerHeight;
 
   const { favorites } = useFavorites(); // local favorites
 
@@ -459,108 +459,41 @@ export default function HomeScreen() {
 
       <SpatialNavigationScrollView>
         <SpatialNavigationView direction="vertical">
-          <SearchInput
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            onFocusChange={setSearchFocused}
+          <HomeHeader
+            searchQuery={searchQuery}
+            onSearchQueryChange={setSearchQuery}
+            onSearchFocusChange={setSearchFocused}
             isDark={isDark}
-          />
-
-          <SectionFilters
             selectedRiwaya={selectedRiwaya}
             onSelectRiwaya={setSelectedRiwaya}
             isRTL={isRTL}
-          />
-
-          <SectionLetterFilter
             letters={lettersForCurrentLang}
             selectedLetter={selectedLetter}
             onSelectLetter={setSelectedLetter}
-            isRTL={isRTL}
+            recentlyPlayedReciters={recentlyPlayedReciters}
+            myFavoritedReciters={myFavoritedReciters}
+            mostViewedReciters={mostViewedReciters}
+            mostFavoritedReciters={mostFavoritedReciters}
+            itemWidth={itemWidth}
+            viewCounts={viewCounts}
+            favoriteCounts={favoriteCounts}
+            onReciterPress={handleReciterPress}
+            isVeryWide={isVeryWide}
+            isWide={isWide}
+            textPrimary={textPrimary}
+            reciterCount={filteredReciters.length}
+            onHeight={setHeaderHeight}
           />
 
-          {recentlyPlayedReciters.length > 0 && (
-            <SectionFeatured
-              title={`${t('recently_played')} (${recentlyPlayedReciters.length})`}
-              reciters={recentlyPlayedReciters}
+          {filteredReciters.length > 0 && (
+            <SectionRecitersGrid
+              reciters={filteredReciters}
+              cardsPerRow={cardsPerRow}
               itemWidth={itemWidth}
-              isRTL={isRTL}
+              onReciterPress={handleReciterPress}
+              preferredFirstFocus={!searchFocused}
               viewCounts={viewCounts}
               favoriteCounts={favoriteCounts}
-              onReciterPress={handleReciterPress}
-              isVeryWide={isVeryWide}
-              isWide={isWide}
-              textPrimary={textPrimary}
-            />
-          )}
-
-          <SectionFeatured
-            title={`${t('my_favorites')} (${myFavoritedReciters.length})`}
-            reciters={myFavoritedReciters}
-            itemWidth={itemWidth}
-            isRTL={isRTL}
-            viewCounts={viewCounts}
-            favoriteCounts={favoriteCounts}
-            onReciterPress={handleReciterPress}
-            isVeryWide={isVeryWide}
-            isWide={isWide}
-            textPrimary={textPrimary}
-          />
-
-          <SectionFeatured
-            title={`${t('most_viewed')} (${mostViewedReciters.length})`}
-            reciters={mostViewedReciters}
-            itemWidth={itemWidth}
-            isRTL={isRTL}
-            viewCounts={viewCounts}
-            favoriteCounts={favoriteCounts}
-            onReciterPress={handleReciterPress}
-            isVeryWide={isVeryWide}
-            isWide={isWide}
-            textPrimary={textPrimary}
-          />
-
-          <SectionFeatured
-            title={`${t('most_favorited')} (${mostFavoritedReciters.length})`}
-            reciters={mostFavoritedReciters}
-            itemWidth={itemWidth}
-            isRTL={isRTL}
-            viewCounts={viewCounts}
-            favoriteCounts={favoriteCounts}
-            onReciterPress={handleReciterPress}
-            isVeryWide={isVeryWide}
-            isWide={isWide}
-            textPrimary={textPrimary}
-          />
-
-          {filteredReciters.length > 0 ? (
-            <View style={{ marginTop: 20 }}>
-              <Text
-                style={{
-                  color: textPrimary,
-                  fontSize: isVeryWide ? 28 : isWide ? 24 : 20,
-                  fontWeight: '700',
-                  marginBottom: 12,
-                  paddingHorizontal: 20,
-                }}
-              >
-                {t('reciters')} ({filteredReciters.length})
-              </Text>
-              <SectionRecitersGrid
-                reciters={filteredReciters}
-                cardsPerRow={cardsPerRow}
-                itemWidth={itemWidth}
-                onReciterPress={handleReciterPress}
-                preferredFirstFocus={!searchFocused}
-                viewCounts={viewCounts}
-                favoriteCounts={favoriteCounts}
-              />
-            </View>
-          ) : (
-            <EmptyState
-              icon="search-outline"
-              title={t('No_Search_Results_Title')}
-              message={t('No_Search_Results_Content')}
             />
           )}
         </SpatialNavigationView>
