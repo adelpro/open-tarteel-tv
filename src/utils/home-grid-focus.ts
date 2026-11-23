@@ -18,6 +18,14 @@ export type GridFocusDecision = {
   focusIndex: number | null;
 };
 
+export type GridRowFocusInput = GridFocusInput & {
+  hasHeader: boolean;
+};
+
+export type GridRowFocusDecision = {
+  focusRow: number | null;
+};
+
 /** Clamp `index` into `[0, length - 1]`, or return 0 for an empty range. */
 export const clampGridIndex = (index: number, length: number): number => {
   if (length <= 0) {
@@ -53,4 +61,40 @@ export const resolveGridFocus = ({
   }
 
   return { focusIndex: clampGridIndex(currentIndex, itemCount) };
+};
+
+/**
+ * Convert a card index into the index used by the virtualized grid ref.
+ *
+ * The library prepends the header as virtual row 0 when a header is supplied,
+ * so ref `focus(index)` and `currentlyFocusedItemIndex` are header-inclusive
+ * while all the helpers above work in card space. With a header, card 0 lives
+ * at row 1 and the last card lives at row `cardCount`; without one, the two
+ * spaces are identical.
+ */
+export const cardIndexToGridRow = (
+  cardIndex: number,
+  hasHeader: boolean,
+): number => cardIndex + (hasHeader ? 1 : 0);
+
+/** Convert a header-inclusive row reported by the ref back into a card index. */
+export const gridRowToCardIndex = (
+  gridRow: number,
+  hasHeader: boolean,
+): number => Math.max(gridRow - (hasHeader ? 1 : 0), 0);
+
+/**
+ * Card-space focus decision translated to a grid row, ready for `ref.focus()`.
+ * A `null` row means the caller must not focus the grid (empty data, search
+ * focused, or data not ready).
+ */
+export const resolveGridRowFocus = ({
+  hasHeader,
+  ...focusInput
+}: GridRowFocusInput): GridRowFocusDecision => {
+  const { focusIndex } = resolveGridFocus(focusInput);
+  if (focusIndex === null) {
+    return { focusRow: null };
+  }
+  return { focusRow: cardIndexToGridRow(focusIndex, hasHeader) };
 };

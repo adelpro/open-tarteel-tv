@@ -43,7 +43,11 @@ import {
   SOFT_CACHE_TTL_MS,
 } from '../services/reciters-cache';
 import { Reciter, Riwaya } from '../types';
-import { clampGridIndex, resolveGridFocus } from '../utils/home-grid-focus';
+import {
+  clampGridIndex,
+  gridRowToCardIndex,
+  resolveGridRowFocus,
+} from '../utils/home-grid-focus';
 import { buildHomeGridKey } from '../utils/home-grid-key';
 import { isAbortError } from '../utils/is-abort-error';
 import { normalizeArabicLetter, normalizeSearchText } from '../utils/search';
@@ -424,35 +428,34 @@ export default function HomeScreen() {
     const grid = gridRef.current;
     if (!grid) return;
 
+    // HomeHeader is always passed as the grid's header, occupying virtual
+    // row 0. The helpers work in card space; translate only at this ref.
+    const hasHeader = true;
     const gridKey = buildHomeGridKey(headerHeight, isRTL, cardsPerRow);
     const isRemount =
       previousGridKeyRef.current !== null &&
       previousGridKeyRef.current !== gridKey;
     const currentIndex = isRemount
-      ? lastFocusedIndexRef.current
-      : grid.currentlyFocusedItemIndex;
+      ? clampGridIndex(lastFocusedIndexRef.current, reciterCount)
+      : gridRowToCardIndex(grid.currentlyFocusedItemIndex, hasHeader);
     lastFocusedIndexRef.current = currentIndex;
     previousGridKeyRef.current = gridKey;
 
     const justLeftSearch = wasSearchFocusedRef.current && !searchFocused;
-    const { focusIndex } = resolveGridFocus({
+    const { focusRow } = resolveGridRowFocus({
       searchFocused,
       justLeftSearch,
       dataReady: reciterCount > 0,
       itemCount: reciterCount,
       currentIndex,
+      hasHeader,
     });
     wasSearchFocusedRef.current = searchFocused;
 
-    if (focusIndex === null) return;
+    if (focusRow === null) return;
 
-    // A remount hands back a fresh ref starting at index 0, so restore where
-    // the outgoing grid held focus, clamped to the current data length.
-    const target = isRemount
-      ? clampGridIndex(lastFocusedIndexRef.current, reciterCount)
-      : focusIndex;
-    grid.focus(target);
-    lastFocusedIndexRef.current = target;
+    grid.focus(focusRow);
+    lastFocusedIndexRef.current = gridRowToCardIndex(focusRow, hasHeader);
   }, [headerHeight, isRTL, cardsPerRow, searchFocused, reciterCount]);
 
   // One warning line for any failed source, shown alongside cached/other
