@@ -7,6 +7,8 @@ import {
   gridRowToCardIndex,
   resolveGridFocus,
   resolveGridRowFocus,
+  resolveRemountFocus,
+  toFiniteGridRow,
 } from './home-grid-focus';
 
 const makeInput = (
@@ -101,6 +103,103 @@ describe('gridRowToCardIndex', () => {
 
   it('maps row 0 to card 0 without a header', () => {
     expect(gridRowToCardIndex(0, false)).toBe(0);
+  });
+});
+
+describe('toFiniteGridRow', () => {
+  it('passes finite rows through unchanged', () => {
+    expect(toFiniteGridRow(9)).toBe(9);
+    expect(toFiniteGridRow(0)).toBe(0);
+  });
+
+  it.each([null, undefined, NaN, Infinity, -Infinity])(
+    'falls back to row 0 for %s',
+    (value) => {
+      expect(toFiniteGridRow(value)).toBe(0);
+    },
+  );
+});
+
+describe('resolveRemountFocus', () => {
+  const keyA = 'grid:300:rtl:3';
+  const keyB = 'grid:320:rtl:3';
+
+  it('preserves the focused card across a keyed remount', () => {
+    // Focus had moved to card 8 on the old grid (ref row 9, header at row 0).
+    // The card's onFocus reports card space directly.
+    const capturedCard = gridRowToCardIndex(9, true);
+    // The fresh grid's ref reports row 0 until focus is restored.
+    const decision = resolveRemountFocus({
+      previousGridKey: keyA,
+      gridKey: keyB,
+      capturedCardIndex: capturedCard,
+      liveGridRow: 0,
+      itemCount: 40,
+      hasHeader: true,
+    });
+    expect(decision).toEqual({ isRemount: true, currentCardIndex: 8 });
+
+    // That card is restored to the same header-inclusive row.
+    expect(
+      resolveGridRowFocus(
+        makeInput({
+          currentIndex: decision.currentCardIndex,
+          hasHeader: true,
+        }),
+      ),
+    ).toEqual({ focusRow: 9 });
+  });
+
+  it('reads the live grid row when the key is unchanged', () => {
+    expect(
+      resolveRemountFocus({
+        previousGridKey: keyA,
+        gridKey: keyA,
+        capturedCardIndex: 3,
+        liveGridRow: 12,
+        itemCount: 40,
+        hasHeader: true,
+      }),
+    ).toEqual({ isRemount: false, currentCardIndex: 11 });
+  });
+
+  it('treats the first mount as a non-remount', () => {
+    expect(
+      resolveRemountFocus({
+        previousGridKey: null,
+        gridKey: keyA,
+        capturedCardIndex: 7,
+        liveGridRow: 1,
+        itemCount: 40,
+        hasHeader: true,
+      }),
+    ).toEqual({ isRemount: false, currentCardIndex: 0 });
+  });
+
+  it('clamps a preserved card when the catalog shrank before the remount', () => {
+    expect(
+      resolveRemountFocus({
+        previousGridKey: keyA,
+        gridKey: keyB,
+        capturedCardIndex: 9,
+        liveGridRow: 0,
+        itemCount: 4,
+        hasHeader: true,
+      }),
+    ).toEqual({ isRemount: true, currentCardIndex: 3 });
+  });
+
+  it('guards a non-finite live row before translating it', () => {
+    expect(
+      resolveRemountFocus({
+        previousGridKey: keyA,
+        gridKey: keyA,
+        capturedCardIndex: 5,
+        liveGridRow: undefined,
+        itemCount: 40,
+        hasHeader: true,
+      }),
+    ).toEqual({ isRemount: false, currentCardIndex: 0 });
   });
 });
 

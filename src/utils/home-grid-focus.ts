@@ -84,6 +84,55 @@ export const gridRowToCardIndex = (
 ): number => Math.max(gridRow - (hasHeader ? 1 : 0), 0);
 
 /**
+ * The grid ref reports a plain number, but a null/undefined/NaN value must
+ * never reach gridRowToCardIndex (it would poison focus with NaN). Fall back
+ * to row 0 — which is card 0 both with and without a header.
+ */
+export const toFiniteGridRow = (gridRow: number | null | undefined): number =>
+  typeof gridRow === 'number' && Number.isFinite(gridRow) ? gridRow : 0;
+
+export type RemountFocusInput = {
+  previousGridKey: string | null;
+  gridKey: string;
+  /** Card index captured from live focus just before a keyed remount. */
+  capturedCardIndex: number;
+  /** Header-inclusive row read from the grid ref (null/undefined guarded). */
+  liveGridRow: number | null | undefined;
+  itemCount: number;
+  hasHeader: boolean;
+};
+
+export type RemountFocusDecision = {
+  isRemount: boolean;
+  currentCardIndex: number;
+};
+
+/**
+ * Decide whether a keyed grid remount happened and which card is focused.
+ *
+ * A key change destroys the old grid and mounts a fresh one whose ref reports
+ * row 0, so on a remount the only trustworthy value is the card index captured
+ * from the live focus before unmount. Otherwise the live grid row wins.
+ */
+export const resolveRemountFocus = ({
+  previousGridKey,
+  gridKey,
+  capturedCardIndex,
+  liveGridRow,
+  itemCount,
+  hasHeader,
+}: RemountFocusInput): RemountFocusDecision => {
+  const isRemount = previousGridKey !== null && previousGridKey !== gridKey;
+  const cardIndex = isRemount
+    ? capturedCardIndex
+    : gridRowToCardIndex(toFiniteGridRow(liveGridRow), hasHeader);
+  return {
+    isRemount,
+    currentCardIndex: clampGridIndex(cardIndex, itemCount),
+  };
+};
+
+/**
  * Card-space focus decision translated to a grid row, ready for `ref.focus()`.
  * A `null` row means the caller must not focus the grid (empty data, search
  * focused, or data not ready).

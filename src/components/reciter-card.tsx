@@ -28,6 +28,8 @@ type ReciterCardProps = {
   reciter: Reciter;
   preferredFocus?: boolean;
   onPress: (reciter: Reciter) => void;
+  /** Fired when spatial navigation focuses this card (used to track grid focus). */
+  onFocus?: () => void;
   viewCount?: number;
   favoriteCount?: number;
 };
@@ -52,6 +54,7 @@ const ReciterCard = ({
   reciter,
   preferredFocus = false,
   onPress,
+  onFocus,
   viewCount,
   favoriteCount,
 }: ReciterCardProps) => {
@@ -123,7 +126,10 @@ const ReciterCard = ({
 
   const badgeIconSize = isVeryWide ? 12 : isWide ? 11 : isMedium ? 10 : 9;
   return (
-    <SpatialNavigationFocusableView onSelect={() => onPress(reciter)}>
+    <SpatialNavigationFocusableView
+      onFocus={onFocus}
+      onSelect={() => onPress(reciter)}
+    >
       {({ isFocused }) => {
         return (
           <Pressable

@@ -1,6 +1,7 @@
 import React, {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -18,6 +19,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import Fuse from 'fuse.js';
 import { useTranslation } from 'react-i18next';
 import {
+  SpatialNavigationScrollView,
   SpatialNavigationVirtualizedGrid,
   type SpatialNavigationVirtualizedListRef,
 } from 'react-tv-space-navigation';
@@ -44,9 +46,9 @@ import {
 } from '../services/reciters-cache';
 import { Reciter, Riwaya } from '../types';
 import {
-  clampGridIndex,
   gridRowToCardIndex,
   resolveGridRowFocus,
+  resolveRemountFocus,
 } from '../utils/home-grid-focus';
 import { buildHomeGridKey } from '../utils/home-grid-key';
 import { isAbortError } from '../utils/is-abort-error';
@@ -98,7 +100,11 @@ export default function HomeScreen() {
   // The library's ref prop is typed as a non-nullable RefObject even though
   // React leaves it null until the grid mounts; every read below guards it.
   const gridRef = useRef<SpatialNavigationVirtualizedListRef>(null!);
-  // Focus index carried across a keyed grid remount.
+  // Live card focus, reported by each card's spatial-navigation onFocus.
+  const liveFocusedCardRef = useRef(0);
+  // Focus index carried across a keyed grid remount. DPAD navigation never
+  // re-renders this screen, so the library ref alone cannot be read at remount
+  // time; the live callback is snapshotted into this ref just before unmount.
   const lastFocusedIndexRef = useRef(0);
   const previousGridKeyRef = useRef<string | null>(null);
   const wasSearchFocusedRef = useRef(searchFocused);
@@ -114,6 +120,9 @@ export default function HomeScreen() {
       flex: 1,
       backgroundColor: bg,
       padding: 20,
+    },
+    scroll: {
+      flex: 1,
     },
     centerContainer: {
       flex: 1,
@@ -420,6 +429,21 @@ export default function HomeScreen() {
   const { itemHeight } = useItemHeight();
   const reciterCount = filteredReciters.length;
 
+  const gridKey =
+    headerHeight === null
+      ? null
+      : buildHomeGridKey(headerHeight, isRTL, cardsPerRow);
+
+  // A key change unmounts the old grid during the commit mutation phase. This
+  // layout-effect cleanup runs at that boundary — after the last onFocus from
+  // the old grid, before any card in the new grid can claim focus — so it
+  // snapshots the card the user actually last focused.
+  useLayoutEffect(() => {
+    return () => {
+      lastFocusedIndexRef.current = liveFocusedCardRef.current;
+    };
+  }, [gridKey]);
+
   // Keep grid focus valid across mount, search transitions, data shrink and
   // the keyed remount forced by a header height / direction / column change.
   // The pure helpers make the decision; this effect only drives the ref.
@@ -431,15 +455,17 @@ export default function HomeScreen() {
     // HomeHeader is always passed as the grid's header, occupying virtual
     // row 0. The helpers work in card space; translate only at this ref.
     const hasHeader = true;
-    const gridKey = buildHomeGridKey(headerHeight, isRTL, cardsPerRow);
-    const isRemount =
-      previousGridKeyRef.current !== null &&
-      previousGridKeyRef.current !== gridKey;
-    const currentIndex = isRemount
-      ? clampGridIndex(lastFocusedIndexRef.current, reciterCount)
-      : gridRowToCardIndex(grid.currentlyFocusedItemIndex, hasHeader);
-    lastFocusedIndexRef.current = currentIndex;
-    previousGridKeyRef.current = gridKey;
+    const currentGridKey = buildHomeGridKey(headerHeight, isRTL, cardsPerRow);
+    const { currentCardIndex } = resolveRemountFocus({
+      previousGridKey: previousGridKeyRef.current,
+      gridKey: currentGridKey,
+      capturedCardIndex: lastFocusedIndexRef.current,
+      liveGridRow: grid.currentlyFocusedItemIndex,
+      itemCount: reciterCount,
+      hasHeader,
+    });
+    lastFocusedIndexRef.current = currentCardIndex;
+    previousGridKeyRef.current = currentGridKey;
 
     const justLeftSearch = wasSearchFocusedRef.current && !searchFocused;
     const { focusRow } = resolveGridRowFocus({
@@ -447,7 +473,7 @@ export default function HomeScreen() {
       justLeftSearch,
       dataReady: reciterCount > 0,
       itemCount: reciterCount,
-      currentIndex,
+      currentIndex: currentCardIndex,
       hasHeader,
     });
     wasSearchFocusedRef.current = searchFocused;
@@ -455,7 +481,9 @@ export default function HomeScreen() {
     if (focusRow === null) return;
 
     grid.focus(focusRow);
-    lastFocusedIndexRef.current = gridRowToCardIndex(focusRow, hasHeader);
+    const restoredCardIndex = gridRowToCardIndex(focusRow, hasHeader);
+    lastFocusedIndexRef.current = restoredCardIndex;
+    liveFocusedCardRef.current = restoredCardIndex;
   }, [headerHeight, isRTL, cardsPerRow, searchFocused, reciterCount]);
 
   // One warning line for any failed source, shown alongside cached/other
@@ -540,17 +568,28 @@ export default function HomeScreen() {
       <BrandHeader />
       {sourceWarning}
 
-      {headerHeight === null || reciterCount === 0 ? (
+      {headerHeight === null ? (
+        // One-frame measuring pass: keep it bare so HomeHeader can report its
+        // height without a scroll wrapper changing the measurement.
         homeHeader
+      ) : reciterCount === 0 ? (
+        // No grid to scroll — make the standalone header scrollable so search,
+        // filters, featured rails and the empty state stay reachable on TV.
+        <SpatialNavigationScrollView style={styles.scroll}>
+          {homeHeader}
+        </SpatialNavigationScrollView>
       ) : (
         <SpatialNavigationVirtualizedGrid<Reciter>
           key={buildHomeGridKey(headerHeight, isRTL, cardsPerRow)}
           ref={gridRef}
           data={filteredReciters}
-          renderItem={({ item }) => (
+          renderItem={({ item, index }) => (
             <ReciterCard
               reciter={item}
               onPress={handleReciterPress}
+              onFocus={() => {
+                liveFocusedCardRef.current = index;
+              }}
               viewCount={viewCounts[item.id.toString()]}
               favoriteCount={favoriteCounts[item.id.toString()]}
             />
