@@ -26,7 +26,7 @@ import { useItemHeight } from '../hooks/ise-item-height';
 
 type ReciterCardProps = {
   reciter: Reciter;
-  preferredFocus: boolean;
+  preferredFocus?: boolean;
   onPress: (reciter: Reciter) => void;
   viewCount?: number;
   favoriteCount?: number;
@@ -50,7 +50,7 @@ const RIWAYA_LABEL: Record<Riwaya, string> = {
 
 const ReciterCard = ({
   reciter,
-  preferredFocus,
+  preferredFocus = false,
   onPress,
   viewCount,
   favoriteCount,

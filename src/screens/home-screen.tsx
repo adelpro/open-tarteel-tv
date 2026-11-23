@@ -18,21 +18,22 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import Fuse from 'fuse.js';
 import { useTranslation } from 'react-i18next';
 import {
-  SpatialNavigationScrollView,
-  SpatialNavigationView,
+  SpatialNavigationVirtualizedGrid,
+  type SpatialNavigationVirtualizedListRef,
 } from 'react-tv-space-navigation';
 
 import BrandHeader from '../components/brand-header';
 import EmptyState from '../components/empty-state';
 import HomeHeader from '../components/home-header';
+import ReciterCard from '../components/reciter-card';
 import RetryButton from '../components/retry-button';
-import SectionRecitersGrid from '../components/section-reciters-grid';
 import SectionTopNav from '../components/section-top-nav';
 import { colorPrimary } from '../constants/interaction-colors';
 import { getThemeColors } from '../constants/theme';
 import { useFavorites } from '../context/favorites.context';
 import { useRecentlyPlayed } from '../context/recently-played.context';
 import { useSettings } from '../context/settings.context';
+import { useItemHeight } from '../hooks/ise-item-height';
 import { useReciterGridLayout } from '../hooks/use-reciter-grid-layout';
 import { useViewCounts } from '../hooks/use-view-counts';
 import { fetchRecitersBySource, getSourceErrorCount } from '../services/api';
@@ -42,6 +43,8 @@ import {
   SOFT_CACHE_TTL_MS,
 } from '../services/reciters-cache';
 import { Reciter, Riwaya } from '../types';
+import { clampGridIndex, resolveGridFocus } from '../utils/home-grid-focus';
+import { buildHomeGridKey } from '../utils/home-grid-key';
 import { isAbortError } from '../utils/is-abort-error';
 import { normalizeArabicLetter, normalizeSearchText } from '../utils/search';
 
@@ -86,9 +89,15 @@ export default function HomeScreen() {
   const [selectedRiwaya, setSelectedRiwaya] = useState<Riwaya | 'all'>('all');
   const [selectedLetter, setSelectedLetter] = useState<string>('all');
   const [searchFocused, setSearchFocused] = useState(false);
-  // Measured by HomeHeader; the virtualized grid consumes this in the next task.
+  // Measured by HomeHeader and used as the virtualized grid's header size.
   const [headerHeight, setHeaderHeight] = useState<number | null>(null);
-  void headerHeight;
+  // The library's ref prop is typed as a non-nullable RefObject even though
+  // React leaves it null until the grid mounts; every read below guards it.
+  const gridRef = useRef<SpatialNavigationVirtualizedListRef>(null!);
+  // Focus index carried across a keyed grid remount.
+  const lastFocusedIndexRef = useRef(0);
+  const previousGridKeyRef = useRef<string | null>(null);
+  const wasSearchFocusedRef = useRef(searchFocused);
 
   const { favorites } = useFavorites(); // local favorites
 
@@ -404,6 +413,47 @@ export default function HomeScreen() {
     filteredReciters,
     width,
   );
+  const { itemHeight } = useItemHeight();
+  const reciterCount = filteredReciters.length;
+
+  // Keep grid focus valid across mount, search transitions, data shrink and
+  // the keyed remount forced by a header height / direction / column change.
+  // The pure helpers make the decision; this effect only drives the ref.
+  useEffect(() => {
+    if (headerHeight === null || reciterCount === 0) return;
+    const grid = gridRef.current;
+    if (!grid) return;
+
+    const gridKey = buildHomeGridKey(headerHeight, isRTL, cardsPerRow);
+    const isRemount =
+      previousGridKeyRef.current !== null &&
+      previousGridKeyRef.current !== gridKey;
+    const currentIndex = isRemount
+      ? lastFocusedIndexRef.current
+      : grid.currentlyFocusedItemIndex;
+    lastFocusedIndexRef.current = currentIndex;
+    previousGridKeyRef.current = gridKey;
+
+    const justLeftSearch = wasSearchFocusedRef.current && !searchFocused;
+    const { focusIndex } = resolveGridFocus({
+      searchFocused,
+      justLeftSearch,
+      dataReady: reciterCount > 0,
+      itemCount: reciterCount,
+      currentIndex,
+    });
+    wasSearchFocusedRef.current = searchFocused;
+
+    if (focusIndex === null) return;
+
+    // A remount hands back a fresh ref starting at index 0, so restore where
+    // the outgoing grid held focus, clamped to the current data length.
+    const target = isRemount
+      ? clampGridIndex(lastFocusedIndexRef.current, reciterCount)
+      : focusIndex;
+    grid.focus(target);
+    lastFocusedIndexRef.current = target;
+  }, [headerHeight, isRTL, cardsPerRow, searchFocused, reciterCount]);
 
   // One warning line for any failed source, shown alongside cached/other
   // sources and on the empty state so a dead source is never mistaken for a
@@ -451,53 +501,67 @@ export default function HomeScreen() {
     );
   }
 
+  // Rendered either standalone (while measuring, or when there are no results)
+  // or as the virtualized grid's header. It is the same element in both cases.
+  const homeHeader = (
+    <HomeHeader
+      searchQuery={searchQuery}
+      onSearchQueryChange={setSearchQuery}
+      onSearchFocusChange={setSearchFocused}
+      isDark={isDark}
+      selectedRiwaya={selectedRiwaya}
+      onSelectRiwaya={setSelectedRiwaya}
+      isRTL={isRTL}
+      letters={lettersForCurrentLang}
+      selectedLetter={selectedLetter}
+      onSelectLetter={setSelectedLetter}
+      recentlyPlayedReciters={recentlyPlayedReciters}
+      myFavoritedReciters={myFavoritedReciters}
+      mostViewedReciters={mostViewedReciters}
+      mostFavoritedReciters={mostFavoritedReciters}
+      itemWidth={itemWidth}
+      viewCounts={viewCounts}
+      favoriteCounts={favoriteCounts}
+      onReciterPress={handleReciterPress}
+      isVeryWide={isVeryWide}
+      isWide={isWide}
+      textPrimary={textPrimary}
+      reciterCount={reciterCount}
+      onHeight={setHeaderHeight}
+    />
+  );
+
   return (
     <View style={styles.container}>
       <SectionTopNav isRTL={isRTL} isDark={isDark} />
       <BrandHeader />
       {sourceWarning}
 
-      <SpatialNavigationScrollView>
-        <SpatialNavigationView direction="vertical">
-          <HomeHeader
-            searchQuery={searchQuery}
-            onSearchQueryChange={setSearchQuery}
-            onSearchFocusChange={setSearchFocused}
-            isDark={isDark}
-            selectedRiwaya={selectedRiwaya}
-            onSelectRiwaya={setSelectedRiwaya}
-            isRTL={isRTL}
-            letters={lettersForCurrentLang}
-            selectedLetter={selectedLetter}
-            onSelectLetter={setSelectedLetter}
-            recentlyPlayedReciters={recentlyPlayedReciters}
-            myFavoritedReciters={myFavoritedReciters}
-            mostViewedReciters={mostViewedReciters}
-            mostFavoritedReciters={mostFavoritedReciters}
-            itemWidth={itemWidth}
-            viewCounts={viewCounts}
-            favoriteCounts={favoriteCounts}
-            onReciterPress={handleReciterPress}
-            isVeryWide={isVeryWide}
-            isWide={isWide}
-            textPrimary={textPrimary}
-            reciterCount={filteredReciters.length}
-            onHeight={setHeaderHeight}
-          />
-
-          {filteredReciters.length > 0 && (
-            <SectionRecitersGrid
-              reciters={filteredReciters}
-              cardsPerRow={cardsPerRow}
-              itemWidth={itemWidth}
-              onReciterPress={handleReciterPress}
-              preferredFirstFocus={!searchFocused}
-              viewCounts={viewCounts}
-              favoriteCounts={favoriteCounts}
+      {headerHeight === null || reciterCount === 0 ? (
+        homeHeader
+      ) : (
+        <SpatialNavigationVirtualizedGrid<Reciter>
+          key={buildHomeGridKey(headerHeight, isRTL, cardsPerRow)}
+          ref={gridRef}
+          data={filteredReciters}
+          renderItem={({ item }) => (
+            <ReciterCard
+              reciter={item}
+              onPress={handleReciterPress}
+              viewCount={viewCounts[item.id.toString()]}
+              favoriteCount={favoriteCounts[item.id.toString()]}
             />
           )}
-        </SpatialNavigationView>
-      </SpatialNavigationScrollView>
+          numberOfColumns={cardsPerRow}
+          itemHeight={itemHeight}
+          additionalRenderedRows={2}
+          header={homeHeader}
+          headerSize={headerHeight}
+          rowContainerStyle={{
+            flexDirection: isRTL ? 'row-reverse' : 'row',
+          }}
+        />
+      )}
     </View>
   );
 }
