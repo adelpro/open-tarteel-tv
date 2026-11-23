@@ -42,7 +42,8 @@ export const fetchWithTimeout = (
       // Enhanced CORS configuration for React Native TV
       mode: 'cors',
       credentials: 'omit',
-      cache: 'no-cache',
+      // Do not set cache:'no-cache': the RN fetch polyfill appends a `_`
+      // cache-buster query param, which strict APIs (MP3Quran v4) reject.
       redirect: 'follow',
       signal: controller.signal,
     }).then(
