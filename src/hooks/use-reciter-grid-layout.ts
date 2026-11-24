@@ -21,10 +21,12 @@ export function useReciterGridLayout(
   }, [width]);
 
   const itemWidth = useMemo(() => {
+    // The grid viewport already sits inside the screen's 20px padding.
+    // Subtracting a second row padding leaves large gaps when the row is
+    // stretched to full width with `justifyContent: 'space-between'`.
     const contentPadding = 20;
-    const rowPadding = 20;
     const rowGap = 12;
-    const available = width - contentPadding * 2 - rowPadding * 2;
+    const available = width - contentPadding * 2;
     const gutters = rowGap * (cardsPerRow - 1);
     const w = (available - gutters) / cardsPerRow;
     return w > 0 ? Math.floor(w) : 0;
