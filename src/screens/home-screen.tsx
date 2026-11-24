@@ -35,6 +35,7 @@ import { getThemeColors } from '../constants/theme';
 import { useFavorites } from '../context/favorites.context';
 import { useRecentlyPlayed } from '../context/recently-played.context';
 import { useSettings } from '../context/settings.context';
+import { useItemHeight } from '../hooks/ise-item-height';
 import { useReciterGridLayout } from '../hooks/use-reciter-grid-layout';
 import { useViewCounts } from '../hooks/use-view-counts';
 import { fetchRecitersBySource, getSourceErrorCount } from '../services/api';
@@ -50,7 +51,10 @@ import {
   resolveRemountFocus,
 } from '../utils/home-grid-focus';
 import { buildHomeGridKey } from '../utils/home-grid-key';
-import { getVirtualGridRowHeight } from '../utils/home-grid-metrics';
+import {
+  getVirtualGridRowContainerStyle,
+  getVirtualGridRowHeight,
+} from '../utils/home-grid-metrics';
 import { isAbortError } from '../utils/is-abort-error';
 import { normalizeArabicLetter, normalizeSearchText } from '../utils/search';
 
@@ -123,6 +127,10 @@ export default function HomeScreen() {
     },
     scroll: {
       flex: 1,
+    },
+    gridViewport: {
+      flex: 1,
+      overflow: 'hidden',
     },
     centerContainer: {
       flex: 1,
@@ -422,10 +430,11 @@ export default function HomeScreen() {
     return results.map((entry) => entry.item);
   }, [reciters, searchQuery, lang, selectedRiwaya, selectedLetter]);
 
-  const { cardsPerRow, itemWidth, rowHeight } = useReciterGridLayout(
+  const { cardsPerRow, itemWidth } = useReciterGridLayout(
     filteredReciters,
     width,
   );
+  const { itemHeight } = useItemHeight();
   const reciterCount = filteredReciters.length;
 
   const gridKey =
@@ -578,30 +587,30 @@ export default function HomeScreen() {
           {homeHeader}
         </SpatialNavigationScrollView>
       ) : (
-        <SpatialNavigationVirtualizedGrid<Reciter>
-          key={buildHomeGridKey(headerHeight, isRTL, cardsPerRow)}
-          ref={gridRef}
-          data={filteredReciters}
-          renderItem={({ item, index }) => (
-            <ReciterCard
-              reciter={item}
-              onPress={handleReciterPress}
-              onFocus={() => {
-                liveFocusedCardRef.current = index;
-              }}
-              viewCount={viewCounts[item.id.toString()]}
-              favoriteCount={favoriteCounts[item.id.toString()]}
-            />
-          )}
-          numberOfColumns={cardsPerRow}
-          itemHeight={getVirtualGridRowHeight(0, rowHeight)}
-          additionalRenderedRows={2}
-          header={homeHeader}
-          headerSize={headerHeight}
-          rowContainerStyle={{
-            flexDirection: isRTL ? 'row-reverse' : 'row',
-          }}
-        />
+        <View style={styles.gridViewport}>
+          <SpatialNavigationVirtualizedGrid<Reciter>
+            key={buildHomeGridKey(headerHeight, isRTL, cardsPerRow)}
+            ref={gridRef}
+            data={filteredReciters}
+            renderItem={({ item, index }) => (
+              <ReciterCard
+                reciter={item}
+                onPress={handleReciterPress}
+                onFocus={() => {
+                  liveFocusedCardRef.current = index;
+                }}
+                viewCount={viewCounts[item.id.toString()]}
+                favoriteCount={favoriteCounts[item.id.toString()]}
+              />
+            )}
+            numberOfColumns={cardsPerRow}
+            itemHeight={getVirtualGridRowHeight(itemHeight)}
+            additionalRenderedRows={2}
+            header={homeHeader}
+            headerSize={headerHeight}
+            rowContainerStyle={getVirtualGridRowContainerStyle(isRTL)}
+          />
+        </View>
       )}
     </View>
   );
