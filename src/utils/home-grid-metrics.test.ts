@@ -16,10 +16,16 @@ describe('getVirtualGridRowHeight', () => {
 });
 
 describe('getVirtualGridRowContainerStyle', () => {
-  it('uses direction rtl for Arabic and ltr otherwise', () => {
-    expect(getVirtualGridRowContainerStyle(true)).toEqual({ direction: 'rtl' });
+  it('flips row order for Arabic and spreads cards across the full width', () => {
+    expect(getVirtualGridRowContainerStyle(true)).toEqual({
+      direction: 'rtl',
+      width: '100%',
+      justifyContent: 'space-between',
+    });
     expect(getVirtualGridRowContainerStyle(false)).toEqual({
       direction: 'ltr',
+      width: '100%',
+      justifyContent: 'space-between',
     });
   });
 });

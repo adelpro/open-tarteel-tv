@@ -9,10 +9,18 @@ export const getVirtualGridRowHeight = (cardHeight: number): number =>
 
 /**
  * The library applies its own `flexDirection: 'row'` after this style, so
- * `row-reverse` is ignored. Use `direction` to get RTL row layout.
+ * `row-reverse` is ignored — `direction` is what flips the order for RTL.
+ * Without a full width and `space-between`, fixed-width cards shrink-wrap to
+ * one side instead of being spread evenly across the screen.
  */
 export const getVirtualGridRowContainerStyle = (
   isRTL: boolean,
-): { direction: 'rtl' | 'ltr' } => ({
+): {
+  direction: 'rtl' | 'ltr';
+  width: '100%';
+  justifyContent: 'space-between';
+} => ({
   direction: isRTL ? 'rtl' : 'ltr',
+  width: '100%',
+  justifyContent: 'space-between',
 });

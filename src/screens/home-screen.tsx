@@ -593,15 +593,17 @@ export default function HomeScreen() {
             ref={gridRef}
             data={filteredReciters}
             renderItem={({ item, index }) => (
-              <ReciterCard
-                reciter={item}
-                onPress={handleReciterPress}
-                onFocus={() => {
-                  liveFocusedCardRef.current = index;
-                }}
-                viewCount={viewCounts[item.id.toString()]}
-                favoriteCount={favoriteCounts[item.id.toString()]}
-              />
+              <View style={{ width: itemWidth }}>
+                <ReciterCard
+                  reciter={item}
+                  onPress={handleReciterPress}
+                  onFocus={() => {
+                    liveFocusedCardRef.current = index;
+                  }}
+                  viewCount={viewCounts[item.id.toString()]}
+                  favoriteCount={favoriteCounts[item.id.toString()]}
+                />
+              </View>
             )}
             numberOfColumns={cardsPerRow}
             itemHeight={getVirtualGridRowHeight(itemHeight)}
