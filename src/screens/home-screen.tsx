@@ -68,7 +68,7 @@ export default function HomeScreen() {
   const [sourceErrorCount, setSourceErrorCount] = useState(0);
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const { viewCounts } = useViewCounts();
   const { favoriteCounts } = useFavorites();
   const { recentlyPlayed } = useRecentlyPlayed();
@@ -128,8 +128,15 @@ export default function HomeScreen() {
     scroll: {
       flex: 1,
     },
+    body: {
+      flex: 1,
+    },
+    headerScroll: {
+      flex: 1,
+    },
     gridViewport: {
       flex: 1,
+      marginTop: 20,
       overflow: 'hidden',
     },
     centerContainer: {
@@ -437,10 +444,14 @@ export default function HomeScreen() {
   const { itemHeight } = useItemHeight();
   const reciterCount = filteredReciters.length;
 
-  const gridKey =
+  const gridKey = buildHomeGridKey(isRTL, cardsPerRow);
+
+  // The header is a bounded, independently scrollable section above the grid.
+  // Letting it take the full screen would leave no room for reciter cards.
+  const headerViewportHeight =
     headerHeight === null
-      ? null
-      : buildHomeGridKey(headerHeight, isRTL, cardsPerRow);
+      ? 0
+      : Math.min(headerHeight, Math.round(height * 0.4));
 
   // A key change unmounts the old grid during the commit mutation phase. This
   // layout-effect cleanup runs at that boundary — after the last onFocus from
@@ -456,14 +467,14 @@ export default function HomeScreen() {
   // the keyed remount forced by a header height / direction / column change.
   // The pure helpers make the decision; this effect only drives the ref.
   useEffect(() => {
-    if (headerHeight === null || reciterCount === 0) return;
+    if (reciterCount === 0) return;
     const grid = gridRef.current;
     if (!grid) return;
 
-    // HomeHeader is always passed as the grid's header, occupying virtual
-    // row 0. The helpers work in card space; translate only at this ref.
-    const hasHeader = true;
-    const currentGridKey = buildHomeGridKey(headerHeight, isRTL, cardsPerRow);
+    // The header is a sibling of the grid now, so card space and grid-row
+    // space are identical — no header offset at this ref.
+    const hasHeader = false;
+    const currentGridKey = gridKey;
     const { currentCardIndex } = resolveRemountFocus({
       previousGridKey: previousGridKeyRef.current,
       gridKey: currentGridKey,
@@ -492,7 +503,7 @@ export default function HomeScreen() {
     const restoredCardIndex = gridRowToCardIndex(focusRow, hasHeader);
     lastFocusedIndexRef.current = restoredCardIndex;
     liveFocusedCardRef.current = restoredCardIndex;
-  }, [headerHeight, isRTL, cardsPerRow, searchFocused, reciterCount]);
+  }, [gridKey, searchFocused, reciterCount]);
 
   // One warning line for any failed source, shown alongside cached/other
   // sources and on the empty state so a dead source is never mistaken for a
@@ -540,8 +551,9 @@ export default function HomeScreen() {
     );
   }
 
-  // Rendered either standalone (while measuring, or when there are no results)
-  // or as the virtualized grid's header. It is the same element in both cases.
+  // Measured once bare, then rendered in its own bounded scroll view above the
+  // grid. Keeping focusable header controls out of the virtualized grid makes
+  // them reachable with the remote instead of being skipped.
   const homeHeader = (
     <HomeHeader
       searchQuery={searchQuery}
@@ -580,38 +592,44 @@ export default function HomeScreen() {
         // One-frame measuring pass: keep it bare so HomeHeader can report its
         // height without a scroll wrapper changing the measurement.
         homeHeader
-      ) : reciterCount === 0 ? (
-        // No grid to scroll — make the standalone header scrollable so search,
-        // filters, featured rails and the empty state stay reachable on TV.
-        <SpatialNavigationScrollView style={styles.scroll}>
-          {homeHeader}
-        </SpatialNavigationScrollView>
       ) : (
-        <View style={styles.gridViewport}>
-          <SpatialNavigationVirtualizedGrid<Reciter>
-            key={buildHomeGridKey(headerHeight, isRTL, cardsPerRow)}
-            ref={gridRef}
-            data={filteredReciters}
-            renderItem={({ item, index }) => (
-              <View style={{ width: itemWidth }}>
-                <ReciterCard
-                  reciter={item}
-                  onPress={handleReciterPress}
-                  onFocus={() => {
-                    liveFocusedCardRef.current = index;
-                  }}
-                  viewCount={viewCounts[item.id.toString()]}
-                  favoriteCount={favoriteCounts[item.id.toString()]}
-                />
-              </View>
-            )}
-            numberOfColumns={cardsPerRow}
-            itemHeight={getVirtualGridRowHeight(itemHeight)}
-            additionalRenderedRows={2}
-            header={homeHeader}
-            headerSize={headerHeight}
-            rowContainerStyle={getVirtualGridRowContainerStyle(isRTL)}
-          />
+        <View style={styles.body}>
+          <SpatialNavigationScrollView
+            style={
+              reciterCount === 0
+                ? styles.scroll
+                : { height: headerViewportHeight }
+            }
+            offsetFromStart={20}
+          >
+            {homeHeader}
+          </SpatialNavigationScrollView>
+          {reciterCount > 0 && (
+            <View style={styles.gridViewport}>
+              <SpatialNavigationVirtualizedGrid<Reciter>
+                key={gridKey}
+                ref={gridRef}
+                data={filteredReciters}
+                renderItem={({ item, index }) => (
+                  <View style={{ width: itemWidth }}>
+                    <ReciterCard
+                      reciter={item}
+                      onPress={handleReciterPress}
+                      onFocus={() => {
+                        liveFocusedCardRef.current = index;
+                      }}
+                      viewCount={viewCounts[item.id.toString()]}
+                      favoriteCount={favoriteCounts[item.id.toString()]}
+                    />
+                  </View>
+                )}
+                numberOfColumns={cardsPerRow}
+                itemHeight={getVirtualGridRowHeight(itemHeight)}
+                additionalRenderedRows={2}
+                rowContainerStyle={getVirtualGridRowContainerStyle(isRTL)}
+              />
+            </View>
+          )}
         </View>
       )}
     </View>

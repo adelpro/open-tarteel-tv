@@ -2,10 +2,7 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 
 import { useTranslation } from 'react-i18next';
-import {
-  SpatialNavigationScrollView,
-  SpatialNavigationView,
-} from 'react-tv-space-navigation';
+import { SpatialNavigationView } from 'react-tv-space-navigation';
 
 import FilterChip from './filter-chip';
 import { Riwaya } from '../types';
@@ -58,33 +55,34 @@ const SectionFilters = ({
   const { t } = useTranslation();
 
   const styles = StyleSheet.create({
+    // Same wrapped layout as the letter filter: all chips stay on screen and
+    // remain direct focusable children of the header's navigation tree.
     filterRow: {
       direction: isRTL ? 'rtl' : 'ltr',
-      flexDirection: isRTL ? 'row-reverse' : 'row',
+      flexDirection: 'row',
       alignItems: 'center',
+      flexWrap: 'wrap',
       marginVertical: 4,
       paddingHorizontal: 20,
     },
   });
 
   return (
-    <SpatialNavigationScrollView horizontal offsetFromStart={20}>
-      <SpatialNavigationView direction="horizontal" style={styles.filterRow}>
+    <SpatialNavigationView direction="horizontal" style={styles.filterRow}>
+      <FilterChip
+        label={t('filter_all')}
+        selected={selectedRiwaya === 'all'}
+        onPress={() => onSelectRiwaya('all')}
+      />
+      {RIWAYA_FILTER_VALUES.map((riwaya) => (
         <FilterChip
-          label={t('filter_all')}
-          selected={selectedRiwaya === 'all'}
-          onPress={() => onSelectRiwaya('all')}
+          key={riwaya}
+          label={t(RIWAYA_LABEL_KEYS[riwaya])}
+          selected={selectedRiwaya === riwaya}
+          onPress={() => onSelectRiwaya(riwaya)}
         />
-        {RIWAYA_FILTER_VALUES.map((riwaya) => (
-          <FilterChip
-            key={riwaya}
-            label={t(RIWAYA_LABEL_KEYS[riwaya])}
-            selected={selectedRiwaya === riwaya}
-            onPress={() => onSelectRiwaya(riwaya)}
-          />
-        ))}
-      </SpatialNavigationView>
-    </SpatialNavigationScrollView>
+      ))}
+    </SpatialNavigationView>
   );
 };
 

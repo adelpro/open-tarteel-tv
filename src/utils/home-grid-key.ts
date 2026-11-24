@@ -1,12 +1,9 @@
 /**
  * Build the identity key for the Home virtualized grid.
  *
- * The grid remounts when its measured header height, text direction or column
- * count changes so the library recalculates its row layout. Callers restore
- * focus after such a remount using the previously focused index.
+ * The header now lives outside the grid, so the grid only remounts when its
+ * text direction or column count changes. Callers restore focus after such a
+ * remount using the previously focused index.
  */
-export const buildHomeGridKey = (
-  headerHeight: number,
-  isRTL: boolean,
-  cardsPerRow: number,
-): string => `grid:${headerHeight}:${isRTL ? 'rtl' : 'ltr'}:${cardsPerRow}`;
+export const buildHomeGridKey = (isRTL: boolean, cardsPerRow: number): string =>
+  `grid:${isRTL ? 'rtl' : 'ltr'}:${cardsPerRow}`;

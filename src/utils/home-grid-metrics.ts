@@ -19,8 +19,12 @@ export const getVirtualGridRowContainerStyle = (
   direction: 'rtl' | 'ltr';
   width: '100%';
   justifyContent: 'space-between';
+  paddingHorizontal: number;
 } => ({
   direction: isRTL ? 'rtl' : 'ltr',
   width: '100%',
   justifyContent: 'space-between',
+  // A focused card scales by 5%, so keep it off the clipping edge of the
+  // viewport instead of letting half its border disappear at the sides.
+  paddingHorizontal: 12,
 });

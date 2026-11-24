@@ -21,11 +21,13 @@ describe('getVirtualGridRowContainerStyle', () => {
       direction: 'rtl',
       width: '100%',
       justifyContent: 'space-between',
+      paddingHorizontal: 12,
     });
     expect(getVirtualGridRowContainerStyle(false)).toEqual({
       direction: 'ltr',
       width: '100%',
       justifyContent: 'space-between',
+      paddingHorizontal: 12,
     });
   });
 });

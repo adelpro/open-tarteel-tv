@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { useTranslation } from 'react-i18next';
 import {
   SpatialNavigationScrollView,
   SpatialNavigationView,
@@ -35,8 +36,7 @@ const SectionFeatured = ({
   textPrimary,
 }: FeaturedSectionProps) => {
   const { itemHeight } = useItemHeight();
-
-  if (reciters.length === 0) return null;
+  const { t } = useTranslation();
 
   const containerHeight = itemHeight + 20; // 10 is the marginBottom
 
@@ -56,6 +56,14 @@ const SectionFeatured = ({
       paddingHorizontal: 10,
       opacity: 0.9,
     },
+    emptyText: {
+      fontSize: 14,
+      color: textPrimary,
+      opacity: 0.6,
+      textAlign: isRTL ? 'right' : 'left',
+      paddingHorizontal: 20,
+      paddingVertical: 12,
+    },
     scrollContent: {
       direction: isRTL ? 'rtl' : 'ltr',
       flexDirection: isRTL ? 'row-reverse' : 'row',
@@ -67,36 +75,40 @@ const SectionFeatured = ({
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>{title}</Text>
 
-      <View style={styles.contentContainer}>
-        <SpatialNavigationScrollView horizontal offsetFromStart={20}>
-          <SpatialNavigationView
-            direction="horizontal"
-            style={styles.scrollContent}
-          >
-            {reciters.map((reciter, index) => (
-              <View
-                key={`view-${title}-${reciter.id}-${index}`}
-                style={[
-                  {
-                    width: itemWidth,
-                    height: itemHeight,
-                    marginHorizontal: 4,
-                  },
-                ]}
-              >
-                <ReciterCard
-                  key={`${title}-${reciter.id}-${index}`}
-                  reciter={reciter}
-                  preferredFocus={index === 0} // first card gets focus
-                  onPress={onReciterPress}
-                  viewCount={viewCounts[String(reciter.id)]}
-                  favoriteCount={favoriteCounts[String(reciter.id)]}
-                />
-              </View>
-            ))}
-          </SpatialNavigationView>
-        </SpatialNavigationScrollView>
-      </View>
+      {reciters.length === 0 ? (
+        <Text style={styles.emptyText}>{t('featured_empty')}</Text>
+      ) : (
+        <View style={styles.contentContainer}>
+          <SpatialNavigationScrollView horizontal offsetFromStart={20}>
+            <SpatialNavigationView
+              direction="horizontal"
+              style={styles.scrollContent}
+            >
+              {reciters.map((reciter, index) => (
+                <View
+                  key={`view-${title}-${reciter.id}-${index}`}
+                  style={[
+                    {
+                      width: itemWidth,
+                      height: itemHeight,
+                      marginHorizontal: 4,
+                    },
+                  ]}
+                >
+                  <ReciterCard
+                    key={`${title}-${reciter.id}-${index}`}
+                    reciter={reciter}
+                    preferredFocus={index === 0} // first card gets focus
+                    onPress={onReciterPress}
+                    viewCount={viewCounts[String(reciter.id)]}
+                    favoriteCount={favoriteCounts[String(reciter.id)]}
+                  />
+                </View>
+              ))}
+            </SpatialNavigationView>
+          </SpatialNavigationScrollView>
+        </View>
+      )}
     </View>
   );
 };

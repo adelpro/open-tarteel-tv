@@ -5,6 +5,7 @@
   "Loading_Reciters": "Loading Reciters...",
   "Failed_to_Load_Reciters": "Failed to Load Reciters",
   "sources_unavailable": "Some sources are temporarily unavailable.",
+  "featured_empty": "Nothing here yet",
   "attempt": "Attempt {{current}} of {{max}}",
   "Try_Again": "Try Again",
   "No_Reciters_Found_Title": "No Reciters Found",
