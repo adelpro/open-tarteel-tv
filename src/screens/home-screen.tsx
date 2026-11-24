@@ -35,7 +35,6 @@ import { getThemeColors } from '../constants/theme';
 import { useFavorites } from '../context/favorites.context';
 import { useRecentlyPlayed } from '../context/recently-played.context';
 import { useSettings } from '../context/settings.context';
-import { useItemHeight } from '../hooks/ise-item-height';
 import { useReciterGridLayout } from '../hooks/use-reciter-grid-layout';
 import { useViewCounts } from '../hooks/use-view-counts';
 import { fetchRecitersBySource, getSourceErrorCount } from '../services/api';
@@ -51,6 +50,7 @@ import {
   resolveRemountFocus,
 } from '../utils/home-grid-focus';
 import { buildHomeGridKey } from '../utils/home-grid-key';
+import { getVirtualGridRowHeight } from '../utils/home-grid-metrics';
 import { isAbortError } from '../utils/is-abort-error';
 import { normalizeArabicLetter, normalizeSearchText } from '../utils/search';
 
@@ -422,11 +422,10 @@ export default function HomeScreen() {
     return results.map((entry) => entry.item);
   }, [reciters, searchQuery, lang, selectedRiwaya, selectedLetter]);
 
-  const { cardsPerRow, itemWidth } = useReciterGridLayout(
+  const { cardsPerRow, itemWidth, rowHeight } = useReciterGridLayout(
     filteredReciters,
     width,
   );
-  const { itemHeight } = useItemHeight();
   const reciterCount = filteredReciters.length;
 
   const gridKey =
@@ -595,7 +594,7 @@ export default function HomeScreen() {
             />
           )}
           numberOfColumns={cardsPerRow}
-          itemHeight={itemHeight}
+          itemHeight={getVirtualGridRowHeight(0, rowHeight)}
           additionalRenderedRows={2}
           header={homeHeader}
           headerSize={headerHeight}
