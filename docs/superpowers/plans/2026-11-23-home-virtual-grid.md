@@ -37,10 +37,12 @@
 ### Task 1: Pure focus helpers
 
 **Files:**
+
 - Create: `src/utils/home-grid-focus.ts`
 - Create: `src/utils/home-grid-focus.test.ts`
 
 **Interfaces:**
+
 - Produces: `clampGridIndex(index: number, length: number): number`
 - Produces: `resolveGridFocus(input: GridFocusInput): GridFocusDecision`
 
@@ -50,6 +52,7 @@
 - [ ] **Step 1: Write the failing helper tests**
 
 `home-grid-focus.test.ts` must assert:
+
 - `clampGridIndex(7, 3) === 2`, `clampGridIndex(-1, 3) === 0`, `clampGridIndex(0, 0) === 0`.
 - `searchFocused: true` → `{ focusIndex: null }`.
 - `justLeftSearch: true`, `dataReady: true`, `itemCount > 0` → `{ focusIndex: 0 }`.
@@ -82,12 +85,14 @@ Commit: `feat: add pure Home grid focus helpers`
 ### Task 2: Extract measured Home header
 
 **Files:**
+
 - Create: `src/components/home-header.tsx`
 - Create: `src/utils/home-header.ts`
 - Create: `src/utils/home-header.test.ts`
 - Modify: `src/screens/home-screen.tsx`
 
 **Interfaces:**
+
 - Produces: `normalizeHeaderHeight(height: number): number`
 - Produces: `HomeHeader` component props: all current search/filter/featured props plus `onHeight: (height: number) => void`
 - Consumes: none from Task 1
@@ -121,12 +126,14 @@ Commit: `refactor: extract measured Home header`
 ### Task 3: Swap in the virtualized grid
 
 **Files:**
+
 - Modify: `src/screens/home-screen.tsx`
 - Create: `src/utils/home-grid-key.ts`
 - Create: `src/utils/home-grid-key.test.ts`
 - Delete: `src/components/section-reciters-grid.tsx`
 
 **Interfaces:**
+
 - Consumes: `clampGridIndex`, `resolveGridFocus` from Task 1; `HomeHeader`, `headerHeight` from Task 2
 - Produces: no new public interface
 
@@ -159,10 +166,12 @@ Commit: `feat: virtualize Home reciter grid`
 ### Task 4: Device verification and runbook
 
 **Files:**
+
 - Modify: `docs/runbooks/tv-playback-check.md` (or create `docs/runbooks/tv-home-grid-check.md` if cleaner)
 - No product code changes unless a device finding requires a fix
 
 **Interfaces:**
+
 - Consumes: all earlier tasks
 
 - [ ] **Step 1: Device matrix**

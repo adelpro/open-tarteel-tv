@@ -10,16 +10,16 @@ Issue #8 asks for more reciter sources. The sibling web app (`adelpro/open-tarte
 
 ## Current comparison (verified 2026-11-21)
 
-| | TV app (`develop`) | Web app (`develop`) |
-|---|---|---|
-| Adapters | mp3quran v3, Itqan | mp3quran v3, mp3quran v4, Qurani.ai, Quran Foundation, Itqan |
-| `ReciterSource` | `getReciters()` only | `getReciters()` + optional `getPlaylist()` |
-| Lazy playlist | Itqan-specific call in `use-player.ts` | generic `getReciterPlaylist()` |
-| Riwaya | 4 enum values, helper recognises 3 names | 13 values, ar/en phrase map |
-| Tests | none | 13 adapter/helper/contract test files |
-| Fetch layer | abortable, timeout aborts fetch, jitter retry | `Promise.race`, no abort, fixed delay |
-| Caching | AsyncStorage catalog + playlist, on-disk audio LRU | in-memory `Map`s |
-| Secrets | none in app | OAuth client id/secret via `process.env` |
+|                 | TV app (`develop`)                                 | Web app (`develop`)                                          |
+| --------------- | -------------------------------------------------- | ------------------------------------------------------------ |
+| Adapters        | mp3quran v3, Itqan                                 | mp3quran v3, mp3quran v4, Qurani.ai, Quran Foundation, Itqan |
+| `ReciterSource` | `getReciters()` only                               | `getReciters()` + optional `getPlaylist()`                   |
+| Lazy playlist   | Itqan-specific call in `use-player.ts`             | generic `getReciterPlaylist()`                               |
+| Riwaya          | 4 enum values, helper recognises 3 names           | 13 values, ar/en phrase map                                  |
+| Tests           | none                                               | 13 adapter/helper/contract test files                        |
+| Fetch layer     | abortable, timeout aborts fetch, jitter retry      | `Promise.race`, no abort, fixed delay                        |
+| Caching         | AsyncStorage catalog + playlist, on-disk audio LRU | in-memory `Map`s                                             |
+| Secrets         | none in app                                        | OAuth client id/secret via `process.env`                     |
 
 Measured live: mp3quran returns 244 reciters / 299 moshafs, of which 254 are labelled Hafs by the current helper; Itqan returns 73 recitations / 114 tracks per recitation. All three new provider endpoints respond publicly.
 
@@ -52,19 +52,19 @@ Measured live: mp3quran returns 244 reciters / 299 moshafs, of which 254 are lab
 
 ### TV-specific environment variables (exact names)
 
-| Variable | Default | Used by | Purpose |
-|---|---|---|---|
-| `EXPO_PUBLIC_OTTV_ITQAN_BASE_URL` | `https://api.cms.itqan.dev` | Itqan | API root |
-| `EXPO_PUBLIC_OTTV_ITQAN_API_KEY` | unset | Itqan | Optional `X-API-Key` header; bundled, extractable |
-| `EXPO_PUBLIC_OTTV_QURANAI_BASE_URL` | `https://api.qurani.ai/gw/qh/v1` | Qurani.ai | API root |
-| `EXPO_PUBLIC_OTTV_QF_CLIENT_ID` | unset | QF | OAuth client id; bundled, extractable |
-| `EXPO_PUBLIC_OTTV_QF_CLIENT_SECRET` | unset | QF | OAuth client secret; bundled, extractable |
-| `EXPO_PUBLIC_OTTV_QF_TOKEN_URL` | `https://oauth2.quran.foundation/oauth2/token` | QF | Token endpoint |
-| `EXPO_PUBLIC_OTTV_QF_API_BASE` | `https://apis.quran.foundation` | QF | Authenticated API root (`/content/api/v4/...`) |
-| `EXPO_PUBLIC_OTTV_QF_PUBLIC_API_BASE` | `https://api.quran.com/api/v4` | QF | Fallback used when credentials are absent (same branch as web) |
-| `EXPO_PUBLIC_OTTV_QF_RATE_LIMIT_MS` | `1100` | QF | Minimum spacing between API calls |
-| `EXPO_PUBLIC_OTTV_ENABLE_MP3QURAN_V4` | `false` | MP3Quran v4 | Kill switch; disabled source is not registered at all |
-| `EXPO_PUBLIC_OTTV_MP3QURAN_V4_BASE_URL` | `https://api-staging.mp3quran.net/v4` | MP3Quran v4 | API root (no key in the web app) |
+| Variable                                | Default                                        | Used by     | Purpose                                                        |
+| --------------------------------------- | ---------------------------------------------- | ----------- | -------------------------------------------------------------- |
+| `EXPO_PUBLIC_OTTV_ITQAN_BASE_URL`       | `https://api.cms.itqan.dev`                    | Itqan       | API root                                                       |
+| `EXPO_PUBLIC_OTTV_ITQAN_API_KEY`        | unset                                          | Itqan       | Optional `X-API-Key` header; bundled, extractable              |
+| `EXPO_PUBLIC_OTTV_QURANAI_BASE_URL`     | `https://api.qurani.ai/gw/qh/v1`               | Qurani.ai   | API root                                                       |
+| `EXPO_PUBLIC_OTTV_QF_CLIENT_ID`         | unset                                          | QF          | OAuth client id; bundled, extractable                          |
+| `EXPO_PUBLIC_OTTV_QF_CLIENT_SECRET`     | unset                                          | QF          | OAuth client secret; bundled, extractable                      |
+| `EXPO_PUBLIC_OTTV_QF_TOKEN_URL`         | `https://oauth2.quran.foundation/oauth2/token` | QF          | Token endpoint                                                 |
+| `EXPO_PUBLIC_OTTV_QF_API_BASE`          | `https://apis.quran.foundation`                | QF          | Authenticated API root (`/content/api/v4/...`)                 |
+| `EXPO_PUBLIC_OTTV_QF_PUBLIC_API_BASE`   | `https://api.quran.com/api/v4`                 | QF          | Fallback used when credentials are absent (same branch as web) |
+| `EXPO_PUBLIC_OTTV_QF_RATE_LIMIT_MS`     | `1100`                                         | QF          | Minimum spacing between API calls                              |
+| `EXPO_PUBLIC_OTTV_ENABLE_MP3QURAN_V4`   | `false`                                        | MP3Quran v4 | Kill switch; disabled source is not registered at all          |
+| `EXPO_PUBLIC_OTTV_MP3QURAN_V4_BASE_URL` | `https://api-staging.mp3quran.net/v4`          | MP3Quran v4 | API root (no key in the web app)                               |
 
 No web key, web name or web credential value is copied — only the auth **logic**. A central `src/config/providers.ts` reads these once with defaults and exposes typed getters; adapters never read `process.env` directly. `.env.example` ships placeholders only. The owner-supplied values live in the gitignored `.env.local` (verified by `git check-ignore`) and must be supplied through CI/build secrets under the same names; they must never be committed.
 

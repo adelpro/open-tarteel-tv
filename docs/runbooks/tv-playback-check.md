@@ -64,6 +64,7 @@ EXPO_PUBLIC_OTTV_ENABLE_MP3QURAN_V4=true
 ```
 
 Notes:
+
 - QF credentials are external and currently return 401 `invalid_client`. The
   app falls back to the public `api.quran.com` path, so QF still works without
   valid credentials — a 401 is expected and must **not** be logged as a source
@@ -86,17 +87,17 @@ Notes:
 3. Confirm the reciter count for each source below. Counts are from the catalog
    fetch log / in-app source cards.
 
-| Source | Expected reciters | Notes |
-| --- | --- | --- |
-| mp3quran | **299** | Baseline source. |
-| Itqan (itqan) | **~75** | Was ~75 at time of writing; small drift is acceptable. |
-| QF (quran-foundation) | **14** | Public fallback (`api.quran.com`) — 401 credentials are expected. |
-| Qurani.ai (qurani) | **present (count not pinned)** | Only after the one-time settings migration re-enables it. |
+| Source                    | Expected reciters              | Notes                                                                                                       |
+| ------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| mp3quran                  | **299**                        | Baseline source.                                                                                            |
+| Itqan (itqan)             | **~75**                        | Was ~75 at time of writing; small drift is acceptable.                                                      |
+| QF (quran-foundation)     | **14**                         | Public fallback (`api.quran.com`) — 401 credentials are expected.                                           |
+| Qurani.ai (qurani)        | **present (count not pinned)** | Only after the one-time settings migration re-enables it.                                                   |
 | mp3quran v4 (mp3quran-v4) | **present (count not pinned)** | Only after `EXPO_PUBLIC_OTTV_ENABLE_MP3QURAN_V4=true` is in the running build; no toggle appears otherwise. |
 
 Baseline total for mp3quran + Itqan + QF is **388**; the total rises once Qurani
 and v4 are enabled. Absence of Qurani or v4 with the prerequisites above met is
-a failure; absence of QF *cards* (source warning) is a failure, but a QF 401 in
+a failure; absence of QF _cards_ (source warning) is a failure, but a QF 401 in
 the log is not.
 
 Capture a screenshot of the loaded catalog (e.g. `evidence/screen-catalog-final.png`).
@@ -146,13 +147,13 @@ entry** and that **displayed progress advances for at least five seconds**.
 
 ### Source-specific expectations
 
-| Source | What to expect |
-| --- | --- |
-| mp3quran | Autoplay chains from Al-Faatiha to the next surah; long surahs (e.g. Al-Baqarah, ~93:05) show steady progress. |
-| Itqan | Playlist resolves lazily; autoplay must wait for it, then start. Do not treat a brief loading state as a failure. |
-| QF | Playlist comes from the public fallback after the 401. Any token/401 message in the log is expected; the player must still play. |
-| Qurani.ai | Present only after the settings migration; plays like any other source. |
-| v4 | Toggle/source appears only in a build with the flag enabled; confirm it plays one surah. |
+| Source    | What to expect                                                                                                                   |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| mp3quran  | Autoplay chains from Al-Faatiha to the next surah; long surahs (e.g. Al-Baqarah, ~93:05) show steady progress.                   |
+| Itqan     | Playlist resolves lazily; autoplay must wait for it, then start. Do not treat a brief loading state as a failure.                |
+| QF        | Playlist comes from the public fallback after the 401. Any token/401 message in the log is expected; the player must still play. |
+| Qurani.ai | Present only after the settings migration; plays like any other source.                                                          |
+| v4        | Toggle/source appears only in a build with the flag enabled; confirm it plays one surah.                                         |
 
 If a source's playlist fails (error/retry state, or no autoplay after loading),
 capture the exact log line:

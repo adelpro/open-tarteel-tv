@@ -35,6 +35,7 @@
 ### Task 1: Provider config, source IDs and base64 helper
 
 **Files:**
+
 - Create: `src/config/providers.ts`
 - Create: `src/utils/base64.ts`
 - Create: `.env.example`
@@ -42,6 +43,7 @@
 - Modify: `src/types/index.ts` (add the three `LinkSource` members)
 
 **Interfaces:**
+
 - Produces: `getItqanConfig(): { baseUrl: string; apiKey?: string }`
 - Produces: `getQuranAiConfig(): { baseUrl: string }`
 - Produces: `getQfConfig(): { clientId?: string; clientSecret?: string; tokenUrl: string; apiBase: string; publicApiBase: string; rateLimitMs: number }`
@@ -53,6 +55,7 @@
 - [ ] **Step 1: Write the failing config test**
 
 `src/config/providers.test.ts` must assert, with `vi.stubEnv` + `vi.resetModules()` + dynamic `import()` so the module re-reads env:
+
 - defaults: Itqan `https://api.cms.itqan.dev`, Qurani.ai `https://api.qurani.ai/gw/qh/v1`, QF token `https://oauth2.quran.foundation/oauth2/token`, QF api `https://apis.quran.foundation`, QF public `https://api.quran.com/api/v4`, rate limit `1100`, v4 disabled, v4 base `https://api-staging.mp3quran.net/v4`.
 - `EXPO_PUBLIC_OTTV_ENABLE_MP3QURAN_V4='true'` makes `getMp3QuranV4Config().enabled === true`.
 - `ACTIVE_SOURCES` contains `mp3quran`, `itqan`, `qurani`, `quran-foundation` and excludes `mp3quran-v4` by default; includes it when the flag is on.
@@ -89,6 +92,7 @@ Commit: `feat: add TV provider config and source IDs`
 ### Task 2: Riwaya expansion and name mapping
 
 **Files:**
+
 - Create: `src/utils/get-riwaya-from-mushaf.ts`
 - Create: `src/utils/get-riwaya-from-mushaf.test.ts`
 - Modify: `src/types/index.ts` (Riwaya enum)
@@ -96,6 +100,7 @@ Commit: `feat: add TV provider config and source IDs`
 - Modify: `src/locales/en.json`, `src/locales/ar.json`
 
 **Interfaces:**
+
 - Produces: `getRiwayaKeyFromMoshafName(name: string, lang: 'ar' | 'en'): Riwaya`
 - Consumes: `Riwaya` from `src/types/index.ts`
 
@@ -130,12 +135,14 @@ Commit: `feat: expand riwaya coverage and localized name mapping`
 ### Task 3: Riwaya UI maps and 13 filter chips
 
 **Files:**
+
 - Modify: `src/components/riwaya-tag.tsx`
 - Modify: `src/components/reciter-card.tsx`
 - Modify: `src/components/section-filters.tsx`
 - Create: `src/components/section-filters.test.ts`
 
 **Interfaces:**
+
 - Produces: `RIWAYA_FILTER_VALUES: readonly Riwaya[]` exported from `section-filters.tsx`
 - Consumes: `Riwaya` from Task 2
 
@@ -166,6 +173,7 @@ Commit: `feat: show all riwayas in tags and filters`
 ### Task 4: Adapter contract, Itqan env wiring and generic playlist loader
 
 **Files:**
+
 - Modify: `src/services/reciters/reciter-source.ts`
 - Modify: `src/services/api.ts`
 - Modify: `src/services/reciters/itqan.adapter.ts`
@@ -174,6 +182,7 @@ Commit: `feat: show all riwayas in tags and filters`
 - Create: `src/services/api.test.ts`
 
 **Interfaces:**
+
 - Produces: `ReciterSource.getPlaylist?(reciter: Reciter, lang: 'ar' | 'en', signal?: AbortSignal): Promise<Playlist>`
 - Produces: `getReciterPlaylist(source: LinkSource, reciter: Reciter, lang: 'ar' | 'en', signal?: AbortSignal): Promise<Playlist | null>`
 - Produces: `ReciterSourceResult.error?: string`
@@ -208,6 +217,7 @@ Commit: `feat: generic playlist loader and configurable Itqan client`
 ### Task 5: Qurani.ai adapter
 
 **Files:**
+
 - Create: `src/services/reciters/quranai.adapter.ts`
 - Create: `src/services/reciters/quranai.helpers.ts`
 - Create: `src/services/reciters/quranai.types.ts`
@@ -216,6 +226,7 @@ Commit: `feat: generic playlist loader and configurable Itqan client`
 - Modify: `src/services/api.ts` (register adapter when active)
 
 **Interfaces:**
+
 - Produces: `QuranAiAdapter: ReciterSource` (with `getPlaylist`)
 - Consumes: `getQuranAiConfig()` from Task 1, `retryFetch`, `getRiwayaKeyFromMoshafName` from Task 2
 
@@ -248,6 +259,7 @@ Commit: `feat: add Qurani.ai reciter adapter`
 ### Task 6: Quran Foundation client and adapter
 
 **Files:**
+
 - Create: `src/services/reciters/quran-foundation.client.ts`
 - Create: `src/services/reciters/quranfoundation.adapter.ts`
 - Create: `src/services/reciters/quranfoundation.types.ts`
@@ -257,6 +269,7 @@ Commit: `feat: add Qurani.ai reciter adapter`
 - Modify: `src/context/settings.context.tsx` (wire cache reset)
 
 **Interfaces:**
+
 - Produces: `qfFetch(path: string, options?: RequestInit): Promise<Response>`
 - Produces: `getAccessToken(forceRefresh?: boolean): Promise<string>`
 - Produces: `resetQuranFoundationClientCache(): void`
@@ -296,12 +309,14 @@ Commit: `feat: add Quran Foundation adapter with TV credentials`
 ### Task 7: MP3Quran v4 adapter behind a flag
 
 **Files:**
+
 - Create: `src/services/reciters/mp3quran-v4.adapter.ts`
 - Create: `src/services/reciters/mp3quran-v4.types.ts`
 - Create: `src/services/reciters/mp3quran-v4.adapter.test.ts`
 - Modify: `src/services/api.ts` (conditional registration)
 
 **Interfaces:**
+
 - Produces: `Mp3QuranV4Adapter: ReciterSource` (with `getPlaylist`)
 - Consumes: `getMp3QuranV4Config()` from Task 1, `retryFetch`, `Riwaya` from Task 2
 
@@ -333,6 +348,7 @@ Commit: `feat: add feature-flagged MP3Quran v4 adapter`
 ### Task 8: Source UI, error reporting and final verification
 
 **Files:**
+
 - Modify: `src/components/source-tag.tsx`
 - Modify: `src/context/settings.context.tsx`
 - Modify: `src/screens/home-screen.tsx`
@@ -340,6 +356,7 @@ Commit: `feat: add feature-flagged MP3Quran v4 adapter`
 - Create: `src/services/source-errors.test.ts`
 
 **Interfaces:**
+
 - Consumes: `ACTIVE_SOURCES` from Task 1, `ReciterSourceResult.error` from Task 4, `fetchRecitersBySource` from `api.ts`
 - Produces: `getSourceErrorCount(results: ReciterSourceResult[]): number` exported from `src/services/api.ts`
 

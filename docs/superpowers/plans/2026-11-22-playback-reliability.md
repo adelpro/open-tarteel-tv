@@ -35,12 +35,14 @@
 ### Task 1: Pure player decision helpers
 
 **Files:**
+
 - Create: `src/utils/player-autoplay.ts`
 - Create: `src/utils/player-autoplay.test.ts`
 - Create: `src/utils/player-label.ts`
 - Create: `src/utils/player-label.test.ts`
 
 **Interfaces:**
+
 - Produces: `resolveAutoplay(input: AutoplayInput): AutoplayDecision`
 - Produces: `getPlayerStatusLabel(isPlaying: boolean): 'now_playing' | 'selected_surah'`
 
@@ -50,6 +52,7 @@
 - [ ] **Step 1: Write the failing helper tests**
 
 `player-autoplay.test.ts` must assert:
+
 - no reciter → `{ shouldPlay: false, surahId: null }`
 - `alreadyAttempted: true` → `shouldPlay: false`
 - `playlistLoading: true` or empty playlist → `shouldPlay: false`
@@ -83,10 +86,12 @@ Commit: `feat: add pure autoplay and player-label helpers`
 ### Task 2: Deep-link reciter lookup
 
 **Files:**
+
 - Modify: `src/services/api.ts`
 - Create: `src/services/reciter-lookup.test.ts`
 
 **Interfaces:**
+
 - Produces: `findReciterById(reciterId: string | number, lang: 'ar' | 'en'): Promise<Reciter | null>`
 
 - [ ] **Step 1: Write the failing test**
@@ -117,12 +122,14 @@ Commit: `feat: resolve deep-link reciter IDs from catalog`
 ### Task 3: Wire autoplay, deep links and honest label
 
 **Files:**
+
 - Modify: `src/hooks/use-player.ts`
 - Modify: `src/screens/player-screen.tsx`
 - Modify: `src/components/player.tsx`
 - Modify: `src/locales/en.json`, `src/locales/ar.json`
 
 **Interfaces:**
+
 - Consumes: `resolveAutoplay`, `getPlayerStatusLabel` from Task 1; `findReciterById` from Task 2
 - Produces: no new public interface; `usePlayer()` keeps its current return shape
 
@@ -155,12 +162,14 @@ Commit: `feat: autoplay current surah on player entry`
 ### Task 4: One-time settings migration and v4 test flag
 
 **Files:**
+
 - Create: `src/utils/settings-migration.ts`
 - Create: `src/utils/settings-migration.test.ts`
 - Modify: `src/context/settings.context.tsx`
 - Modify: `.env.local` (gitignored; no tracked change)
 
 **Interfaces:**
+
 - Produces: `migrateEnabledSources(stored: Record<string, unknown>, version: number | undefined): { enabledSources: Record<string, boolean>; version: number }`
 
 - [ ] **Step 1: Write the failing migration test**
@@ -191,10 +200,12 @@ Commit: `feat: migrate stale source settings and enable v4 for testing`
 ### Task 5: Chunked reciter cache
 
 **Files:**
+
 - Modify: `src/services/reciters-cache.ts`
 - Create: `src/services/reciters-cache.test.ts`
 
 **Interfaces:**
+
 - Preserve existing exports unchanged: `getCachedReciters`, `getCachedRecitersInfo`, `setCachedReciters(sources, lang)`, `getRecitersCacheTimestamp`, `clearRecitersCache`
 - Produces: `chunkReciters(reciters: Reciter[], size?: number): Reciter[][]` (default 50)
 
@@ -226,10 +237,12 @@ Commit: `fix: store reciter catalog in bounded AsyncStorage chunks`
 ### Task 6: Lazy playlist verification and adapter fixes
 
 **Files:**
+
 - Modify (only if a test fails): `src/services/reciters/itqan.adapter.ts`, `src/services/reciters/quranfoundation.adapter.ts`
 - Test: existing adapter test files plus any added case
 
 **Interfaces:**
+
 - Consumes: existing `getReciterPlaylist(source, reciter, lang, signal)` from `api.ts`
 
 - [ ] **Step 1: Write or confirm failing adapter tests**
@@ -259,9 +272,11 @@ Expected: all PASS. Commit any adapter fix with `fix: <provider> lazy playlist`.
 ### Task 7: Final verification and runbook
 
 **Files:**
+
 - Create: `docs/runbooks/tv-playback-check.md`
 
 **Interfaces:**
+
 - Consumes: all earlier tasks
 
 - [ ] **Step 1: Write the runbook**
