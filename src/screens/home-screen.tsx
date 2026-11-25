@@ -16,7 +16,6 @@ import {
 
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import Fuse from 'fuse.js';
 import { useTranslation } from 'react-i18next';
 import {
   SpatialNavigationScrollView,
@@ -36,6 +35,7 @@ import { useFavorites } from '../context/favorites.context';
 import { useRecentlyPlayed } from '../context/recently-played.context';
 import { useSettings } from '../context/settings.context';
 import { useItemHeight } from '../hooks/ise-item-height';
+import { useDebouncedValue } from '../hooks/use-debounced-value';
 import { useReciterGridLayout } from '../hooks/use-reciter-grid-layout';
 import { useRecitersLoader } from '../hooks/use-reciters-loader';
 import { useViewCounts } from '../hooks/use-view-counts';
@@ -50,6 +50,10 @@ import {
   getVirtualGridRowContainerStyle,
   getVirtualGridRowHeight,
 } from '../utils/home-grid-metrics';
+import {
+  buildReciterSearchIndex,
+  searchReciters,
+} from '../utils/reciter-search';
 import { normalizeArabicLetter, normalizeSearchText } from '../utils/search';
 
 export default function HomeScreen() {
@@ -92,6 +96,10 @@ export default function HomeScreen() {
     useRecitersLoader(enabledSourcesRef);
 
   const [searchQuery, setSearchQuery] = useState('');
+  // The Fuse search is the expensive part of typing, so it runs on a debounced
+  // copy of the query: a burst of remote key presses costs a single search.
+  // The input itself stays controlled by `searchQuery`, so the text never lags.
+  const debouncedQuery = useDebouncedValue(searchQuery, 150);
   const [selectedRiwaya, setSelectedRiwaya] = useState<Riwaya | 'all'>('all');
   const [selectedLetter, setSelectedLetter] = useState<string>('all');
   const [searchFocused, setSearchFocused] = useState(false);
@@ -288,65 +296,62 @@ export default function HomeScreen() {
     );
   }, [reciters, lang, selectedRiwaya]);
 
+  // Reciters left after the riwaya filter - the base of both the alphabetical
+  // list and the search index.
+  const riwayaFilteredReciters = useMemo(() => {
+    if (selectedRiwaya === 'all') {
+      return reciters;
+    }
+    return reciters.filter(
+      (reciter) => reciter.moshaf.riwaya === selectedRiwaya,
+    );
+  }, [reciters, selectedRiwaya]);
+
+  // The base list is kept alphabetically sorted, so the no-query path and the
+  // search index agree on the order: a pending debounce must not reshuffle
+  // the grid.
+  const baseList = useMemo(() => {
+    return riwayaFilteredReciters
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name, lang));
+  }, [riwayaFilteredReciters, lang]);
+
+  // Building the Fuse index is expensive, so it is cached and only rebuilt
+  // when the catalog or the language changes.
+  const searchIndex = useMemo(
+    () => buildReciterSearchIndex(baseList, lang),
+    [baseList, lang],
+  );
+
   const filteredReciters = useMemo(() => {
-    const matchesRiwaya = (reciter: Reciter) =>
-      selectedRiwaya === 'all' || reciter.moshaf.riwaya === selectedRiwaya;
-
-    // 1. Get base list filtered by Riwaya
-    let baseList = reciters.filter(matchesRiwaya);
-
     const normalizedQuery = normalizeSearchText(searchQuery, lang);
 
-    // 2. If no search query, sort alphabetically and return
+    // 1. No search query: the alphabetical list, narrowed by the letter filter.
     if (!normalizedQuery.length) {
-      let result = baseList;
-
-      // Apply letter filter when no search query
-      if (selectedLetter && selectedLetter !== 'all') {
-        result = result.filter((r) => {
-          let reciterFirstChar = r.name.charAt(0);
-          if (lang === 'ar') {
-            const normalizedChar = normalizeArabicLetter(reciterFirstChar);
-            return normalizedChar === selectedLetter;
-          }
-          const match =
-            reciterFirstChar.toUpperCase() === selectedLetter.toUpperCase();
-
-          return match;
-        });
+      if (!selectedLetter || selectedLetter === 'all') {
+        return baseList;
       }
-
-      const sorted = result.sort((a, b) => {
-        return a.name.localeCompare(b.name, lang);
+      return baseList.filter((reciter) => {
+        const reciterFirstChar = reciter.name.charAt(0);
+        if (lang === 'ar') {
+          const normalizedChar = normalizeArabicLetter(reciterFirstChar);
+          return normalizedChar === selectedLetter;
+        }
+        return reciterFirstChar.toUpperCase() === selectedLetter.toUpperCase();
       });
-      return sorted;
     }
 
-    // 3. If there is a search query, run Fuse.js (keep relevance order, don't alphabetical sort)
-    type ReciterSearchItem = Reciter & {
-      searchName: string;
-      searchMoshafName: string;
-    };
-
-    const items: ReciterSearchItem[] = baseList.map((reciter) => ({
-      ...reciter,
-      searchName: normalizeSearchText(reciter.name, lang),
-      searchMoshafName: normalizeSearchText(reciter.moshaf.name, lang),
-    }));
-
-    const fuse = new Fuse(items, {
-      keys: [
-        { name: 'searchName', weight: 0.6 },
-        { name: 'searchMoshafName', weight: 0.4 },
-      ],
-      threshold: 0.4,
-      ignoreLocation: true,
-      minMatchCharLength: 1,
-    });
-
-    const results = fuse.search(normalizedQuery);
-    return results.map((entry) => entry.item);
-  }, [reciters, searchQuery, lang, selectedRiwaya, selectedLetter]);
+    // 2. With a search query: fuzzy search (relevance order, no alphabetical
+    // sort) on the debounced query, using the cached index.
+    return searchReciters(searchIndex, debouncedQuery, lang);
+  }, [
+    baseList,
+    searchIndex,
+    searchQuery,
+    debouncedQuery,
+    lang,
+    selectedLetter,
+  ]);
 
   const { cardsPerRow, itemWidth } = useReciterGridLayout(
     filteredReciters,
