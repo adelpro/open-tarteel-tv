@@ -424,8 +424,10 @@ Expected: all PASS.
 
 - [ ] **Step 2: Compiler coverage probe**
 
-Repeat the Task 1 probe for `home-screen.tsx`, `reciter-card.tsx`, `player.tsx`,
-`play-list.tsx`. Expected: `true` for all four.
+Repeat the corrected Task 1 probe for `home-screen.tsx`, `reciter-card.tsx`,
+`player.tsx`, `play-list.tsx`. Expected: `COMPILED true true` for all four
+(no diagnostic thrown; `react/compiler-runtime` import + `_c(N)` present).
+`memo_cache_sentinel` is not a valid marker and must not be used as the gate.
 
 - [ ] **Step 3: Metro bundle check**
 
