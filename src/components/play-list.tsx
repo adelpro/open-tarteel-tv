@@ -16,13 +16,13 @@ import {
 } from '../constants/interaction-colors';
 import { getThemeColors } from '../constants/theme';
 import { useSettings } from '../context/settings.context';
-import type { PlayerState } from '../hooks/use-player';
+import type { PlayerCoreState } from '../hooks/use-player';
 
 const SURAH_ITEM_HEIGHT = 64;
 
 type PlaylistProps = {
   listRef: React.RefObject<SpatialNavigationVirtualizedListRef | null>;
-  player: PlayerState;
+  player: PlayerCoreState;
 };
 
 const Playlist = ({ player, listRef }: PlaylistProps) => {

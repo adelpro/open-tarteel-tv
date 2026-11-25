@@ -9,6 +9,7 @@ import {
 } from 'react-tv-space-navigation';
 
 import AudioSpectrum from './audio-spectrum';
+import PlayerProgress from './player-progress';
 import {
   colorPrimary,
   colorPrimaryLight,
@@ -16,12 +17,12 @@ import {
 import { getThemeColors } from '../constants/theme';
 import { useFavorites } from '../context/favorites.context';
 import { useSettings } from '../context/settings.context';
-import type { PlayerState } from '../hooks/use-player';
+import type { PlayerCoreState } from '../hooks/use-player';
 import { getPlayerStatusLabel } from '../utils/player-label';
 
 const isArabicText = (text: string) => /[\u0600-\u06FF]/.test(text);
 
-type PlayerProps = { player: PlayerState };
+type PlayerProps = { player: PlayerCoreState };
 
 export const Player = ({ player }: PlayerProps) => {
   const { isDark } = useSettings();
@@ -30,13 +31,12 @@ export const Player = ({ player }: PlayerProps) => {
   const { t } = useTranslation();
 
   const {
+    audioPlayer,
     playlistData,
     reciter,
     selectedSurah,
     isPlaying,
     repeat,
-    position,
-    duration,
     handlePlayPause,
     handlePrevious,
     handleNext,
@@ -100,16 +100,6 @@ export const Player = ({ player }: PlayerProps) => {
     [currentSurah?.name],
   );
 
-  const formatTime = (sec: number) => {
-    const m = Math.floor(sec / 60)
-      .toString()
-      .padStart(2, '0');
-    const s = Math.floor(sec % 60)
-      .toString()
-      .padStart(2, '0');
-    return `${m}:${s}`;
-  };
-
   if (!reciter) {
     return (
       <View style={styles.playerColumn}>
@@ -165,26 +155,9 @@ export const Player = ({ player }: PlayerProps) => {
 
           <AudioSpectrum playing={hasSelection && isPlaying} />
 
-          {/* Progress bar */}
-          {hasSelection && (
-            <View style={styles.progressContainer}>
-              <View style={styles.progressBarBackground}>
-                <View
-                  style={[
-                    styles.progressBarForeground,
-                    {
-                      width: duration
-                        ? `${(position / duration) * 100}%`
-                        : '0%',
-                    },
-                  ]}
-                />
-              </View>
-              <Text style={styles.progressText}>
-                {formatTime(position)} / {formatTime(duration)}
-              </Text>
-            </View>
-          )}
+          {/* Progress bar — subscribes to the audio status on its own so a
+              status tick does not re-render the controls. */}
+          {hasSelection && <PlayerProgress player={audioPlayer} />}
 
           <SpatialNavigationView
             style={styles.controlsRow}
@@ -293,25 +266,6 @@ function createStyles(isDark: boolean) {
     },
     arabicText: { textAlign: 'right', writingDirection: 'rtl' },
     controlsRow: { flexDirection: 'row', alignItems: 'center' },
-
-    progressContainer: { width: '100%', marginVertical: 6 },
-    progressBarBackground: {
-      height: 4,
-      backgroundColor: '#555',
-      borderRadius: 2,
-      overflow: 'hidden',
-    },
-    progressBarForeground: {
-      height: 4,
-      backgroundColor: colorPrimary,
-      borderRadius: 2,
-    },
-    progressText: {
-      marginTop: 4,
-      fontSize: 12,
-      color: textSecondary,
-      textAlign: 'right',
-    },
   });
 }
 

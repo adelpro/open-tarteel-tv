@@ -93,8 +93,8 @@ export default function PlayerScreen() {
   return (
     <View style={styles.container}>
       <SpatialNavigationView direction="horizontal" style={styles.mainContent}>
-        <PlayerComponent player={player} />
-        <Playlist player={player} listRef={playlistRef} />
+        <PlayerComponent player={player.core} />
+        <Playlist player={player.core} listRef={playlistRef} />
       </SpatialNavigationView>
     </View>
   );

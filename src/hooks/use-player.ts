@@ -1,7 +1,19 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  type Dispatch,
+  type SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
+import {
+  type AudioPlayer,
+  useAudioPlayer,
+  useAudioPlayerStatus,
+} from 'expo-audio';
 import { useTranslation } from 'react-i18next';
 
 import { SURAHS } from '../constants/surahs';
@@ -18,6 +30,36 @@ type PlayerScreenRouteProp = RouteProp<
   { PlayerScreen: { reciter?: Reciter; reciterId?: number; surahId?: number } },
   'PlayerScreen'
 >;
+
+/**
+ * Everything the player UI needs that is NOT tied to the playback position.
+ *
+ * The object identity is stable across progress ticks, so `memo(Player)` and
+ * `memo(Playlist)` can bail out instead of re-rendering on every status tick.
+ */
+export type PlayerCoreState = {
+  /** Stable `expo-audio` instance, consumed by `PlayerProgress`. */
+  audioPlayer: AudioPlayer;
+  playlistData: Surah[];
+  reciter: Reciter | null;
+  selectedSurah: number | null;
+  isPlaying: boolean;
+  repeat: boolean;
+  playlistLoading: boolean;
+  playlistError: boolean;
+  retryLoadPlaylist: () => void;
+  handleSurahPress: (
+    surahId: number,
+    reciterOverride?: Reciter | null,
+  ) => Promise<void>;
+  handlePlayPause: () => void;
+  handlePrevious: () => void;
+  handleNext: () => void;
+  handleToggleRepeat: () => void;
+  setReciter: Dispatch<SetStateAction<Reciter | null>>;
+  handleSeekBackward: (seconds?: number) => void;
+  handleSeekForward: (seconds?: number) => void;
+};
 
 export function usePlayer() {
   const route = useRoute<PlayerScreenRouteProp>();
@@ -251,7 +293,52 @@ export function usePlayer() {
 
   const handleToggleRepeat = useCallback(() => setRepeat((prev) => !prev), []);
 
+  // `position` and `duration` change on every audio status tick, so they are
+  // kept out of `core`: the memo below keeps its identity across those ticks
+  // and the memoized player/playlist components can skip re-rendering.
+  const core = useMemo<PlayerCoreState>(
+    () => ({
+      audioPlayer: player,
+      playlistData,
+      reciter,
+      selectedSurah,
+      isPlaying,
+      repeat,
+      playlistLoading,
+      playlistError,
+      retryLoadPlaylist,
+      handleSurahPress,
+      handlePlayPause,
+      handlePrevious,
+      handleNext,
+      handleToggleRepeat,
+      setReciter,
+      handleSeekBackward,
+      handleSeekForward,
+    }),
+    [
+      player,
+      playlistData,
+      reciter,
+      selectedSurah,
+      isPlaying,
+      repeat,
+      playlistLoading,
+      playlistError,
+      retryLoadPlaylist,
+      handleSurahPress,
+      handlePlayPause,
+      handlePrevious,
+      handleNext,
+      handleToggleRepeat,
+      setReciter,
+      handleSeekBackward,
+      handleSeekForward,
+    ],
+  );
+
   return {
+    core,
     playlistData,
     reciter,
     selectedSurah,
