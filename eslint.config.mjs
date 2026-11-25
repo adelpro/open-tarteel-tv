@@ -1,6 +1,7 @@
 import { defineConfig } from 'eslint/config';
 import expoConfig from 'eslint-config-expo/flat.js';
 import prettierPlugin from 'eslint-plugin-prettier';
+import reactCompilerPlugin from 'eslint-plugin-react-compiler';
 
 const ignores = [
   'dist/',
@@ -24,6 +25,7 @@ export default defineConfig([
     ignores,
   },
   expoConfig,
+  reactCompilerPlugin.configs.recommended,
   {
     plugins: {
       prettier: prettierPlugin,

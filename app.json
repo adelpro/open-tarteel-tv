@@ -7,6 +7,9 @@
     "icon": "./assets/icon.png",
     "scheme": "opentarteeltv",
     "userInterfaceStyle": "light",
+    "experiments": {
+      "reactCompiler": true
+    },
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": false

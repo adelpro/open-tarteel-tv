@@ -73,6 +73,9 @@ const ReciterCard = ({
   const isRecentlyPlayed = recentlyPlayed.some(
     (item) => item.reciterId === reciter.id.toString(),
   );
+  // Compiler-compatible: a conditional expression cannot be used directly as
+  // a computed object key, so resolve the side into a plain variable first.
+  const badgeSide: 'right' | 'left' = isRTL ? 'right' : 'left';
   const styles = StyleSheet.create({
     reciterCard: {
       position: 'relative',
@@ -108,7 +111,7 @@ const ReciterCard = ({
     recentlyPlayedBadge: {
       position: 'absolute',
       bottom: 8,
-      [isRTL ? 'right' : 'left']: 8,
+      [badgeSide]: 8,
       backgroundColor: colorPrimary,
       paddingVertical: 4,
       paddingHorizontal: 8,

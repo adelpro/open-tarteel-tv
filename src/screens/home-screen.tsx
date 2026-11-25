@@ -77,7 +77,12 @@ export default function HomeScreen() {
   // Read the latest enabled sources without recreating loadReciters on every
   // identity change (SettingsProvider rebuilds the object on mount).
   const enabledSourcesRef = useRef(enabledSources);
-  enabledSourcesRef.current = enabledSources;
+  // Compiler-compatible: syncing a ref during render is a Rules-of-React
+  // violation. Effects run in declaration order, so this lands before the
+  // load effect below that reads the ref.
+  useEffect(() => {
+    enabledSourcesRef.current = enabledSources;
+  }, [enabledSources]);
 
   // Content-based signature so the load effect only re-fires when the actual
   // set of enabled sources changes, not when the object identity changes.
@@ -183,12 +188,24 @@ export default function HomeScreen() {
     const controller = new AbortController();
     abortRef.current = controller;
 
+    // Compiler-compatible replacement for the old `finally` clause: every
+    // exit path below funnels through this guard so the loading flag is
+    // cleared exactly once for the current request.
+    const finish = () => {
+      if (requestId === requestIdRef.current) {
+        setLoading(false);
+      }
+    };
+
     setLoading(true);
     setError(null);
     setSourceErrorCount(0);
     try {
       const cached = await getCachedRecitersInfo(lang);
-      if (requestId !== requestIdRef.current) return;
+      if (requestId !== requestIdRef.current) {
+        finish();
+        return;
+      }
 
       // Serve cached data instantly.
       if (cached && cached.data.length > 0) {
@@ -203,6 +220,7 @@ export default function HomeScreen() {
           cached.sourcesKey === currentSourcesKey &&
           Date.now() - cached.timestamp < SOFT_CACHE_TTL_MS
         ) {
+          finish();
           return;
         }
       }
@@ -212,7 +230,10 @@ export default function HomeScreen() {
         enabledSourcesRef.current,
         controller.signal,
       );
-      if (requestId !== requestIdRef.current) return;
+      if (requestId !== requestIdRef.current) {
+        finish();
+        return;
+      }
       setSourceErrorCount(getSourceErrorCount(sourceResults));
 
       // Merge: a source that returned empty keeps its previously cached
@@ -234,9 +255,15 @@ export default function HomeScreen() {
         await setCachedReciters(mergedSources, lang);
       }
     } catch (err) {
-      if (requestId !== requestIdRef.current) return;
+      if (requestId !== requestIdRef.current) {
+        finish();
+        return;
+      }
       // Aborts (superseded/unmounted) are not real failures.
-      if (isAbortError(err)) return;
+      if (isAbortError(err)) {
+        finish();
+        return;
+      }
       setSourceErrorCount(0);
 
       console.error('Failed to load reciters:', err);
@@ -246,11 +273,8 @@ export default function HomeScreen() {
           : 'Failed to load reciters. Please try again.';
       setError(errorMsg);
       setReciters([]);
-    } finally {
-      if (requestId === requestIdRef.current) {
-        setLoading(false);
-      }
     }
+    finish();
   }, []);
 
   useEffect(() => {
