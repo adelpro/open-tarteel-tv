@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Eliminate TV UI jank by making the React Compiler actually cover the hot components and by removing the render *triggers* the compiler cannot fix.
+**Goal:** Eliminate TV UI jank by making the React Compiler actually cover the hot components and by removing the render _triggers_ the compiler cannot fix.
 
 **Architecture:** Two layers. First, restructure the few functions the compiler refuses to lower out of component bodies so the render itself is cached. Second, isolate state that changes frequently (audio progress, GUN counts, search text, context values) behind narrow subscribers and memoized provider values, so a change re-renders only the small part that depends on it.
 

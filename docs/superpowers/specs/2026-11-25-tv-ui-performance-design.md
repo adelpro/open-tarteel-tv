@@ -11,14 +11,14 @@ Home (scroll, search typing, GUN count sync) or Player (audio progress updates).
 
 ### Render-cost findings
 
-| ID | Finding | Evidence |
-|----|---------|----------|
-| F1 | `useAudioPlayerStatus` drives a `PlayerScreen` re-render on every audio status tick; `memo(Player)` and `memo(Playlist)` are defeated because `usePlayer()` returns a fresh object literal | `src/hooks/use-player.ts:29-31,254-274`, `src/screens/player-screen.tsx:27,96-97`, `src/components/player.tsx:318`, `src/components/play-list.tsx:219` |
-| F2 | `ReciterCard` subscribes to two contexts plus i18n/window dimensions and builds 6 styles per render; four featured rails render all cards unvirtualized | `src/components/reciter-card.tsx:53-125`, `src/components/section-featured.tsx:87-107` |
-| F3 | All three providers pass fresh inline object values, so any provider state change re-renders every consumer | `src/context/settings.context.tsx:187-201`, `src/context/favorites.context.tsx:76-84`, `src/context/recently-played.context.tsx:77-83` |
-| F4 | GUN `.map().on()` calls `setState` per key; each event re-renders Home and recomputes full-catalog sorts | `src/services/gun-service.ts:47,91`, `src/context/favorites.context.tsx:44-46`, `src/hooks/use-view-counts.ts:9-11`, `src/screens/home-screen.tsx:301-361` |
-| F5 | Fuse index is rebuilt and every name normalized on each keystroke; no debounce | `src/screens/home-screen.tsx:380-438` |
-| F6 | `StyleSheet.create()` runs inside render in several components; `reciterRows` is built but never used | `src/screens/home-screen.tsx:122`, `src/components/home-header.tsx:83`, `src/components/section-featured.tsx:43`, `src/hooks/use-reciter-grid-layout.ts:34-44` |
+| ID  | Finding                                                                                                                                                                                    | Evidence                                                                                                                                                       |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| F1  | `useAudioPlayerStatus` drives a `PlayerScreen` re-render on every audio status tick; `memo(Player)` and `memo(Playlist)` are defeated because `usePlayer()` returns a fresh object literal | `src/hooks/use-player.ts:29-31,254-274`, `src/screens/player-screen.tsx:27,96-97`, `src/components/player.tsx:318`, `src/components/play-list.tsx:219`         |
+| F2  | `ReciterCard` subscribes to two contexts plus i18n/window dimensions and builds 6 styles per render; four featured rails render all cards unvirtualized                                    | `src/components/reciter-card.tsx:53-125`, `src/components/section-featured.tsx:87-107`                                                                         |
+| F3  | All three providers pass fresh inline object values, so any provider state change re-renders every consumer                                                                                | `src/context/settings.context.tsx:187-201`, `src/context/favorites.context.tsx:76-84`, `src/context/recently-played.context.tsx:77-83`                         |
+| F4  | GUN `.map().on()` calls `setState` per key; each event re-renders Home and recomputes full-catalog sorts                                                                                   | `src/services/gun-service.ts:47,91`, `src/context/favorites.context.tsx:44-46`, `src/hooks/use-view-counts.ts:9-11`, `src/screens/home-screen.tsx:301-361`     |
+| F5  | Fuse index is rebuilt and every name normalized on each keystroke; no debounce                                                                                                             | `src/screens/home-screen.tsx:380-438`                                                                                                                          |
+| F6  | `StyleSheet.create()` runs inside render in several components; `reciterRows` is built but never used                                                                                      | `src/screens/home-screen.tsx:122`, `src/components/home-header.tsx:83`, `src/components/section-featured.tsx:43`, `src/hooks/use-reciter-grid-layout.ts:34-44` |
 
 ### React Compiler findings (verified on this repo)
 
@@ -36,7 +36,7 @@ Home (scroll, search typing, GUN count sync) or Player (audio progress updates).
   - `HomeScreen`: `try/finally` unsupported; then ref write during render; then
     "value blocks (conditional, logical, optional chaining) within a try/catch".
   - `ReciterCard`: conditional expression used as a computed object key.
-- React Compiler memoizes work *inside* a render. It cannot prevent renders
+- React Compiler memoizes work _inside_ a render. It cannot prevent renders
   caused by changed state, context values, or new prop identity. F1, F3, F4 and F5
   still require explicit fixes even with full compiler coverage.
 - React docs recommend **keeping** existing `useMemo`/`useCallback`/`memo` rather
