@@ -125,11 +125,14 @@ Expected: all PASS.
 Run the compiler coverage probe (from repo root, Node 22+):
 
 ```bash
-node -e "const b=require('D:/open-tarteel-tv/node_modules/@babel/core'),p=require('D:/open-tarteel-tv/node_modules/babel-plugin-react-compiler');for(const f of ['src/screens/home-screen.tsx','src/components/reciter-card.tsx']){const o=b.transformSync(require('fs').readFileSync(f,'utf8'),{configFile:false,babelrc:false,filename:f,plugins:[['@babel/plugin-syntax-jsx',{}],['@babel/plugin-syntax-typescript',{isTSX:true}],[p,{target:'19',panicThreshold:'all_errors'}]]});console.log(f, o.code.includes('memo_cache_sentinel'))}"
+node -e "const b=require('D:/open-tarteel-tv/node_modules/@babel/core'),p=require('D:/open-tarteel-tv/node_modules/babel-plugin-react-compiler');for(const f of ['src/screens/home-screen.tsx','src/components/reciter-card.tsx']){try{const o=b.transformSync(require('fs').readFileSync(f,'utf8'),{configFile:false,babelrc:false,filename:f,plugins:[['@babel/plugin-syntax-jsx',{}],['@babel/plugin-syntax-typescript',{isTSX:true}],[p,{target:'19',panicThreshold:'all_errors'}]]});console.log(f,'COMPILED',o.code.includes('react/compiler-runtime'),/_c\([0-9]+\)/.test(o.code))}catch(e){console.log(f,'SKIPPED',e.message.split('\n')[0])}}"
 ```
 
-Expected: `true` for both files. If `false`, read the thrown compiler diagnostic and
-move the offending expression out of the component; do not patch it in place.
+Expected: `COMPILED true true` for both files. `memo_cache_sentinel` is NOT a valid
+coverage marker — the compiler emits it only for scopes with no reactive
+dependencies; fully compiled components can correctly omit it. If the probe prints
+`SKIPPED`, read the compiler diagnostic and move the offending expression out of
+the component; do not patch it in place.
 
 - [ ] **Step 7: Commit**
 
