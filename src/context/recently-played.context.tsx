@@ -3,6 +3,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from 'react';
 
@@ -74,13 +75,16 @@ export function RecentlyPlayedProvider({
     });
   }, []);
 
+  const contextValue = useMemo(
+    () => ({
+      recentlyPlayed,
+      addToRecentlyPlayed,
+    }),
+    [recentlyPlayed, addToRecentlyPlayed],
+  );
+
   return (
-    <RecentlyPlayedContext.Provider
-      value={{
-        recentlyPlayed,
-        addToRecentlyPlayed,
-      }}
-    >
+    <RecentlyPlayedContext.Provider value={contextValue}>
       {children}
     </RecentlyPlayedContext.Provider>
   );

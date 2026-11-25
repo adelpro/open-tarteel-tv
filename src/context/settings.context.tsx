@@ -3,6 +3,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from 'react';
 import { useColorScheme } from 'react-native';
@@ -184,21 +185,35 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     setCacheEpoch((prev) => prev + 1);
   }, []);
 
+  const contextValue = useMemo(
+    () => ({
+      enabledSources,
+      isSourceEnabled,
+      toggleSource,
+      themeMode,
+      setThemeMode,
+      isDark,
+      keepScreenAwake,
+      toggleKeepScreenAwake,
+      cacheEpoch,
+      clearCaches,
+    }),
+    [
+      enabledSources,
+      isSourceEnabled,
+      toggleSource,
+      themeMode,
+      setThemeMode,
+      isDark,
+      keepScreenAwake,
+      toggleKeepScreenAwake,
+      cacheEpoch,
+      clearCaches,
+    ],
+  );
+
   return (
-    <SettingsContext.Provider
-      value={{
-        enabledSources,
-        isSourceEnabled,
-        toggleSource,
-        themeMode,
-        setThemeMode,
-        isDark,
-        keepScreenAwake,
-        toggleKeepScreenAwake,
-        cacheEpoch,
-        clearCaches,
-      }}
-    >
+    <SettingsContext.Provider value={contextValue}>
       {children}
     </SettingsContext.Provider>
   );
