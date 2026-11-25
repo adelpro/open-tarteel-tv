@@ -56,6 +56,73 @@ import {
 } from '../utils/reciter-search';
 import { normalizeArabicLetter, normalizeSearchText } from '../utils/search';
 
+function createStyles(
+  bg: string,
+  textPrimary: string,
+  textSecondary: string,
+  errorPrimary: string,
+  isVeryWide: boolean,
+  isWide: boolean,
+) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: bg,
+      padding: 20,
+    },
+    scroll: {
+      flex: 1,
+    },
+    body: {
+      flex: 1,
+    },
+    headerScroll: {
+      flex: 1,
+    },
+    gridViewport: {
+      flex: 1,
+      marginTop: 20,
+      overflow: 'hidden',
+    },
+    centerContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: bg,
+    },
+    loadingText: {
+      color: textPrimary,
+      marginTop: 10,
+      fontSize: isVeryWide ? 24 : isWide ? 20 : 16,
+    },
+
+    errorMessage: {
+      fontSize: isVeryWide ? 20 : isWide ? 18 : 16,
+      color: textSecondary,
+      textAlign: 'center',
+      marginBottom: 24,
+      lineHeight: 24,
+    },
+    sourceWarning: {
+      fontSize: isVeryWide ? 18 : isWide ? 16 : 14,
+      color: errorPrimary,
+      textAlign: 'center',
+      marginBottom: 12,
+    },
+    errorContainer: {
+      alignItems: 'center',
+      paddingHorizontal: 40,
+    },
+    errorTitle: {
+      fontSize: isVeryWide ? 32 : isWide ? 28 : 24,
+      fontWeight: '700',
+      color: textPrimary,
+      marginTop: 20,
+      marginBottom: 12,
+    },
+  });
+}
+
 export default function HomeScreen() {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
@@ -123,63 +190,18 @@ export default function HomeScreen() {
     getThemeColors(isDark);
   const isVeryWide = width >= 2800;
   const isWide = width >= 2200 && width < 2800;
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: bg,
-      padding: 20,
-    },
-    scroll: {
-      flex: 1,
-    },
-    body: {
-      flex: 1,
-    },
-    headerScroll: {
-      flex: 1,
-    },
-    gridViewport: {
-      flex: 1,
-      marginTop: 20,
-      overflow: 'hidden',
-    },
-    centerContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: bg,
-    },
-    loadingText: {
-      color: textPrimary,
-      marginTop: 10,
-      fontSize: isVeryWide ? 24 : isWide ? 20 : 16,
-    },
-
-    errorMessage: {
-      fontSize: isVeryWide ? 20 : isWide ? 18 : 16,
-      color: textSecondary,
-      textAlign: 'center',
-      marginBottom: 24,
-      lineHeight: 24,
-    },
-    sourceWarning: {
-      fontSize: isVeryWide ? 18 : isWide ? 16 : 14,
-      color: errorPrimary,
-      textAlign: 'center',
-      marginBottom: 12,
-    },
-    errorContainer: {
-      alignItems: 'center',
-      paddingHorizontal: 40,
-    },
-    errorTitle: {
-      fontSize: isVeryWide ? 32 : isWide ? 28 : 24,
-      fontWeight: '700',
-      color: textPrimary,
-      marginTop: 20,
-      marginBottom: 12,
-    },
-  });
+  const styles = useMemo(
+    () =>
+      createStyles(
+        bg,
+        textPrimary,
+        textSecondary,
+        errorPrimary,
+        isVeryWide,
+        isWide,
+      ),
+    [bg, textPrimary, textSecondary, errorPrimary, isVeryWide, isWide],
+  );
 
   useEffect(() => {
     const lang = i18n.language === 'ar' ? 'ar' : 'en';
@@ -353,10 +375,7 @@ export default function HomeScreen() {
     selectedLetter,
   ]);
 
-  const { cardsPerRow, itemWidth } = useReciterGridLayout(
-    filteredReciters,
-    width,
-  );
+  const { cardsPerRow, itemWidth } = useReciterGridLayout(width);
   const { itemHeight } = useItemHeight();
   const reciterCount = filteredReciters.length;
 

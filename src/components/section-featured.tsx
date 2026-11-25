@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useTranslation } from 'react-i18next';
@@ -24,23 +24,15 @@ type FeaturedSectionProps = {
   textPrimary: string;
 };
 
-const SectionFeatured = ({
-  title,
-  reciters,
-  itemWidth,
-  isRTL,
-  viewCounts,
-  favoriteCounts,
-  onReciterPress,
-  isVeryWide,
-  textPrimary,
-}: FeaturedSectionProps) => {
-  const { itemHeight } = useItemHeight();
-  const { t } = useTranslation();
-
+function createStyles(
+  itemHeight: number,
+  isVeryWide: boolean,
+  isRTL: boolean,
+  textPrimary: string,
+) {
   const containerHeight = itemHeight + 20; // 10 is the marginBottom
 
-  const styles = StyleSheet.create({
+  return StyleSheet.create({
     container: {
       marginBottom: 24,
     },
@@ -70,6 +62,26 @@ const SectionFeatured = ({
       paddingHorizontal: 20,
     },
   });
+}
+
+const SectionFeatured = ({
+  title,
+  reciters,
+  itemWidth,
+  isRTL,
+  viewCounts,
+  favoriteCounts,
+  onReciterPress,
+  isVeryWide,
+  textPrimary,
+}: FeaturedSectionProps) => {
+  const { itemHeight } = useItemHeight();
+  const { t } = useTranslation();
+
+  const styles = useMemo(
+    () => createStyles(itemHeight, isVeryWide, isRTL, textPrimary),
+    [itemHeight, isVeryWide, isRTL, textPrimary],
+  );
 
   return (
     <View style={styles.container}>

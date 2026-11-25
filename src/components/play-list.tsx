@@ -31,24 +31,22 @@ const Playlist = ({ player, listRef }: PlaylistProps) => {
   const { i18n } = useTranslation();
 
   const isArabic = i18n.language === 'ar';
-  const styles = createStyles(isDark);
-
-  const memoizedData = useMemo(() => playlistData, [playlistData]);
+  const styles = useMemo(() => createStyles(isDark), [isDark]);
 
   useEffect(() => {
-    if (selectedSurah === null && memoizedData.length > 0) {
-      handleSurahPress(memoizedData[0].id);
+    if (selectedSurah === null && playlistData.length > 0) {
+      handleSurahPress(playlistData[0].id);
     }
-  }, [handleSurahPress, memoizedData, selectedSurah]);
+  }, [handleSurahPress, playlistData, selectedSurah]);
 
   useEffect(() => {
-    const index = memoizedData.findIndex((surah) => surah.id === selectedSurah);
+    const index = playlistData.findIndex((surah) => surah.id === selectedSurah);
     if (index >= 0 && listRef.current) {
       listRef.current.focus(index);
     }
-  }, [listRef, memoizedData, selectedSurah]);
+  }, [listRef, playlistData, selectedSurah]);
 
-  const renderItem = ({ item }: { item: (typeof memoizedData)[0] }) => (
+  const renderItem = ({ item }: { item: (typeof playlistData)[0] }) => (
     <SpatialNavigationFocusableView
       onSelect={() => handleSurahPress(item.id)}
       style={styles.surahCard}
@@ -107,7 +105,7 @@ const Playlist = ({ player, listRef }: PlaylistProps) => {
           <SpatialNavigationVirtualizedList
             ref={listRef}
             additionalItemsRendered={2}
-            data={memoizedData}
+            data={playlistData}
             itemSize={SURAH_ITEM_HEIGHT}
             orientation="vertical"
             renderItem={renderItem}

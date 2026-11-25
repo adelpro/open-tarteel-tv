@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import {
   Pressable,
   StyleSheet,
@@ -50,33 +51,21 @@ const RIWAYA_LABEL: Record<Riwaya, string> = {
   [Riwaya.YAQOUB]: "Ya'qoub",
 };
 
-const ReciterCard = ({
-  reciter,
-  preferredFocus = false,
-  onPress,
-  onFocus,
-  viewCount,
-  favoriteCount,
-}: ReciterCardProps) => {
-  const { itemHeight } = useItemHeight();
-  const { i18n, t } = useTranslation();
-  const { recentlyPlayed } = useRecentlyPlayed();
-  const { isDark } = useSettings();
-  const { textPrimary, textSecondary, cardBg, border } = getThemeColors(isDark);
-  const { width } = useWindowDimensions();
-  const isRTL = i18n.dir() === 'rtl';
-  const isVeryWide = width >= 2800;
-  const isWide = width >= 2200 && width < 2800;
-  const isMedium = width >= 1600 && width < 2200;
-
-  // Check if this reciter is in recently played
-  const isRecentlyPlayed = recentlyPlayed.some(
-    (item) => item.reciterId === reciter.id.toString(),
-  );
-  // Compiler-compatible: a conditional expression cannot be used directly as
-  // a computed object key, so resolve the side into a plain variable first.
+function createStyles(
+  isRTL: boolean,
+  itemHeight: number,
+  cardBg: string,
+  isDark: boolean,
+  border: string,
+  textPrimary: string,
+  textSecondary: string,
+  isVeryWide: boolean,
+  isWide: boolean,
+  isMedium: boolean,
+) {
   const badgeSide: 'right' | 'left' = isRTL ? 'right' : 'left';
-  const styles = StyleSheet.create({
+
+  return StyleSheet.create({
     reciterCard: {
       position: 'relative',
       direction: isRTL ? 'rtl' : 'ltr',
@@ -126,6 +115,58 @@ const ReciterCard = ({
       fontWeight: 'bold',
     },
   });
+}
+
+const ReciterCard = ({
+  reciter,
+  preferredFocus = false,
+  onPress,
+  onFocus,
+  viewCount,
+  favoriteCount,
+}: ReciterCardProps) => {
+  const { itemHeight } = useItemHeight();
+  const { i18n, t } = useTranslation();
+  const { recentlyPlayed } = useRecentlyPlayed();
+  const { isDark } = useSettings();
+  const { textPrimary, textSecondary, cardBg, border } = getThemeColors(isDark);
+  const { width } = useWindowDimensions();
+  const isRTL = i18n.dir() === 'rtl';
+  const isVeryWide = width >= 2800;
+  const isWide = width >= 2200 && width < 2800;
+  const isMedium = width >= 1600 && width < 2200;
+
+  // Check if this reciter is in recently played
+  const isRecentlyPlayed = recentlyPlayed.some(
+    (item) => item.reciterId === reciter.id.toString(),
+  );
+  const styles = useMemo(
+    () =>
+      createStyles(
+        isRTL,
+        itemHeight,
+        cardBg,
+        isDark,
+        border,
+        textPrimary,
+        textSecondary,
+        isVeryWide,
+        isWide,
+        isMedium,
+      ),
+    [
+      isRTL,
+      itemHeight,
+      cardBg,
+      isDark,
+      border,
+      textPrimary,
+      textSecondary,
+      isVeryWide,
+      isWide,
+      isMedium,
+    ],
+  );
 
   const badgeIconSize = isVeryWide ? 12 : isWide ? 11 : isMedium ? 10 : 9;
   return (

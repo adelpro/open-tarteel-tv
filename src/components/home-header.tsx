@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { LayoutChangeEvent, StyleSheet, Text, View } from 'react-native';
 
 import { useTranslation } from 'react-i18next';
@@ -41,6 +41,25 @@ type HomeHeaderProps = {
   onHeight: (height: number) => void;
 };
 
+function createStyles(
+  textPrimary: string,
+  isVeryWide: boolean,
+  isWide: boolean,
+) {
+  return StyleSheet.create({
+    recitersTitleContainer: {
+      marginTop: 20,
+    },
+    recitersTitle: {
+      color: textPrimary,
+      fontSize: isVeryWide ? 28 : isWide ? 24 : 20,
+      fontWeight: '700',
+      marginBottom: 12,
+      paddingHorizontal: 20,
+    },
+  });
+}
+
 /**
  * The scrollable, non-grid part of the Home screen: search, filters, featured
  * rails and the Reciters title (or its empty state). Reports its own measured
@@ -80,18 +99,10 @@ export default function HomeHeader({
     [onHeight],
   );
 
-  const styles = StyleSheet.create({
-    recitersTitleContainer: {
-      marginTop: 20,
-    },
-    recitersTitle: {
-      color: textPrimary,
-      fontSize: isVeryWide ? 28 : isWide ? 24 : 20,
-      fontWeight: '700',
-      marginBottom: 12,
-      paddingHorizontal: 20,
-    },
-  });
+  const styles = useMemo(
+    () => createStyles(textPrimary, isVeryWide, isWide),
+    [textPrimary, isVeryWide, isWide],
+  );
 
   return (
     <View onLayout={handleLayout}>
