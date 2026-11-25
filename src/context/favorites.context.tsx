@@ -13,6 +13,7 @@ import {
   subscribeToFavoriteCounts,
   syncFavorite,
 } from '../services/gun-service';
+import { createCountBatcher, mergeCountEvents } from '../utils/count-batcher';
 
 const FAVORITES_STORAGE_KEY = '@open_tarteel_favorites';
 
@@ -42,11 +43,19 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
 
   /* gun subscription once */
   useEffect(() => {
-    const unsub = subscribeToFavoriteCounts((id, count) => {
-      setFavoriteCounts((prev) => ({ ...prev, [id]: count }));
+    /* one state update per animation frame instead of one per GUN event */
+    const batcher = createCountBatcher((events) => {
+      setFavoriteCounts((prev) => mergeCountEvents(prev, events));
     });
 
-    return () => unsub();
+    const unsub = subscribeToFavoriteCounts((id, count) => {
+      batcher.push(id, count);
+    });
+
+    return () => {
+      unsub();
+      batcher.dispose();
+    };
   }, []);
 
   const isFavorited = useCallback(
