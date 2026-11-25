@@ -37,13 +37,8 @@ import { useRecentlyPlayed } from '../context/recently-played.context';
 import { useSettings } from '../context/settings.context';
 import { useItemHeight } from '../hooks/ise-item-height';
 import { useReciterGridLayout } from '../hooks/use-reciter-grid-layout';
+import { useRecitersLoader } from '../hooks/use-reciters-loader';
 import { useViewCounts } from '../hooks/use-view-counts';
-import { fetchRecitersBySource, getSourceErrorCount } from '../services/api';
-import {
-  getCachedRecitersInfo,
-  setCachedReciters,
-  SOFT_CACHE_TTL_MS,
-} from '../services/reciters-cache';
 import { Reciter, Riwaya } from '../types';
 import {
   gridRowToCardIndex,
@@ -55,17 +50,12 @@ import {
   getVirtualGridRowContainerStyle,
   getVirtualGridRowHeight,
 } from '../utils/home-grid-metrics';
-import { isAbortError } from '../utils/is-abort-error';
 import { normalizeArabicLetter, normalizeSearchText } from '../utils/search';
 
 export default function HomeScreen() {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
   const lang = i18n.language === 'ar' ? 'ar' : 'en';
-  const [reciters, setReciters] = useState<Reciter[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [sourceErrorCount, setSourceErrorCount] = useState(0);
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const { width, height } = useWindowDimensions();
@@ -95,10 +85,11 @@ export default function HomeScreen() {
     [enabledSources],
   );
 
-  // Guards against stale responses racing each other (fast language switches,
-  // rapid retries) and cancels in-flight HTTP on unmount.
-  const requestIdRef = useRef(0);
-  const abortRef = useRef<AbortController | null>(null);
+  // All reciter loading lives in the hook: the React Compiler cannot lower a
+  // try/catch that holds value blocks, so keeping it here lets this screen be
+  // compiled.
+  const { reciters, loading, error, sourceErrorCount, loadReciters } =
+    useRecitersLoader(enabledSourcesRef);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRiwaya, setSelectedRiwaya] = useState<Riwaya | 'all'>('all');
@@ -182,114 +173,10 @@ export default function HomeScreen() {
     },
   });
 
-  const loadReciters = useCallback(async (lang: 'ar' | 'en') => {
-    const requestId = ++requestIdRef.current;
-    abortRef.current?.abort();
-    const controller = new AbortController();
-    abortRef.current = controller;
-
-    // Compiler-compatible replacement for the old `finally` clause: every
-    // exit path below funnels through this guard so the loading flag is
-    // cleared exactly once for the current request.
-    const finish = () => {
-      if (requestId === requestIdRef.current) {
-        setLoading(false);
-      }
-    };
-
-    setLoading(true);
-    setError(null);
-    setSourceErrorCount(0);
-    try {
-      const cached = await getCachedRecitersInfo(lang);
-      if (requestId !== requestIdRef.current) {
-        finish();
-        return;
-      }
-
-      // Serve cached data instantly.
-      if (cached && cached.data.length > 0) {
-        setReciters(cached.data);
-        setLoading(false);
-
-        // Fresh cache + same enabled sources -> skip the background refresh.
-        const currentSourcesKey = Object.keys(enabledSourcesRef.current)
-          .sort()
-          .join('|');
-        if (
-          cached.sourcesKey === currentSourcesKey &&
-          Date.now() - cached.timestamp < SOFT_CACHE_TTL_MS
-        ) {
-          finish();
-          return;
-        }
-      }
-
-      const sourceResults = await fetchRecitersBySource(
-        lang,
-        enabledSourcesRef.current,
-        controller.signal,
-      );
-      if (requestId !== requestIdRef.current) {
-        finish();
-        return;
-      }
-      setSourceErrorCount(getSourceErrorCount(sourceResults));
-
-      // Merge: a source that returned empty keeps its previously cached
-      // reciters (e.g. a temporary outage) instead of vanishing.
-      const cachedSources = cached?.sources ?? {};
-      const mergedSources: Record<string, Reciter[]> = {};
-      for (const result of sourceResults) {
-        mergedSources[result.source] =
-          result.reciters.length > 0
-            ? result.reciters
-            : (cachedSources[result.source] ?? []);
-      }
-
-      const merged = Object.values(mergedSources).flat();
-      setReciters(merged);
-
-      // Never overwrite the cache with an empty result.
-      if (merged.length > 0) {
-        await setCachedReciters(mergedSources, lang);
-      }
-    } catch (err) {
-      if (requestId !== requestIdRef.current) {
-        finish();
-        return;
-      }
-      // Aborts (superseded/unmounted) are not real failures.
-      if (isAbortError(err)) {
-        finish();
-        return;
-      }
-      setSourceErrorCount(0);
-
-      console.error('Failed to load reciters:', err);
-      const errorMsg =
-        err instanceof Error
-          ? err.message
-          : 'Failed to load reciters. Please try again.';
-      setError(errorMsg);
-      setReciters([]);
-    }
-    finish();
-  }, []);
-
   useEffect(() => {
     const lang = i18n.language === 'ar' ? 'ar' : 'en';
     loadReciters(lang);
   }, [i18n.language, sourcesSignature, cacheEpoch, loadReciters]);
-
-  // Cancel any in-flight load when the screen unmounts so stale responses
-  // cannot write state afterwards.
-  useEffect(() => {
-    return () => {
-      abortRef.current?.abort();
-      requestIdRef.current += 1;
-    };
-  }, []);
 
   useEffect(() => {
     setSelectedRiwaya('all');
